@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>CAL Duty (Pro v4.5 Auto-Link)</title>
+    <style>
+        /* === SYSTEM & VARIABLES === */
+        :root {
+            /* Light Mode Palette */
+            --bg-app: #f0f2f5;
+            --bg-card: #ffffff;
+            --bg-glass: rgba(255, 255, 255, 0.85);
+            --bg-input: #f8fafc;
+            --bg-accent: #eff6ff;
+            
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            
+            --brand-blue: #007AFF;
+            --brand-green: #34C759;
+            --brand-red: #FF3B30;
+            --brand-orange: #FF9500;
+            
+            --border-light: #e2e8f0;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-float: 0 10px 15px -3px rgba(0,0,0,0.1);
+
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 999px;
+            
+            --safe-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Dark Mode Palette */
+        body.dark-mode {
+            --bg-app: #0f172a;
+            --bg-card: #1e293b;
+            --bg-glass: rgba(30, 41, 59, 0.9);
+            --bg-input: #334155;
+            --bg-accent: #1e3a8a;
+            
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #64748b;
+            
+            --brand-blue: #3b82f6;
+            --brand-green: #4ade80;
+            --brand-red: #ef4444;
+            --brand-orange: #fbbf24;
+            
+            --border-light: #334155;
+        }
+
+        /* === RESET & BASE === */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, sans-serif;
+            background-color: var(--bg-app);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            padding-bottom: calc(100px + var(--safe-bottom));
+            transition: background-color 0.3s ease;
+            overflow-x: hidden;
+        }
+        
+        input, button, select { font-family: inherit; outline: none; border: none; }
+        
+        /* Typography */
+        .text-xs { font-size: 11px; letter-spacing: 0.02em; }
+        .text-sm { font-size: 13px; }
+        .text-base { font-size: 15px; }
+        .text-lg { font-size: 17px; }
+        .text-xl { font-size: 20px; letter-spacing: -0.01em; }
+        .font-medium { font-weight: 500; }
+        .font-bold { font-weight: 700; }
+        .font-mono { font-family: "SF Mono", SFMono-Regular, ui-monospace, monospace; letter-spacing: -0.5px; }
+        
+        /* Layout Utilities */
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; }
+        .gap-2 { gap: 8px; }
+        .gap-4 { gap: 16px; }
+
+        /* === HEADER === */
+        .app-header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .app-title {
+            font-size: 18px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .crew-selector {
+            background: var(--bg-input);
+            padding: 3px;
+            border-radius: var(--radius-md);
+            display: flex;
+            border: 1px solid var(--border-light);
+        }
+        .crew-btn {
+            padding: 6px 10px; 
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .crew-btn.active {
+            background: var(--brand-blue);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 8px;
+            align-items: center;
+        }
+
+        .date-trigger {
+            background: var(--bg-input);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            padding: 0 12px; 
+            height: 34px;    
+            line-height: 32px; 
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 13px;
+            width: 100%;
+            text-align: center;
+            -webkit-appearance: none; 
+        }
+
+        .toggle-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-input);
+            padding: 0 10px; 
+            height: 34px;    
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-light);
+        }
+        .toggle-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
+        
+        .switch { position: relative; display: inline-block; width: 34px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--text-tertiary); transition: .4s; border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px;
+            background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--brand-blue); }
+        input:checked + .slider:before { transform: translateX(14px); }
+        input:disabled + .slider { opacity: 0.3; cursor: not-allowed; }
+
+        .prev-ft-badge {
+            background: var(--bg-accent);
+            color: var(--brand-blue);
+            padding: 0 12px; 
+            height: 34px;    
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            border: 1px solid rgba(0,122,255,0.1);
+        }
+
+        /* === STATS === */
+        .stats-dashboard {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1fr 1fr;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-app);
+        }
+        .stat-card {
+            background: var(--bg-card);
+            padding: 8px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 1px solid var(--border-light);
+        }
+        .stat-label { font-size: 9px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 2px; }
+        .stat-value { font-size: 14px; font-weight: 700; font-family: "SF Mono", monospace; }
+        .progress-bar-bg { width: 100%; height: 4px; background: var(--border-light); border-radius: 2px; margin-top: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+        .stat-alert { border: 1px solid var(--brand-red); background: rgba(255, 59, 48, 0.05); }
+        .stat-alert .stat-value { color: var(--brand-red); }
+
+        /* === TIMELINE === */
+        #timeline-container {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding: 16px;
+            gap: 0;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            align-items: center; /* This ensures vertical centering */
+            min-height: calc(100vh - 220px);
+            padding-top: 0;
+        }
+        #timeline-container::-webkit-scrollbar { display: none; }
+
+        .station-wrapper {
+            scroll-snap-align: center;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .station-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            width: 280px;
+            padding: 16px;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            z-index: 2;
+            transition: transform 0.2s, width 0.3s;
+        }
+        
+        .station-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        
+        .station-code-input {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-primary);
+            background: transparent;
+            text-transform: uppercase;
+            width: 80px;
+            padding: 0;
+        }
+        
+        .station-divert { border: 2px solid var(--brand-orange); background: #fffbeb; }
+        body.dark-mode .station-divert { background: #451a03; border-color: var(--brand-orange); }
+
+        .input-group { margin-bottom: 10px; position: relative; }
+        .input-label { font-size: 10px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 4px; display: block; }
+        .time-input-row { display: flex; gap: 8px; }
+        
+        .glass-input {
+            width: 100%;
+            height: 36px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 0 8px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-family: "SF Mono", monospace;
+        }
+        .glass-input:focus { border-color: var(--brand-blue); background: var(--bg-card); }
+        
+        /* 🔥 Smart Input Styles 🔥 */
+        .smart-input-wrapper { position: relative; width: 100%; }
+        .mode-badge {
+            position: absolute; 
+            right: 4px; 
+            top: 50%; 
+            transform: translateY(-50%);
+            font-size: 10px; 
+            font-weight: 800; 
+            padding: 2px 5px; 
+            border-radius: 4px;
+            cursor: pointer; 
+            user-select: none; 
+            z-index: 5;
+            transition: all 0.2s;
+        }
+        .mode-z { color: var(--text-tertiary); background: transparent; }
+        .mode-l { color: white; background: var(--brand-orange); box-shadow: var(--shadow-sm); }
+        
+        .ghost-text {
+            position: absolute; 
+            bottom: -11px; 
+            right: 2px;
+            font-size: 9px; 
+            font-weight: 600; 
+            color: var(--text-secondary);
+            pointer-events: none; 
+            white-space: nowrap; 
+            font-family: "SF Mono", monospace;
+            opacity: 0.8;
+        }
+
+        .taxi-badge {
+            display: flex;
+            align-items: center;
+            background: var(--bg-input);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 0 6px;
+            height: 36px;
+            flex-shrink: 0;
+        }
+        .taxi-val { width: 24px; font-size: 12px; font-weight: 700; text-align: center; color: var(--text-secondary); background: transparent; }
+
+        .lbo-display {
+            background: var(--bg-input);
+            border-radius: 8px;
+            padding: 8px;
+            margin-top: 12px;
+            text-align: center;
+            border: 1px solid var(--border-light);
+        }
+        .lbo-label { font-size: 10px; font-weight: 700; color: var(--text-secondary); display: block; }
+        .lbo-time { font-size: 18px; font-weight: 800; color: var(--text-primary); line-height: 1.2; }
+        .lbo-safe { border-left: 4px solid var(--brand-green); }
+        .lbo-warn { border-left: 4px solid var(--brand-red); background: rgba(255, 59, 48, 0.05); }
+
+        .lbo-locked {
+            background-color: var(--bg-input);
+            border: 1px dashed var(--text-tertiary) !important;
+            color: var(--text-secondary) !important;
+            position: relative;
+        }
+        .lbo-locked::after { content: "🔒"; font-size: 10px; position: absolute; top: 4px; right: 4px; opacity: 0.6; }
+
+        .hotel-section {
+            background: var(--bg-accent);
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .hotel-inputs { display: flex; gap: 4px; }
+        .hotel-time { width: 50px; height: 28px; font-size: 13px; text-align: center; border-radius: 4px; border: 1px solid rgba(0,0,0,0.05); }
+
+        .leg-connector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 140px;
+            position: relative;
+            z-index: 1;
+            flex-shrink: 0;
+            margin-top: 0; /* Changed from 45px to 0 for vertical centering */
+        }
+        .flight-line {
+            height: 2px;
+            background: var(--text-tertiary);
+            width: 100%;
+            position: absolute;
+            top: 50%;
+            z-index: -1;
+        }
+        .flight-pill {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 8px;
+            width: 110px;
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+        }
+        .flight-pill.acm { background: #fff7ed; border-color: var(--brand-orange); }
+        .dark-mode .flight-pill.acm { background: #431407; }
+
+        .action-row { display: flex; justify-content: center; gap: 12px; margin-top: 8px; }
+        .icon-btn {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; font-weight: bold; color: white;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+        }
+        .btn-add { background: var(--brand-green); }
+        .btn-div { background: var(--brand-orange); }
+        .btn-del { position: absolute; top: -8px; right: -8px; background: var(--brand-red); width: 24px; height: 24px; font-size: 12px; z-index: 10; border: 2px solid var(--bg-app); }
+
+        /* === FOOTER HUD === */
+        .hud-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--bg-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid var(--border-light);
+            padding: 10px 16px var(--safe-bottom) 16px;
+            z-index: 200;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+        }
+        .hud-grid { display: grid; grid-template-columns: 1fr 1fr 0.8fr 1.2fr; gap: 8px; }
+        .hud-item { display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; transition: all 0.2s; }
+        .hud-label { font-size: 10px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 2px; }
+        .hud-value { font-size: 18px; font-weight: 800; color: var(--text-primary); line-height: 1; font-family: "SF Mono", monospace; }
+        .hud-sub { font-size: 10px; color: var(--text-secondary); margin-top: 2px; display: flex; align-items: center; gap: 2px; }
+        
+        .val-danger { color: var(--brand-red) !important; }
+        .val-safe { color: var(--brand-green) !important; }
+        .hidden { display: none !important; }
+        
+        .hud-item.locked .hud-label { color: var(--brand-red); }
+        .hud-item.locked .hud-value { color: var(--brand-red); }
+        .lock-icon { font-size: 10px; margin-left: 4px; padding: 2px 4px; background: var(--bg-input); border-radius: 4px; cursor: pointer; }
+        
+        .popover {
+            position: absolute; top: 110%; right: 0;
+            background: var(--bg-card); border: 1px solid var(--border-light);
+            border-radius: 12px; padding: 12px; box-shadow: var(--shadow-float);
+            z-index: 300; width: 240px; display: none; animation: fadeIn 0.2s ease;
+        }
+        .popover.show { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: 0; } }
+
+        /* RESPONSIVE */
+        @media screen and (max-width: 820px) {
+            #timeline-container {
+                flex-direction: column; overflow-x: hidden; overflow-y: visible; padding-bottom: 120px; align-items: center; gap: 0; min-height: auto; padding-top: 16px;
+            }
+            .leg-connector { width: 100%; height: 110px; flex-direction: column; margin-top: 0; }
+            .flight-line { width: 2px; height: 100%; top: 0; left: 50%; transform: translateX(-50%); }
+            .stats-dashboard { grid-template-columns: 1fr 1fr; }
+            .station-wrapper { width: 100%; justify-content: center; scroll-snap-align: start; }
+            .station-card { width: 92%; max-width: 380px; }
+            .controls-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+            .date-trigger { flex: 1 1 100%; order: -1; margin-bottom: 4px; }
+            .toggle-wrapper, .relative { flex: 1 1 auto; min-width: 80px; }
+            body::-webkit-scrollbar { display: none; }
+        }
+    </style>
+</head>
+<body class="light-mode">
+
+    <header class="app-header">
+        <div class="header-top">
+            <div class="app-title">
+                <span style="font-size:20px;">✈️</span> CAL Duty <span class="text-xs font-medium text-secondary" style="border:1px solid var(--border-light); padding:1px 4px; border-radius:4px;">PRO v4.5 Auto-Link</span>
+            </div>
+            <div class="crew-selector">
+                <div class="crew-btn active" id="btn-S" onclick="setCrew('S')">Single</div>
+                <div class="crew-btn" id="btn-M" onclick="setCrew('M')">Multi</div>
+                <div class="crew-btn" id="btn-D" onclick="setCrew('D')">Double</div>
+            </div>
+        </div>
+
+        <div class="controls-grid">
+            <button class="toggle-wrapper" onclick="toggleNightMode()" style="justify-content:center; width:auto; padding:0 12px;">
+                <span id="nightBtnIcon">🌙</span>
+            </button>
+            <input type="date" id="flightDate" class="date-trigger" onchange="calc24hOverlap(); runAllCalc()">
+
+            <div class="toggle-wrapper" id="extFdtContainer">
+                <span class="toggle-label">Ext FDT</span>
+                <label class="switch">
+                    <input type="checkbox" id="extFdt" onchange="runAllCalc()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="toggle-wrapper" id="night-container">
+                <span class="toggle-label">Night</span>
+                <label class="switch">
+                    <input type="checkbox" id="nightOps" onchange="runAllCalc()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="toggle-wrapper">
+                <span class="toggle-label">No Bunk</span>
+                <label class="switch">
+                    <input type="checkbox" id="noBunk" onchange="runAllCalc()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="relative" style="min-width:140px;">
+                <div class="prev-ft-badge" onclick="togglePrevPopup()">
+                    <span class="text-secondary" style="font-size:10px;">PREV FT</span>
+                    <input type="tel" id="prevFt" value="0000" readonly style="background:transparent; text-align:right; font-weight:bold; width:50px; color:var(--brand-blue);">
+                    <span>▼</span>
+                </div>
+                <div id="prevPopup" class="popover">
+                    <div class="text-sm font-bold text-primary mb-3">Previous Flight (24h Check)</div>
+                    <div class="flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-secondary">DATE (Z)</span>
+                            <input type="date" id="pf-date" class="glass-input" style="width:120px; font-size:12px;" onchange="calc24hOverlap(); runAllCalc()">
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-secondary">IN (Z)</span>
+                            <input type="tel" id="pf-in" class="glass-input" style="width:70px;" placeholder="HHMM" oninput="calc24hOverlap(); runAllCalc()">
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-secondary">FT</span>
+                            <input type="tel" id="pf-dur" class="glass-input" style="width:70px;" placeholder="HHMM" oninput="calc24hOverlap(); runAllCalc()">
+                        </div>
+                        <div style="margin-top:8px; display:flex; justify-content:center;">
+                            <button onclick="togglePrevPopup()" class="crew-btn active" style="width:100%; background:var(--brand-green); color:white;">✅ OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="toggle-wrapper" onclick="resetData()" style="justify-content:center; color:var(--brand-red); font-weight:bold; font-size:11px; padding:0 12px;">RESET</button>
+            <button class="toggle-wrapper" id="routeBtn" onclick="toggleRoutePopup()" style="justify-content:center; font-weight:bold; font-size:11px; padding:0 12px;">📂</button>
+            
+             <div id="routePopup" class="popover">
+                <div class="text-sm font-bold text-primary mb-3">Saved Routes</div>
+                <div class="flex gap-2 mb-2">
+                    <input type="text" id="routeName" class="glass-input" placeholder="Name" style="font-size:12px;">
+                    <button id="saveBtn" onclick="saveRoute()" class="crew-btn active" style="padding:4px 8px;">Save</button>
+                </div>
+                <div id="routeList" style="max-height:150px; overflow-y:auto; border-top:1px solid var(--border-light); padding-top:4px;"></div>
+                <div class="flex justify-between mt-2 pt-2 border-t" style="border-color:var(--border-light);">
+                    <button onclick="exportRoutes()" class="text-xs text-secondary">Export</button>
+                    <button onclick="importRoutes()" class="text-xs text-secondary">Import</button>
+                </div>
+            </div>
+        </div>
+        <div id="ulr-alert" class="hidden" style="background:var(--brand-red); color:white; text-align:center; font-size:10px; font-weight:bold; border-radius:4px; margin-top:4px; padding:2px;">⚠️ ULR DETECTED: REQUIRE 4 PILOTS</div>
+    </header>
+
+    <div class="stats-dashboard">
+        <div class="stat-card">
+            <span class="stat-label">Local (STD)</span>
+            <span id="loc-time-display" class="stat-value text-secondary" style="font-size:12px;">--:--</span>
+        </div>
+        <div class="stat-card" id="box-plan">
+            <span class="stat-label">Plan</span>
+            <span id="t-plan" class="stat-value">--</span>
+            <div id="bar-plan" class="progress-bar-bg"></div>
+        </div>
+        <div class="stat-card" id="box-sched">
+            <span class="stat-label">Sched</span>
+            <span id="t-sched" class="stat-value" style="color:var(--brand-green);">--</span>
+            <div id="bar-sched" class="progress-bar-bg"></div>
+        </div>
+        <div class="stat-card" id="box-act">
+            <span class="stat-label">Actual</span>
+            <span id="t-act" class="stat-value" style="color:var(--brand-blue);">--</span>
+            <div id="bar-act" class="progress-bar-bg"></div>
+        </div>
+    </div>
+
+    <div id="timeline-container"></div>
+
+    <footer class="hud-footer">
+        <div class="hud-grid">
+            <div class="hud-item" id="report-box">
+                <span class="hud-label">Report (Z) <span id="lockBtn" class="lock-icon" onclick="toggleLock()">🔓</span></span>
+                <span id="resReport" class="hud-value">--:--</span>
+                <span id="reportLabel" class="hud-sub">--</span>
+            </div>
+            <div class="hud-item" style="border-left:1px solid var(--border-light); border-right:1px solid var(--border-light);">
+                <span class="hud-label">Max FDT</span>
+                <span id="disp-limit-dur" class="hud-value">--</span>
+                <span id="limits-out" class="hud-sub">FT: --</span>
+            </div>
+            <div class="hud-item" id="box-ldg">
+                <span class="hud-label">Landings</span>
+                <span id="resLdg" class="hud-value">0</span>
+                <span class="hud-sub">Max: 6</span>
+            </div>
+            <div class="hud-item">
+                <span class="hud-label">Next Rpt</span>
+                <span id="resNextRpt" class="hud-value text-lg">--:--</span>
+                <div class="hud-sub" style="justify-content:center; width:100%;">
+                    <span id="min-rest-lbl">Rest: --</span>
+                    <label class="hidden" id="next-leg-check" style="display:flex; align-items:center; gap:4px; margin-left:4px; cursor:pointer;">
+                        <input type="checkbox" id="nextLegHigh" onchange="toggleNextLegHigh(this.checked)" style="width:12px; height:12px;">
+                        <span id="nextLegLabel" style="font-size:9px; color:var(--brand-red); font-weight:bold;">Next>7h?</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+<script>
+    const icaoToIata = {
+        'RCTP': 'TPE', 'RCSS': 'TSA', 'RCKH': 'KHH', 'VHHH': 'HKG', 'VMMC': 'MFM',
+        'ZSPD': 'PVG', 'ZBAA': 'PEK', 'RJAA': 'NRT', 'RJTT': 'HND', 'RJBB': 'KIX',
+        'RJFF': 'FUK', 'RJGG': 'NGO', 'RJCC': 'CTS', 'ROAH': 'OKA', 
+        'RKSI': 'ICN', 'RKSS': 'GMP', 'RKPK': 'PUS', 
+        'VTBS': 'BKK', 'WSSS': 'SIN', 'WMKK': 'KUL', 'RPLL': 'MNL', 'WIII': 'CGK', 'WADD': 'DPS',
+        'VVTS': 'SGN', 'VVNB': 'HAN', 'VVDN': 'DAD', 'WMKP': 'PEN', 
+        'VIDP': 'DEL', 
+        'EHAM': 'AMS', 'EDDF': 'FRA', 'LOWW': 'VIE', 'EGLL': 'LHR', 'LFPG': 'CDG', 'ELLX': 'LUX', 'LIRF': 'FCO',
+        'LKPR': 'PRG', 
+        'KLAX': 'LAX', 'KSFO': 'SFO', 'KSEA': 'SEA', 'KJFK': 'JFK', 'CYVR': 'YVR', 'PHNL': 'HNL', 'PANC': 'ANC',
+        'KORD': 'ORD', 'KONT': 'ONT', 
+        'YSSY': 'SYD', 'YMML': 'MEL', 'YBBN': 'BNE', 'NZAA': 'AKL', 'PGUM': 'GUM'
+    };
+
+    const DEFAULTS = [
+        { id: 1, code: 'TPE', std: '', stdMode: 'Z', out: '', in: null, sta: null, staMode: 'Z', hotel: false, ci: '', co: '', taxiOut: 15, taxiIn: 15, isDivert: false, isAcm: false },
+        { id: 2, code: 'HKG', std: '', stdMode: 'Z', out: '', in: '', sta: '', staMode: 'Z', hotel: false, ci: '', co: '', taxiOut: 15, taxiIn: 15, isDivert: false, isAcm: false },
+        { id: 3, code: 'TPE', std: null, stdMode: 'Z', out: null, in: '', sta: '', staMode: 'Z', hotel: false, ci: '', co: '', taxiOut: 15, taxiIn: 15, isDivert: false, isAcm: false }
+    ];
+    let app = { 
+        crew: 'S', 
+        stations: JSON.parse(JSON.stringify(DEFAULTS)), 
+        sfts: ['', ''],
+        lockedReport: null,
+        isLocked: false,
+        nextLegHeavy: false 
+    };
+    let savedRoutes = [];
+
+    const airportIanaZones = {
+        'TPE': 'Asia/Taipei', 'TSA': 'Asia/Taipei', 'KHH': 'Asia/Taipei', 
+        'HKG': 'Asia/Hong_Kong', 'MFM': 'Asia/Macau', 'PVG': 'Asia/Shanghai', 'PEK': 'Asia/Shanghai', 
+        'NRT': 'Asia/Tokyo', 'HND': 'Asia/Tokyo', 'KIX': 'Asia/Tokyo', 
+        'FUK': 'Asia/Tokyo', 'NGO': 'Asia/Tokyo', 'CTS': 'Asia/Tokyo', 'OKA': 'Asia/Tokyo',
+        'ICN': 'Asia/Seoul', 'GMP': 'Asia/Seoul', 'PUS': 'Asia/Seoul',
+        'BKK': 'Asia/Bangkok', 'SIN': 'Asia/Singapore', 'KUL': 'Asia/Kuala_Lumpur', 
+        'MNL': 'Asia/Manila', 'CGK': 'Asia/Jakarta', 'DPS': 'Asia/Makassar',
+        'SGN': 'Asia/Ho_Chi_Minh', 'HAN': 'Asia/Ho_Chi_Minh', 'DAD': 'Asia/Ho_Chi_Minh', 'PEN': 'Asia/Kuala_Lumpur',
+        'DEL': 'Asia/Kolkata',
+        'AMS': 'Europe/Amsterdam', 'FRA': 'Europe/Berlin', 'VIE': 'Europe/Vienna', 'LHR': 'Europe/London', 
+        'CDG': 'Europe/Paris', 'LUX': 'Europe/Luxembourg', 'FCO': 'Europe/Rome', 'PRG': 'Europe/Prague',
+        'LAX': 'America/Los_Angeles', 'SFO': 'America/Los_Angeles', 'SEA': 'America/Los_Angeles', 
+        'JFK': 'America/New_York', 'YVR': 'America/Vancouver', 'HNL': 'Pacific/Honolulu', 'ANC': 'America/Anchorage',
+        'ORD': 'America/Chicago', 'ONT': 'America/Los_Angeles',
+        'SYD': 'Australia/Sydney', 'MEL': 'Australia/Melbourne', 'BNE': 'Australia/Brisbane', 'AKL': 'Pacific/Auckland', 'GUM': 'Pacific/Guam'
+    };
+
+    function getUtcDate(dateStr) {
+        if (!dateStr) return null;
+        const [y, m, d] = dateStr.split('-').map(Number);
+        return new Date(Date.UTC(y, m - 1, d)); 
+    }
+
+    /* 🧠 Smart Input Logic 🧠 */
+    function getDisplayValue(i, field, mode) {
+        const utcVal = app.stations[i][field];
+        if (!utcVal) return '';
+        if (mode === 'Z') return utcVal;
+
+        const code = app.stations[i].code.trim().toUpperCase();
+        const zone = airportIanaZones[code];
+        if (!zone) return utcVal; 
+
+        const refDate = getUtcDate(document.getElementById('flightDate').value) || new Date();
+        const info = getLocalInfo(parse(utcVal), zone, refDate);
+        return info ? info.timeStr.replace(':','') : utcVal;
+    }
+
+    function handleSmartInput(i, field, rawVal) {
+        const mode = app.stations[i][field + 'Mode'] || 'Z';
+        
+        if (mode === 'Z') {
+            app.stations[i][field] = rawVal;
+        } else {
+            const code = app.stations[i].code.trim().toUpperCase();
+            const zone = airportIanaZones[code];
+            if (zone && rawVal.length === 4) {
+                const calculatedUtc = calcUtcFromLocal(rawVal, zone);
+                app.stations[i][field] = calculatedUtc;
+            } else {
+                if(rawVal.length === 0) app.stations[i][field] = '';
+            }
+        }
+        updateGhostText(i, field, rawVal);
+        saveData();
+        
+        // 🔥 AUTO-LINK LOGIC: Update Prev FT if STD changes, else just update totals
+        if (field === 'std') {
+            calc24hOverlap(); // Recalculate Prev FT window
+        }
+        runAllCalc(false); // Update bars
+    }
+
+    function toggleInputMode(i, field) {
+        const current = app.stations[i][field + 'Mode'] || 'Z';
+        app.stations[i][field + 'Mode'] = (current === 'Z') ? 'L' : 'Z';
+        saveData();
+        drawTimeline(); 
+    }
+
+    function calcUtcFromLocal(localHHMM, zone) {
+        const refDate = getUtcDate(document.getElementById('flightDate').value) || new Date();
+        const h = parseInt(localHHMM.substring(0,2));
+        const m = parseInt(localHHMM.substring(2,4));
+        if(isNaN(h) || isNaN(m)) return '';
+
+        const guessUtc = new Date(refDate);
+        guessUtc.setUTCHours(h, m);
+
+        const formatLocal = new Intl.DateTimeFormat('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+        const parts = formatLocal.formatToParts(guessUtc);
+        const lh = parseInt(parts.find(p=>p.type==='hour').value);
+        const lm = parseInt(parts.find(p=>p.type==='minute').value);
+        
+        let diffMinutes = (lh*60+lm) - (h*60+m);
+        if (diffMinutes > 720) diffMinutes -= 1440;
+        if (diffMinutes < -720) diffMinutes += 1440;
+
+        let totalMins = (h*60+m) - diffMinutes;
+        if (totalMins < 0) totalMins += 1440;
+        if (totalMins >= 1440) totalMins -= 1440;
+
+        const uh = Math.floor(totalMins/60);
+        const um = totalMins%60;
+        return String(uh).padStart(2,'0') + String(um).padStart(2,'0');
+    }
+
+    function updateGhostText(i, field, rawVal) {
+        const el = document.getElementById(`${field}-ghost-${i}`);
+        if (!el || rawVal.length < 4) { if(el) el.innerText = ''; return; }
+        
+        const mode = app.stations[i][field + 'Mode'] || 'Z';
+        const code = app.stations[i].code.trim().toUpperCase();
+        const zone = airportIanaZones[code];
+        
+        if (!zone) { el.innerText = ''; return; }
+
+        if (mode === 'L') {
+            const utc = calcUtcFromLocal(rawVal, zone);
+            el.innerText = `= ${utc.substring(0,2)}:${utc.substring(2,4)}Z`;
+        } else {
+            const refDate = getUtcDate(document.getElementById('flightDate').value) || new Date();
+            const utcMins = parse(rawVal);
+            if (utcMins !== null) {
+                const info = getLocalInfo(utcMins, zone, refDate);
+                if(info) el.innerText = `= ${info.timeStr}L`;
+            }
+        }
+    }
+
+    function drawTimeline() {
+        const con = document.getElementById('timeline-container');
+        let html = '';
+        
+        app.stations.forEach((st, i) => {
+            const isFirst = i === 0;
+            const isLast = i === app.stations.length - 1;
+
+            if (!isFirst) {
+                const sft = app.sfts[i-1] || '';
+                const isAcmLeg = app.stations[i-1].isAcm; 
+                html += `
+                <div class="leg-connector">
+                    <div class="flight-line"></div>
+                    <div class="flight-pill ${isAcmLeg ? 'acm' : ''}">
+                        <div style="font-size:9px; font-weight:700; color:var(--text-secondary); margin-bottom:4px; text-transform:uppercase; cursor:pointer;" onclick="toggleAcm(${i-1})">
+                            ${isAcmLeg ? 'ACM (Pos)' : 'Flight Leg'}
+                        </div>
+                        <div class="flex justify-between text-xs text-secondary mb-1">
+                            <span>Plan</span> <span id="p-${i-1}" class="font-mono">--</span>
+                        </div>
+                        <input type="tel" class="glass-input mb-1" style="height:28px; font-size:14px;" 
+                            placeholder="FT" value="${sft}" oninput="updSft(${i-1}, this.value)" id="sft-${i-1}">
+                        <div class="flex justify-between text-xs font-bold text-primary">
+                            <span>Act</span> <span id="a-${i-1}" class="font-mono" style="color:var(--brand-blue);">--</span>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            const cardClass = st.isDivert ? 'station-card station-divert' : 'station-card';
+            
+            html += `<div class="station-wrapper"><div class="${cardClass}">`;
+            
+            if(!isFirst && !isLast) html += `<div class="icon-btn btn-del" onclick="remSt(${i})">✕</div>`;
+
+            html += `<div class="station-header">
+                        <input type="text" id="code-${i}" class="station-code-input" value="${st.code}" onchange="updVal(${i},'code',this.value)">
+                        ${!isLast ? `
+                        <div style="text-align:right;">
+                            <label class="toggle-wrapper" style="padding:0 8px;">
+                                <span style="font-size:10px; font-weight:700; margin-right:6px;">HOTEL</span>
+                                <label class="switch" style="transform:scale(0.8);">
+                                    <input type="checkbox" ${st.hotel?'checked':''} onchange="toggleHotel(${i},this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </label>
+                            <div id="rest-badge-${i}" style="font-size:10px; margin-top:4px; font-weight:bold; color:var(--brand-blue); display:none;">Rest: --:--</div>
+                        </div>` : ''}
+                    </div>`;
+
+            if (!isLast && st.hotel) {
+                html += `
+                <div class="hotel-section">
+                    <span style="font-size:10px; font-weight:bold; color:var(--text-tertiary);">REST PERIOD</span>
+                    <div class="hotel-inputs">
+                        <input type="tel" class="glass-input hotel-time" style="width:60px;" id="ci-${i}" value="${st.ci||''}" oninput="updVal(${i},'ci',this.value)" placeholder="C/I">
+                        <span style="align-self:center; color:var(--text-tertiary);">-</span>
+                        <input type="tel" class="glass-input hotel-time" style="width:60px;" id="co-${i}" value="${st.co||''}" oninput="updVal(${i},'co',this.value)" placeholder="C/O">
+                    </div>
+                </div>`;
+            }
+
+            if (!isFirst) {
+                // ARRIVAL BLOCK
+                const staMode = st.staMode || 'Z';
+                const staDisplay = getDisplayValue(i, 'sta', staMode);
+                html += `<div class="input-group">
+                            <span class="input-label">Arrival (IN)</span>
+                            <div class="time-input-row">
+                                <div class="taxi-badge">
+                                    <span style="font-size:9px; font-weight:700; color:var(--text-tertiary);">TX</span>
+                                    <input type="tel" class="taxi-val" value="${st.taxiIn!==undefined?st.taxiIn:15}" oninput="updVal(${i},'taxiIn',this.value)">
+                                </div>
+                                <input type="tel" class="glass-input" id="in-${i}" placeholder="ACT IN" value="${st.in||''}" oninput="updVal(${i},'in',this.value)" style="border-color:var(--brand-red);">
+                                
+                                <div class="smart-input-wrapper">
+                                    <input type="tel" class="glass-input" placeholder="STA" 
+                                        value="${staDisplay}" 
+                                        oninput="handleSmartInput(${i}, 'sta', this.value)"
+                                        onfocus="updateGhostText(${i}, 'sta', this.value)"
+                                        onblur="document.getElementById('sta-ghost-${i}').innerText=''"
+                                        >
+                                    <div class="mode-badge ${staMode==='L'?'mode-l':'mode-z'}" onclick="toggleInputMode(${i}, 'sta')">
+                                        ${staMode}
+                                    </div>
+                                    <div id="sta-ghost-${i}" class="ghost-text"></div>
+                                </div>
+
+                            </div>
+                         </div>`;
+            }
+
+            if (!isFirst && !isLast) {
+                html += `<div id="turn-${i}" style="text-align:center; font-size:10px; font-weight:bold; color:var(--text-secondary); margin:6px 0; font-family:monospace;">Turn: --:--</div>`;
+            }
+
+            if (!isLast) {
+                 // DEPARTURE BLOCK
+                 const stdMode = st.stdMode || 'Z';
+                 const stdDisplay = getDisplayValue(i, 'std', stdMode);
+
+                 html += `<div class="input-group">
+                            <span class="input-label">Departure (OUT)</span>
+                            <div class="time-input-row">
+                                <div class="smart-input-wrapper">
+                                    <input type="tel" class="glass-input" placeholder="STD" 
+                                        value="${stdDisplay}" 
+                                        oninput="handleSmartInput(${i}, 'std', this.value)"
+                                        onfocus="updateGhostText(${i}, 'std', this.value)"
+                                        onblur="document.getElementById('std-ghost-${i}').innerText=''"
+                                        >
+                                    <div class="mode-badge ${stdMode==='L'?'mode-l':'mode-z'}" onclick="toggleInputMode(${i}, 'std')">
+                                        ${stdMode}
+                                    </div>
+                                    <div id="std-ghost-${i}" class="ghost-text"></div>
+                                </div>
+
+                                <input type="tel" class="glass-input" id="out-${i}" placeholder="ACT OUT" value="${st.out||''}" oninput="updVal(${i},'out',this.value)" style="border-color:var(--brand-green);">
+                                <div class="taxi-badge">
+                                    <span style="font-size:9px; font-weight:700; color:var(--text-tertiary);">TX</span>
+                                    <input type="tel" class="taxi-val" value="${st.taxiOut!==undefined?st.taxiOut:15}" oninput="updVal(${i},'taxiOut',this.value)">
+                                </div>
+                            </div>
+                         </div>`;
+
+                 html += `<div class="lbo-display" id="lbo-box-${i}">
+                            <span class="lbo-label">LAST LEGAL PUSH (Z)</span>
+                            <div id="lbo-${i}" class="lbo-time">--:--</div>
+                            <div id="lbo-detail-${i}" style="font-size:9px; color:var(--text-secondary); font-family:monospace;"></div>
+                          </div>`;
+
+                 html += `<div class="action-row">
+                            <div class="icon-btn btn-add" onclick="addSt(${i})">+</div>
+                            <div class="icon-btn btn-div" onclick="addDivert(${i})">⤵</div>
+                          </div>`;
+            } else {
+                 html += `<div class="lbo-display" id="max-fdt-box-card" style="margin-top:20px; background:var(--bg-accent);">
+                            <span class="lbo-label">MAX FDT END (Z)</span>
+                            <div id="resMaxFdtCard" class="lbo-time">--:--</div>
+                            <div id="cap-msg-card" style="font-size:10px; color:var(--brand-red); font-weight:bold;"></div>
+                          </div>`;
+            }
+
+            html += `</div></div>`;
+        });
+        
+        con.innerHTML = html;
+        updateLockButton();
+        updateResultsOnly(); 
+    }
+
+    function toggleLock() {
+        if (app.isLocked) {
+            app.isLocked = false;
+            app.lockedReport = null;
+        } else {
+            const s0 = app.stations[0];
+            const std = parse(s0.std);
+            if (std === null) return;
+            const code = s0.code.toUpperCase().trim();
+            const reportOffset = (code === 'TPE') ? 90 : 60;
+            let rep = std - reportOffset;
+            if (rep < 0) rep += 1440;
+            app.lockedReport = rep;
+            app.isLocked = true;
+        }
+        saveData();
+        updateLockButton();
+        runAllCalc();
+    }
+
+    function updateLockButton() {
+        const btn = document.getElementById('lockBtn');
+        const box = document.getElementById('report-box');
+        if (app.isLocked) {
+            btn.innerHTML = `🔒`;
+            if(box) box.classList.add('locked');
+        } else {
+            btn.innerHTML = `🔓`;
+            btn.style.color = 'var(--text-secondary)';
+            if(box) box.classList.remove('locked');
+        }
+    }
+
+    function toggleNightMode() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('nightMode', isDark);
+        document.getElementById('nightBtnIcon').innerText = isDark ? '☀️' : '🌙';
+    }
+    
+    function toggleNextLegHigh(checked) {
+        app.nextLegHeavy = checked;
+        saveData();
+        runAllCalc();
+    }
+
+    function toggleRoutePopup() {
+        const el = document.getElementById('routePopup');
+        el.classList.toggle('show');
+        renderRouteList();
+    }
+
+    function saveRoute() {
+        const name = document.getElementById('routeName').value.trim();
+        if(!name) { alert('Please enter a name'); return; }
+        const routeData = {
+            name: name,
+            stations: JSON.parse(JSON.stringify(app.stations)),
+            sfts: JSON.parse(JSON.stringify(app.sfts)),
+            crew: app.crew,
+            isNight: document.getElementById('nightOps').checked,
+            isNoBunk: document.getElementById('noBunk').checked,
+            extFdt: document.getElementById('extFdt').checked
+        };
+        savedRoutes.push(routeData);
+        localStorage.setItem('calSavedRoutes', JSON.stringify(savedRoutes));
+        const btn = document.getElementById('saveBtn');
+        const origText = btn.innerText;
+        btn.innerText = "Saved!";
+        setTimeout(() => { 
+            btn.innerText = origText; 
+            document.getElementById('routeName').value = '';
+            renderRouteList();
+        }, 1000);
+    }
+
+    function loadRoute(idx) {
+        if(!savedRoutes[idx]) return;
+        const r = savedRoutes[idx];
+        app.stations = JSON.parse(JSON.stringify(r.stations));
+        app.sfts = JSON.parse(JSON.stringify(r.sfts));
+        if (r.isNight !== undefined) document.getElementById('nightOps').checked = r.isNight;
+        if (r.isNoBunk !== undefined) document.getElementById('noBunk').checked = r.isNoBunk;
+        if (r.extFdt !== undefined) document.getElementById('extFdt').checked = r.extFdt;
+        setCrew(r.crew); 
+        drawTimeline(); 
+        runAllCalc();
+        document.getElementById('routePopup').classList.remove('show');
+    }
+
+    function deleteRoute(idx) {
+        if(confirm('Delete this route?')) {
+            savedRoutes.splice(idx, 1);
+            localStorage.setItem('calSavedRoutes', JSON.stringify(savedRoutes));
+            renderRouteList();
+        }
+    }
+
+    function renderRouteList() {
+        const list = document.getElementById('routeList');
+        if(savedRoutes.length === 0) {
+            list.innerHTML = '<div style="font-size:10px; color:#999; text-align:center; padding:5px;">No saved routes</div>';
+            return;
+        }
+        let html = '';
+        savedRoutes.forEach((r, i) => {
+            html += `
+            <div style="display:flex; justify-content:space-between; padding:6px; border-bottom:1px solid var(--border-light); align-items:center; cursor:pointer;" onclick="loadRoute(${i})">
+                <span style="font-size:12px; font-weight:600;">${r.name}</span>
+                <span style="color:var(--brand-red); font-weight:bold; padding:4px;" onclick="event.stopPropagation(); deleteRoute(${i})">✕</span>
+            </div>`;
+        });
+        list.innerHTML = html;
+    }
+
+    function exportRoutes() {
+        if(savedRoutes.length === 0) { alert('No routes to export.'); return; }
+        const dataStr = JSON.stringify(savedRoutes);
+        navigator.clipboard.writeText(dataStr).then(() => {
+            alert('Routes copied to clipboard!');
+        }).catch(() => {
+            prompt('Copy this data manually:', dataStr);
+        });
+    }
+
+    function importRoutes() {
+        const dataStr = prompt('Paste your exported route data here:');
+        if(!dataStr) return;
+        try {
+            const imported = JSON.parse(dataStr);
+            if(Array.isArray(imported)) {
+                if(imported.length > 0 && (!imported[0].stations || !imported[0].crew)) {
+                        alert('Invalid data format.'); return;
+                }
+                savedRoutes = imported;
+                localStorage.setItem('calSavedRoutes', JSON.stringify(savedRoutes));
+                renderRouteList();
+                alert('Routes imported successfully!');
+            } else { alert('Invalid data format.'); }
+        } catch(e) { alert('Error parsing data.'); }
+    }
+
+    function updVal(i, f, v) { 
+        if (f==='ci' || f==='co') { app.stations[i][f] = v; } 
+        else if (f==='taxiIn') { let n = parseInt(v); app.stations[i].taxiIn = isNaN(n) ? 15 : n; }
+        else if (f==='taxiOut') { let n = parseInt(v); app.stations[i].taxiOut = isNaN(n) ? 15 : n; }
+        else { 
+            if (f === 'code') {
+                let val = v.toUpperCase().trim();
+                if (val.length === 4 && icaoToIata[val]) {
+                    val = icaoToIata[val];
+                    const el = document.getElementById(`code-${i}`);
+                    if(el) el.value = val;
+                }
+                app.stations[i][f] = val;
+            } else {
+                app.stations[i][f] = v; 
+            }
+        }
+        saveData();
+        
+        // 🔥 Update Prev FT only if OUT changes (Actual times affect history)
+        if(f === 'out') {
+            calc24hOverlap();
+        }
+        runAllCalc();
+    }
+
+    function updSft(i, v) { 
+        app.sfts[i] = v; 
+        saveData(); 
+        runAllCalc(); // Only re-calc totals, do NOT shift prev FT
+    }
+      
+    function toggleHotel(i, checked) { 
+        app.stations[i]['hotel'] = checked; 
+        saveData(); 
+        drawTimeline(); 
+    }
+    
+    function toggleAcm(i) {
+        if(app.stations[i]) {
+            app.stations[i].isAcm = !app.stations[i].isAcm;
+            saveData();
+            drawTimeline();
+        }
+    }
+
+    function addSt(i) { 
+        app.stations.splice(i+1, 0, { id: Date.now(), code: 'XXX', std: '', stdMode: 'Z', out: '', in: '', sta: '', staMode: 'Z', hotel: false, ci:'', co:'', taxiOut: 15, taxiIn: 15, isDivert: false, isAcm: false }); 
+        app.sfts.splice(i, 0, ''); 
+        saveData(); drawTimeline(); 
+    }
+
+    function addDivert(i) {
+        app.stations.splice(i+1, 0, { 
+            id: Date.now(), 
+            code: 'DIV', 
+            std: '', stdMode: 'Z', out: '', in: '', sta: '', staMode: 'Z', 
+            hotel: false, ci:'', co:'', 
+            taxiOut: 15, taxiIn: 15,
+            isDivert: true,
+            isAcm: false
+        });
+        app.sfts.splice(i, 0, ''); 
+        saveData(); 
+        drawTimeline();
+    }
+
+    function remSt(i) { app.stations.splice(i, 1); app.sfts.splice(i-1, 1); saveData(); drawTimeline(); }
+    
+    function setCrew(c) { 
+        app.crew = c; 
+        document.querySelectorAll('.crew-btn').forEach(b => b.classList.remove('active')); 
+        document.getElementById(`btn-${c}`).classList.add('active'); 
+        
+        const extChk = document.getElementById('extFdt');
+        const extCont = document.getElementById('extFdtContainer');
+        if (c === 'S') {
+            extChk.checked = false;
+            extChk.disabled = true;
+            extCont.style.opacity = '0.5';
+        } else {
+            extChk.disabled = false;
+            extCont.style.opacity = '1';
+        }
+        saveData(); 
+        updateResultsOnly(); 
+    }
+    
+    function resetData() { 
+        const saved = localStorage.getItem('calSavedRoutes');
+        const night = localStorage.getItem('nightMode');
+        localStorage.removeItem('calData158'); 
+        if(saved) localStorage.setItem('calSavedRoutes', saved);
+        if(night) localStorage.setItem('nightMode', night);
+        location.reload(); 
+    }
+
+    function runAllCalc(redraw = false) { 
+        // calc24hOverlap() is intentionally removed here to prevent "ghost jumps"
+        saveData(); 
+        updateResultsOnly(); 
+        if (redraw) drawTimeline();
+    }
+    
+    function togglePrevPopup() {
+        const el = document.getElementById('prevPopup');
+        const isClosed = !el.classList.contains('show');
+        if (isClosed) {
+            const curDateVal = document.getElementById('flightDate').value;
+            if (curDateVal) {
+                const d = getUtcDate(curDateVal);
+                d.setUTCDate(d.getUTCDate() - 1); 
+                const yyyy = d.getUTCFullYear();
+                const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+                const dd = String(d.getUTCDate()).padStart(2, '0');
+                document.getElementById('pf-date').value = `${yyyy}-${mm}-${dd}`;
+            }
+            calc24hOverlap(); 
+        }
+        el.classList.toggle('show');
+    }
+    
+    function calc24hOverlap() {
+        const pfDateStr = document.getElementById('pf-date').value;
+        const pfInStr = document.getElementById('pf-in').value;
+        const pfDurStr = document.getElementById('pf-dur').value;
+        const curDateStr = document.getElementById('flightDate').value;
+        const s0 = app.stations[0];
+        const s1 = app.stations[1]; 
+        
+        const curStartMins = parse(s0.out) !== null ? parse(s0.out) : parse(s0.std);
+        let curDurMins = parse(app.sfts[0]);
+
+        if (curDurMins !== null) {
+            const tOut = s0.taxiOut !== undefined ? s0.taxiOut : 15;
+            const tIn = (s1 && s1.taxiIn !== undefined) ? s1.taxiIn : 15;
+            curDurMins += (tOut + tIn);
+        }
+        if(curDurMins === null && s1 && parse(s1.sta) !== null && parse(s0.std) !== null) {
+            curDurMins = diff(parse(s0.std), parse(s1.sta));
+        }
+        
+        if (!pfDateStr || !pfInStr || !pfDurStr || !curDateStr || curStartMins === null || curDurMins === null) return; 
+
+        const pfInMins = parse(pfInStr);
+        const pfDurMins = parse(pfDurStr);
+        const ONE_DAY = 24 * 60 * 60 * 1000;
+        
+        const curBaseDate = getUtcDate(curDateStr);
+        const curStartTs = curBaseDate.getTime() + (curStartMins * 60000);
+        const curEndTs = curStartTs + (curDurMins * 60000);
+        const windowStartTs = curEndTs - ONE_DAY;
+
+        const pfBaseDate = getUtcDate(pfDateStr);
+        const pfEndTs = pfBaseDate.getTime() + (pfInMins * 60000);
+        const pfStartTs = pfEndTs - (pfDurMins * 60000);
+
+        const overlapStart = Math.max(windowStartTs, pfStartTs);
+        const overlapEnd = Math.min(curEndTs, pfEndTs); 
+        
+        let overlapMins = 0;
+        if (overlapEnd > overlapStart) {
+            overlapMins = Math.floor((overlapEnd - overlapStart) / 60000);
+        }
+        
+        if (overlapMins > 0) {
+            document.getElementById('prevFt').value = fmt(overlapMins, false).replace(':',''); 
+            document.getElementById('prevFt').style.color = 'var(--brand-blue)';
+        } else {
+            document.getElementById('prevFt').value = "0000"; 
+            document.getElementById('prevFt').style.color = 'var(--text-tertiary)';
+        }
+    }
+
+    function updateResultsOnly() {
+        let stationLimitExtensions = []; 
+        let globalPauseMinutes = 0; 
+
+        app.stations.forEach((s, i) => {
+            let extension = 0;
+            let pause = 0;
+            if (s.hotel && i < app.stations.length - 1) {
+                const hTime = calcRest(s.ci, s.co);
+                const badge = document.getElementById(`rest-badge-${i}`);
+                if(badge) {
+                    badge.style.display = 'block';
+                    badge.innerText = `Rest: ${hTime>0 ? fmt(hTime,false) : '--:--'}`;
+                    if (hTime > 0 && hTime < 180) {
+                        badge.style.color = 'var(--brand-red)';
+                        badge.innerText += ' (<3h)';
+                    } else {
+                        badge.style.color = 'var(--brand-blue)';
+                    }
+                }
+                if (hTime >= 180) {
+                    if (i === 0) {
+                        pause = hTime;
+                        if(badge) badge.innerText += ' (Split)';
+                    } else {
+                        extension = Math.floor(hTime / 2);
+                        if(badge) badge.innerText += ' (Ext)';
+                    }
+                }
+            } else {
+                const badge = document.getElementById(`rest-badge-${i}`);
+                if(badge) badge.style.display = 'none';
+            }
+            stationLimitExtensions.push(extension);
+            if (i === 0) globalPauseMinutes = pause;
+        });
+
+        calcTotals();
+
+        let isULR = false;
+        for(let i=0; i<app.stations.length-1; i++) {
+            let legTime = 0;
+            const sft = parse(app.sfts[i]);
+            const actualOut = parse(app.stations[i].out);
+            const actualIn = parse(app.stations[i+1].in);
+            if (actualOut !== null && actualIn !== null) {
+                legTime = diff(actualOut, actualIn);
+            } else if (sft !== null) {
+                legTime = sft;
+            }
+            if (legTime >= 960) { 
+                isULR = true;
+            }
+        }
+
+        const alertOverlay = document.getElementById('ulr-alert');
+        if (isULR && app.crew !== 'D') {
+            alertOverlay.classList.remove('hidden');
+        } else {
+            alertOverlay.classList.add('hidden');
+        }
+
+        const s1 = parse(app.stations[0].std);
+        const code = app.stations[0].code.trim().toUpperCase();
+        const dateInput = document.getElementById('flightDate').value;
+        const refDate = getUtcDate(dateInput) || new Date();
+
+        let rep = null;
+        let reportOffset = (code==='TPE'?90:60); 
+        
+        if (app.isLocked && app.lockedReport !== null) {
+            rep = app.lockedReport;
+            document.getElementById('reportLabel').innerText = "LOCKED";
+        } else if (s1 !== null) {
+            rep = s1 - reportOffset; if(rep<0) rep+=1440;
+            document.getElementById('reportLabel').innerText = code==='TPE'?"STD-90":"STD-60";
+        }
+
+        const nightContainer = document.getElementById('night-container');
+        if (s1 !== null) {
+            if (code in airportIanaZones) {
+                nightContainer.style.border = "1px solid var(--border-light)";
+                const stdInfo = getLocalInfo(s1, airportIanaZones[code], refDate);
+                if (stdInfo) {
+                    const h = parseInt(stdInfo.timeStr.split(':')[0]);
+                    const m = parseInt(stdInfo.timeStr.split(':')[1]);
+                    const isNightTime = (h > 21 || h < 7) || (h === 21 && m > 0);
+                    document.getElementById('nightOps').checked = isNightTime;
+                    const offsetSign = stdInfo.offset >= 0 ? '+' : '';
+                    document.getElementById('loc-time-display').innerText = `${stdInfo.timeStr} L (UTC${offsetSign}${stdInfo.offset})`;
+                }
+            } else {
+                nightContainer.style.border = "2px solid var(--brand-orange)";
+                document.getElementById('loc-time-display').innerText = `STD: --:-- (Chk Night)`;
+            }
+        } else {
+            document.getElementById('loc-time-display').innerText = `STD: --:--`;
+            nightContainer.style.border = "1px solid var(--border-light)";
+        }
+
+        if (rep === null) {
+            document.getElementById('resReport').innerText="--:--"; 
+            const nextRptEl = document.getElementById('resNextRpt');
+            if(nextRptEl) nextRptEl.innerHTML = "--:--";
+            const minRestEl = document.getElementById('min-rest-lbl');
+            if(minRestEl) minRestEl.innerText = "Rest: --";
+            document.getElementById('disp-limit-dur').innerText = "--";
+            const cardMax = document.getElementById('resMaxFdtCard');
+            if(cardMax) cardMax.innerText = "--:--";
+            return; 
+        }
+
+        let repHtml = fmt(rep);
+        if (rep !== null && code in airportIanaZones) {
+            let rptDate = new Date(refDate);
+            if (s1 !== null && (s1 - reportOffset) < 0) {
+                rptDate.setUTCDate(rptDate.getUTCDate() - 1);
+            }
+            const rptLoc = getLocalInfo(rep, airportIanaZones[code], rptDate);
+            if (rptLoc) {
+                repHtml += ` <span style="font-size:10px; color:var(--text-secondary); font-weight:normal;">(${rptLoc.timeStr}L)</span>`;
+            }
+        }
+        document.getElementById('resReport').innerHTML = repHtml;
+        
+        let base = 14; 
+        if(app.crew==='M') base=18; if(app.crew==='D') base=24; 
+        
+        const isNight = document.getElementById('nightOps').checked;
+        let lim = isNight ? base - 2 : base;
+        
+        const totalExtension = stationLimitExtensions.reduce((a, b) => a + b, 0);
+        const isExt = document.getElementById('extFdt').checked;
+        const discretionMins = isExt ? 120 : 0;
+
+        let globalMaxFdpMins = (lim*60) + globalPauseMinutes + totalExtension + discretionMins; 
+        let isCapped = false;
+        if (globalMaxFdpMins > 1440) { globalMaxFdpMins = 1440; isCapped = true; } 
+
+        let limitText = `${base}h`;
+        if(isNight) limitText += `-2h`;
+        if(globalPauseMinutes > 0) limitText += `+S`; 
+        if(totalExtension > 0) limitText += `+E`; 
+        if(isExt) limitText += `+CD`; 
+
+        document.getElementById('disp-limit-dur').innerText = limitText;
+
+        const fdpEndTime = rep + globalMaxFdpMins;
+        const maxFdtEl = document.getElementById('resMaxFdtCard');
+        if (maxFdtEl) {
+            maxFdtEl.innerText = fmt(fdpEndTime);
+            const capMsg = document.getElementById('cap-msg-card');
+            if (isCapped) {
+                if(capMsg) capMsg.innerText = " (Cap 24h)";
+            } else {
+                if(capMsg) capMsg.innerText = "";
+            }
+        }
+        
+        let cbnOffset = 60;
+        if (code === 'TPE') cbnOffset = 140;
+        else if (code === 'TSA') cbnOffset = 90;
+        else if (code === 'KHH') cbnOffset = 110;
+
+        let cbnLimit = 14 * 60;
+        if (app.crew === 'M' || app.crew === 'D') cbnLimit = 20 * 60;
+
+        let cbnEndRelative = cbnLimit - (cbnOffset - reportOffset); 
+        
+        let cbnChoke = false;
+        let cbnEndDisplay = "";
+        
+        if (cbnEndRelative < globalMaxFdpMins) {
+             cbnChoke = true;
+             let cbnEndAbs = rep + cbnEndRelative;
+             cbnEndDisplay = fmt(cbnEndAbs);
+        }
+
+        const maxFdtBox = document.getElementById('max-fdt-box-card');
+        const capMsg = document.getElementById('cap-msg-card');
+        
+        let effectiveLimit = globalMaxFdpMins;
+        let checkInVal = null;
+        for (let i = app.stations.length - 1; i > 0; i--) {
+            const val = parse(app.stations[i].in);
+            if (val !== null) {
+                checkInVal = val;
+                break; 
+            }
+        }
+        
+        let isActExceeded = false;
+        if (checkInVal !== null) {
+            let actualElapsed = checkInVal - rep;
+            if (actualElapsed < 0) actualElapsed += 1440;
+            if (actualElapsed > effectiveLimit) isActExceeded = true;
+        }
+
+        const lastSt = app.stations[app.stations.length - 1];
+        const lastStaVal = parse(lastSt.sta);
+        let isStaExceeded = false;
+        if (lastStaVal !== null) {
+             let staElapsed = lastStaVal - rep;
+             if (staElapsed < 0) staElapsed += 1440;
+             if (staElapsed > effectiveLimit) isStaExceeded = true;
+        }
+        
+        if(maxFdtBox) {
+             maxFdtBox.querySelector('.lbo-time').style.color = 'var(--text-primary)'; 
+             maxFdtBox.querySelector('.lbo-label').style.color = 'var(--text-secondary)';
+
+             if (isActExceeded) {
+                maxFdtBox.style.background = 'var(--brand-red)'; 
+                maxFdtBox.querySelector('.lbo-time').style.color = 'white'; 
+                maxFdtBox.querySelector('.lbo-label').style.color = 'white';
+                if(capMsg) capMsg.innerText = "⚠️ ACT EXCEEDS LIMIT";
+             } else if (isStaExceeded) {
+                maxFdtBox.style.background = 'var(--brand-orange)'; 
+                maxFdtBox.querySelector('.lbo-time').style.color = 'white'; 
+                maxFdtBox.querySelector('.lbo-label').style.color = 'white';
+                if(capMsg) capMsg.innerText = "⚠️ STA EXCEEDS LIMIT";
+             } else {
+                maxFdtBox.style.background = 'var(--bg-accent)';
+                maxFdtBox.classList.remove('station-divert');
+                maxFdtBox.style.borderColor = 'var(--border-light)';
+                
+                if (cbnChoke) {
+                    if(capMsg) capMsg.innerText = `(CBN: ${cbnEndDisplay}Z)`;
+                } else if (isCapped) {
+                     if(capMsg) capMsg.innerText = " (Cap 24h)";
+                 } else {
+                     if(capMsg) capMsg.innerText = "";
+                 }
+             }
+        }
+        
+        const lastIdx = app.stations.length - 1;
+        let lastInVal = parse(app.stations[lastIdx].in);
+        if (lastInVal === null) lastInVal = parse(app.stations[lastIdx].sta);
+        
+        if (lastInVal === null) {
+            document.getElementById('resNextRpt').innerHTML = "--:--";
+            document.getElementById('min-rest-lbl').innerText = "Rest: --";
+        } else {
+            let actualFdp = lastInVal - rep;
+            if (actualFdp < 0) actualFdp += 1440;
+
+            let totalFtCalc = 0;
+            for(let k=0; k<app.stations.length-1; k++) {
+                 if (app.stations[k].isAcm) continue;
+                 const o = parse(app.stations[k].out);
+                 const i = parse(app.stations[k+1].in);
+                 if(o!==null && i!==null) totalFtCalc += diff(o,i);
+                 else if(parse(app.sfts[k])) totalFtCalc += parse(app.sfts[k]);
+            }
+            const ftHours = totalFtCalc / 60;
+            let tableRest = 0;
+
+            if (isULR) {
+                tableRest = 48; 
+                if(!document.getElementById('ulr-tag')) {
+                    const tag = document.createElement('span');
+                    tag.id = 'ulr-tag';
+                    tag.className = 'text-xs bg-purple-600 text-white px-1 rounded ml-1';
+                    tag.style.fontSize = '9px';
+                    tag.innerText = 'ULR';
+                    document.getElementById('min-rest-lbl').appendChild(tag);
+                }
+            } else {
+                const tag = document.getElementById('ulr-tag');
+                if(tag) tag.remove();
+
+                if (app.crew === 'S') {
+                    if (ftHours <= 8) tableRest = 10;
+                    else tableRest = 18; 
+                } else if (app.crew === 'M') {
+                    if (ftHours <= 12) tableRest = 18;
+                    else tableRest = 24; 
+                } else if (app.crew === 'D') {
+                    if (ftHours <= 16) tableRest = 18;
+                    else tableRest = 22; 
+                }
+                
+                const fdpHours = actualFdp / 60;
+                if (app.crew === 'M') {
+                    if (ftHours <= 10 && fdpHours <= 14) {
+                        let sRest = (ftHours <= 8) ? 10 : 18;
+                        tableRest = Math.min(tableRest, sRest);
+                    }
+                }
+                
+                if (app.crew === 'D') {
+                    if (ftHours <= 10 && fdpHours <= 14) {
+                        let sRest = (ftHours <= 8) ? 10 : 18;
+                        tableRest = Math.min(tableRest, sRest);
+                    }
+                    if (ftHours <= 16 && fdpHours <= 18) {
+                        let mRest = (ftHours <= 12) ? 18 : 24;
+                        tableRest = Math.min(tableRest, mRest);
+                    }
+                }
+            }
+            
+            // --- NEXT LEG LOGIC ---
+            const nextLegCheck = document.getElementById('next-leg-check');
+            const nextLegLabel = document.getElementById('nextLegLabel');
+            const nextLegInput = document.getElementById('nextLegHigh');
+            
+            if (app.crew === 'S') {
+                const remaining24 = 600 - totalFtCalc; // 10 hours - current FT
+                if (remaining24 > 0 && remaining24 < 600) {
+                      nextLegCheck.classList.remove('hidden');
+                      nextLegLabel.innerText = `Next > ${fmt(remaining24, false)}?`;
+                      nextLegInput.checked = app.nextLegHeavy;
+                      
+                      if (app.nextLegHeavy) {
+                          tableRest = Math.max(tableRest, 12); // Force 12h
+                      }
+                } else {
+                    nextLegCheck.classList.add('hidden');
+                }
+            } else {
+                nextLegCheck.classList.add('hidden');
+            }
+            // --------------------------
+
+            let finalRestHours = tableRest;
+            if (actualFdp > globalMaxFdpMins) {
+                const fdpRestHours = Math.ceil(actualFdp / 60);
+                finalRestHours = Math.max(tableRest, fdpRestHours);
+            }
+            
+            const finalRestMins = finalRestHours * 60;
+            const postDuty = 30; 
+            
+            let arrivalZAbs = rep + (lastInVal - rep);
+            if (lastInVal - rep < 0) arrivalZAbs += 1440;
+
+            let nextRptZAbs = arrivalZAbs + postDuty + finalRestMins;
+            const destCode = app.stations[lastIdx].code;
+            let nextRptHtml = fmt(nextRptZAbs % 1440) + " Z"; 
+
+            let localReportStr = "";
+            let dayOffsetStr = "";
+
+            if (destCode in airportIanaZones) {
+                const zone = airportIanaZones[destCode];
+                const anchor = new Date(refDate);
+                const arrDate = new Date(anchor.getTime() + (arrivalZAbs * 60000));
+                const nextDate = new Date(anchor.getTime() + (nextRptZAbs * 60000));
+                
+                const fmtLocal = new Intl.DateTimeFormat('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23', day: 'numeric' });
+                const arrParts = fmtLocal.formatToParts(arrDate);
+                const nextParts = fmtLocal.formatToParts(nextDate);
+                
+                const arrDay = arrParts.find(p => p.type === 'day').value;
+                const nextDay = nextParts.find(p => p.type === 'day').value;
+                const h = nextParts.find(p => p.type === 'hour').value;
+                const m = nextParts.find(p => p.type === 'minute').value;
+                
+                localReportStr = `${h}:${m}L`;
+                
+                const dayDiff = Math.floor((nextDate - arrDate) / (1000 * 60 * 60 * 24));
+                if (arrDay !== nextDay || dayDiff > 0) {
+                      let label = "+1";
+                      if (finalRestHours >= 48) label = "+2"; 
+                      dayOffsetStr = `<span style="font-size:10px; background:var(--brand-red); color:white; padding:0 2px; border-radius:2px; margin-left:2px;">${label}</span>`;
+                }
+            }
+
+            if (localReportStr) {
+                nextRptHtml = `${localReportStr}${dayOffsetStr} <span style="font-size:11px; color:var(--text-secondary);">(${fmt(nextRptZAbs % 1440)}Z)</span>`;
+            } else {
+                nextRptHtml = fmt(nextRptZAbs % 1440) + " Z"; 
+            }
+
+            document.getElementById('resNextRpt').innerHTML = nextRptHtml;
+            document.getElementById('min-rest-lbl').childNodes[0].nodeValue = `Rest: ${finalRestHours}h`;
+        }
+
+        calcLBO(rep, globalMaxFdpMins, stationLimitExtensions, globalPauseMinutes);
+        
+        let landingCount = 0;
+        for(let k=0; k<app.stations.length-1; k++) {
+            if (!app.stations[k].isAcm) landingCount++;
+        }
+
+        const resLdgEl = document.getElementById('resLdg');
+        if(resLdgEl) {
+            resLdgEl.innerText = landingCount;
+            if(landingCount > 6) {
+                resLdgEl.classList.add('val-danger');
+            } else {
+                resLdgEl.classList.remove('val-danger');
+            }
+        }
+        updateTurns();
+    }
+      
+    function updateTurns() {
+        for(let i=1; i < app.stations.length - 1; i++) {
+             const div = document.getElementById(`turn-${i}`);
+             if(!div) continue;
+             const st = app.stations[i];
+             const actualIn = parse(st.in);
+             const actualOut = parse(st.out);
+             const schedIn = parse(st.sta);
+             const schedOut = parse(st.std);
+             let val = null;
+             let label = "Turn";
+             if (actualIn !== null && actualOut !== null) {
+                 val = diff(actualIn, actualOut);
+             } else if (schedIn !== null && schedOut !== null) {
+                 val = diff(schedIn, schedOut);
+                 label = "Turn (P)"; 
+             }
+             div.innerText = val !== null ? `${label}: ${fmt(val, false)}` : `Turn: --:--`;
+        }
+    }
+
+    function updateBar(elId, val, limit) {
+        const el = document.getElementById(elId);
+        const parentBox = el.closest('.stat-card');
+        if(!el) return;
+        if(!val || val === 0) { el.innerHTML = ''; return; }
+        const maxRef = Math.max(val, limit);
+        const okPct = (Math.min(val, limit) / maxRef) * 100;
+        const errPct = (Math.max(0, val - limit) / maxRef) * 100;
+        let isAlert = false;
+        if (parentBox && parentBox.classList.contains('stat-alert')) {
+            isAlert = true;
+        }
+        let safeColor = isAlert ? 'rgba(255,59,48,0.3)' : (val > limit ? 'var(--brand-blue)' : 'var(--brand-blue)');
+        if(elId === 'bar-sched') safeColor = 'var(--brand-green)';
+        let excessColor = isAlert ? 'var(--brand-orange)' : 'var(--brand-red)'; 
+        let html = `<div style="display:flex; width:100%; height:100%;">`;
+        html += `<div class="progress-fill" style="width:${okPct}%; background:${safeColor};"></div>`;
+        if (errPct > 0) {
+            html += `<div class="progress-fill" style="width:${errPct}%; background:${excessColor};"></div>`;
+        }
+        html += `</div>`;
+        el.innerHTML = html;
+    }
+
+    function calcTotals() {
+        let prevVal = parse(document.getElementById('prevFt').value) || 0;
+        let totalAct = 0; // Purely actual flight time for current duty
+        let totalActWithPrev = prevVal; // Actual + Prev for limit checking
+        
+        let aggPlan = prevVal; 
+        let aggSched = prevVal; 
+        const noBunk = document.getElementById('noBunk').checked;
+
+        for(let i=0; i<app.stations.length-1; i++) {
+            const std=parse(app.stations[i].std), sta=parse(app.stations[i+1].sta);
+            const out=parse(app.stations[i].out), inc=parse(app.stations[i+1].in);
+            const sft=parse(app.sfts[i]);
+            const sftEl = document.getElementById(`sft-${i}`);
+            if(sftEl) sftEl.style.borderColor = 'var(--border-light)';
+            const isAcm = app.stations[i].isAcm;
+            const pEl = document.getElementById(`p-${i}`);
+            if(pEl) {
+                if(std!==null && sta!==null) { 
+                    let d = diff(std,sta); 
+                    if (!isAcm) aggPlan += d; 
+                    pEl.innerText = fmt(d, false); 
+                } 
+                else pEl.innerText = "--";
+            }
+            if (sft !== null) {
+                const txOut = app.stations[i].taxiOut !== undefined ? app.stations[i].taxiOut : 15;
+                const txIn = app.stations[i+1].taxiIn !== undefined ? app.stations[i+1].taxiIn : 15;
+                if (!isAcm) aggSched += (sft + txOut + txIn); 
+            }
+            let ft = 0;
+            const aEl = document.getElementById(`a-${i}`);
+            if(out!==null && inc!==null) { 
+                ft = diff(out,inc); 
+                if(aEl) aEl.innerText = fmt(ft, false); 
+                if (!isAcm) {
+                    totalAct += ft; 
+                    totalActWithPrev += ft;
+                }
+            }
+            else if(sft!==null) { 
+                // Only for "Sched" calculation visual cue, NOT added to totalAct
+                let estimatedBlock = sft + (app.stations[i].taxiOut||15) + (app.stations[i+1].taxiIn||15);
+                if(aEl) aEl.innerText = fmt(estimatedBlock, false) + "*"; 
+            }
+            else { if(aEl) aEl.innerText = "--"; }
+        }
+        
+        let maxFt = 600; 
+        if (app.crew === 'M') {
+             maxFt = noBunk ? 720 : 960; 
+        } else if (app.crew === 'D') {
+             maxFt = noBunk ? 720 : 1080; 
+        }
+
+        const boxPlan = document.getElementById('box-plan');
+        const boxSched = document.getElementById('box-sched');
+        const boxAct = document.getElementById('box-act');
+
+        document.getElementById('t-plan').innerHTML = fmt(aggPlan, false);
+        document.getElementById('t-sched').innerHTML = fmt(aggSched, false);
+        
+        // Actual Box Logic
+        let actHtml = fmt(totalAct, false); // Display pure actual
+        if (prevVal > 0) {
+            actHtml += `<span style="font-size:9px; color:var(--text-tertiary); margin-left:2px;">+${fmt(prevVal,false)}</span>`;
+        }
+        document.getElementById('t-act').innerHTML = actHtml;
+        
+        // Update labels
+        const planLabel = document.querySelector('#box-plan .stat-label');
+        if(planLabel) planLabel.innerText = prevVal > 0 ? "Plan (+Prev)" : "Plan";
+        
+        const schedLabel = document.querySelector('#box-sched .stat-label');
+        if(schedLabel) schedLabel.innerText = prevVal > 0 ? "Sched (+Prev)" : "Sched";
+        
+        if (aggPlan > maxFt) boxPlan.classList.add('stat-alert'); else boxPlan.classList.remove('stat-alert');
+        if (aggSched > maxFt) boxSched.classList.add('stat-alert'); else boxSched.classList.remove('stat-alert');
+        
+        // Check Limit using totalActWithPrev
+        if (totalActWithPrev > maxFt) {
+             boxAct.classList.add('stat-alert');
+             let alertMsg = " ⚠️";
+             if (noBunk && (app.crew === 'M' || app.crew === 'D') && totalActWithPrev > 720) {
+                 alertMsg = "*";
+             }
+             document.getElementById('t-act').innerHTML += alertMsg;
+        } else {
+             boxAct.classList.remove('stat-alert');
+        }
+        
+        updateBar('bar-plan', aggPlan, maxFt);
+        updateBar('bar-sched', aggSched, maxFt);
+        updateBar('bar-act', totalActWithPrev, maxFt); // Bar reflects limit check
+        document.getElementById('limits-out').innerText = `FT Limit: ${fmt(maxFt, false)}`;
+    }
+    
+    function calcLBO(rep, globalMaxFdpMins, stationLimitExtensions, globalPauseMinutes) {
+        for(let i=0; i<app.stations.length-1; i++) {
+             let currentLimit = 14 * 60; 
+             if(app.crew==='M') currentLimit = 18 * 60;
+             if(app.crew==='D') currentLimit = 24 * 60;
+             if(document.getElementById('nightOps').checked) currentLimit -= 120;
+             if (globalPauseMinutes > 0) currentLimit += globalPauseMinutes; 
+             let midDutyBonus = 0;
+             for(let b=1; b<=i; b++) midDutyBonus += stationLimitExtensions[b] || 0;
+             currentLimit += midDutyBonus;
+             const isExt = document.getElementById('extFdt').checked;
+             if (isExt) currentLimit += 120;
+             if (currentLimit > 1440) currentLimit = 1440;
+             let timeNeeded = 0;
+             for(let j=i; j<app.stations.length-1; j++) {
+                if (!app.stations[j] || !app.stations[j+1]) continue; 
+                let isFdpLeg = false;
+                if (!app.stations[j].isAcm) {
+                    isFdpLeg = true; 
+                } else {
+                    for (let x = j + 1; x < app.stations.length - 1; x++) {
+                        if (!app.stations[x].isAcm) {
+                            isFdpLeg = true;
+                            break;
+                        }
+                    }
+                }
+                if (!isFdpLeg) continue; 
+                let seg = 0;
+                const s_sft=parse(app.sfts[j]), s_std=parse(app.stations[j].std), s_sta=parse(app.stations[j+1].sta);
+                if(s_sft!==null) {
+                    seg = s_sft + (app.stations[j].taxiOut||15) + (app.stations[j+1].taxiIn||15);
+                } 
+                else if(s_std!==null && s_sta!==null) seg = diff(s_std,s_sta);
+                else { seg = (app.stations[j].taxiOut||15) + (app.stations[j+1].taxiIn||15); }
+                timeNeeded += seg;
+                if (j > i && app.stations[j].hotel) {
+                      const hTime = calcRest(app.stations[j].ci, app.stations[j].co);
+                      if(hTime >= 180) {
+                          timeNeeded += hTime; 
+                      }
+                }
+                if(j < app.stations.length-2) {
+                    const currArr = parse(app.stations[j+1].sta);
+                    const nextDep = parse(app.stations[j+1].std);
+                    let turn = 45; 
+                    if (currArr !== null && nextDep !== null) turn = Math.max(diff(currArr, nextDep), 45);
+                    timeNeeded += turn;
+                }
+             }
+             const lboFromReport = currentLimit - timeNeeded;
+             let lboAbs = rep + lboFromReport;
+             const actualOut = parse(app.stations[i].out);
+             const nextIn = parse(app.stations[i+1].in);
+             const isSectorFlown = (actualOut !== null && nextIn !== null);
+             if (isSectorFlown) {
+                 if (app.stations[i].frozenLbo === undefined || app.stations[i].frozenLbo === null) {
+                     app.stations[i].frozenLbo = lboAbs;
+                 } else {
+                     lboAbs = app.stations[i].frozenLbo;
+                 }
+             } else {
+                 app.stations[i].frozenLbo = null;
+             }
+             const lboEl = document.getElementById(`lbo-${i}`);
+             const lboDet = document.getElementById(`lbo-detail-${i}`);
+             const lboBox = document.getElementById(`lbo-box-${i}`);
+             let isImpossible = false;
+             if (app.stations[i].hotel) {
+                const co = parse(app.stations[i].co);
+                if (co !== null) {
+                    let coElapsed = co - rep; 
+                    if (coElapsed < 0) coElapsed += 1440;
+                    if (lboFromReport < coElapsed) {
+                        isImpossible = true;
+                    }
+                }
+             }
+             if(lboEl) {
+                lboEl.classList.remove('lbo-locked');
+                lboBox.classList.remove('lbo-warn', 'lbo-safe');
+                if (isImpossible) {
+                    lboEl.innerText = "IMPOSSIBLE";
+                    lboEl.style.color = 'var(--brand-red)';
+                } else {
+                    lboEl.innerText = fmt(lboAbs)+" Z";
+                    lboEl.style.color = 'var(--text-primary)';
+                    if (isSectorFlown && app.stations[i].frozenLbo !== null) {
+                        lboBox.classList.add('lbo-locked');
+                    }
+                }
+             }
+             let detText = "";
+             if (globalPauseMinutes > 0) detText += `Split+${fmt(globalPauseMinutes,false)} `;
+             if (midDutyBonus > 0) detText += `Ext+${fmt(midDutyBonus,false)}`;
+             if (isExt) detText += `CD+2h`; 
+             if (lboDet) lboDet.innerText = detText;
+             const outEl = document.getElementById(`out-${i}`);
+             if(outEl) outEl.style.borderColor = 'var(--border-light)';
+             if (!isImpossible && actualOut !== null) {
+                let outElapsed = actualOut - rep; 
+                if(outElapsed < 0) outElapsed += 1440;
+                let actualOutAbs = rep + outElapsed;
+                let diffTime = actualOutAbs - lboAbs;
+                if(diffTime > 0) {
+                    if(outEl) outEl.style.borderColor = 'var(--brand-red)';
+                    if(lboBox) lboBox.classList.add('lbo-warn');
+                } else {
+                    if(lboBox) lboBox.classList.add('lbo-safe');
+                }
+             }
+        }
+    }
+
+    function calcRest(ci, co) {
+        const i = parse(ci);
+        const o = parse(co);
+        if(i === null || o === null) return 0;
+        let diff = o - i;
+        if(diff < 0) diff += 1440;
+        return diff;
+    }
+
+    function parse(v) { 
+        if(!v) return null; 
+        let c=v.replace(/\D/g,''); 
+        if(c.length===0) return null;
+        while(c.length<4) c='0'+c; 
+        return parseInt(c.substring(0,2))*60 + parseInt(c.substring(2,4)); 
+    }
+    function fmt(m, mod=true) { while(m<0) m+=1440; let h=Math.floor(m/60), n=m%60; if(mod) h%=24; return `${String(h).padStart(2,'0')}:${String(n).padStart(2,'0')}`; }
+    function diff(s,e) { let d=e-s; if(d<0) d+=1440; return d; }
+
+    function getLocalInfo(utcMins, ianaZone, refDate) {
+        if (!ianaZone) return null;
+        const y = refDate.getUTCFullYear();
+        const m = refDate.getUTCMonth();
+        const d = refDate.getUTCDate();
+        const utcDate = new Date(Date.UTC(y, m, d, Math.floor(utcMins/60), utcMins%60));
+        try {
+            const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: ianaZone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23', day: 'numeric', month: 'numeric' });
+            const parts = fmt.formatToParts(utcDate);
+            const h = parseInt(parts.find(p => p.type === 'hour').value);
+            const min = parseInt(parts.find(p => p.type === 'minute').value);
+            const timeStr = `${String(h).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
+            const localStr = new Intl.DateTimeFormat('en-GB', { timeZone: ianaZone, hour: 'numeric', hourCycle: 'h23' }).format(utcDate);
+            const localH = parseInt(localStr.split(':')[0]);
+            const utcH = Math.floor(utcMins/60)%24;
+            let offset = localH - utcH; if (offset < -12) offset += 24; if (offset > 12) offset -= 24;
+            return { timeStr, offset };
+        } catch (e) { return null; }
+    }
+      
+    function saveData() {
+        const data = {
+            stations: app.stations, sfts: app.sfts, crew: app.crew, 
+            isNight: document.getElementById('nightOps').checked,
+            isNoBunk: document.getElementById('noBunk').checked,
+            prevFt: document.getElementById('prevFt').value,
+            extFdt: document.getElementById('extFdt').checked, 
+            pfDate: document.getElementById('pf-date').value,
+            pfIn: document.getElementById('pf-in').value,
+            pfDur: document.getElementById('pf-dur').value,
+            flightDate: document.getElementById('flightDate').value,
+            isLocked: app.isLocked,
+            lockedReport: app.lockedReport,
+            nextLegHeavy: app.nextLegHeavy,
+            nightMode: localStorage.getItem('nightMode')
+        };
+        localStorage.setItem('calData158', JSON.stringify(data));
+    }
+
+    // Global Click Listener to Close Popups
+    window.addEventListener('click', function(e) {
+        const prevPopup = document.getElementById('prevPopup');
+        const prevBadge = document.querySelector('.prev-ft-badge');
+        if (prevPopup.classList.contains('show')) {
+            if (!prevPopup.contains(e.target) && !prevBadge.contains(e.target)) {
+                prevPopup.classList.remove('show');
+            }
+        }
+
+        const routePopup = document.getElementById('routePopup');
+        const routeBtn = document.getElementById('routeBtn');
+        if (routePopup.classList.contains('show')) {
+            if (!routePopup.contains(e.target) && !routeBtn.contains(e.target)) {
+                routePopup.classList.remove('show');
+            }
+        }
+    });
+
+    window.onload = () => { 
+        const isDark = localStorage.getItem('nightMode') === 'true';
+        if(isDark) {
+            document.body.classList.add('dark-mode');
+            document.getElementById('nightBtnIcon').innerText = '☀️';
+        }
+        const routes = localStorage.getItem('calSavedRoutes');
+        if(routes) {
+            try { savedRoutes = JSON.parse(routes); } catch(e) {}
+        }
+        const d = localStorage.getItem('calData158'); 
+        let savedCrew = 'S';
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('flightDate').value = today;
+        if(d) { 
+            try { 
+                const p=JSON.parse(d); 
+                app.stations=p.stations; 
+                app.sfts=p.sfts; 
+                app.crew=p.crew; 
+                savedCrew=p.crew; 
+                document.getElementById('nightOps').checked=p.isNight;
+                if(p.isNoBunk) document.getElementById('noBunk').checked=p.isNoBunk;
+                if(p.extFdt) document.getElementById('extFdt').checked=p.extFdt;
+                document.getElementById('prevFt').value=p.prevFt;
+                if(p.pfDate) document.getElementById('pf-date').value = p.pfDate;
+                if(p.pfIn) document.getElementById('pf-in').value = p.pfIn;
+                if(p.pfDur) document.getElementById('pf-dur').value = p.pfDur;
+                if(p.flightDate) document.getElementById('flightDate').value = p.flightDate;
+                if(p.isLocked !== undefined) app.isLocked = p.isLocked;
+                if(p.lockedReport !== undefined) app.lockedReport = p.lockedReport;
+                if(p.nextLegHeavy !== undefined) app.nextLegHeavy = p.nextLegHeavy;
+            } catch(e){} 
+        }
+        setCrew(savedCrew);
+        drawTimeline(); 
+    };
+</script>
+</body>
+</html>
