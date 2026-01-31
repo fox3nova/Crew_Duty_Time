@@ -328,6 +328,7 @@
             font-weight: 600;
             color: var(--text-primary);
             font-family: "SF Mono", monospace;
+            line-height: 34px; /* 🔥 FIX: Ensures text is vertically centered and not clipped */
         }
         .glass-input:focus { border-color: var(--brand-blue); background: var(--bg-card); }
         
@@ -604,7 +605,7 @@
              <div id="routePopup" class="popover">
                 <div class="text-sm font-bold text-primary mb-3">Saved Routes</div>
                 <div class="flex gap-2 mb-2">
-                    <input type="text" id="routeName" class="glass-input" placeholder="Name" style="font-size:12px;">
+                    <input type="text" id="routeName" class="glass-input" placeholder="Name" style="font-size:12px; line-height:34px;">
                     <button id="saveBtn" onclick="saveRoute()" class="crew-btn active" style="padding:4px 8px;">Save</button>
                 </div>
                 <div id="routeList" style="max-height:150px; overflow-y:auto; border-top:1px solid var(--border-light); padding-top:4px;"></div>
