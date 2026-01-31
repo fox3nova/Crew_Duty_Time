@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>CAL Duty (Pro v4.6 Landscape Lock)</title>
+    <title>CAL Duty (Pro v4.7 Global Time)</title>
     <style>
         /* === SYSTEM & VARIABLES === */
         :root {
@@ -183,6 +183,8 @@
             height: 34px;    
             border-radius: var(--radius-md);
             border: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: all 0.2s;
         }
         .toggle-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
         
@@ -524,7 +526,7 @@
     <header class="app-header">
         <div class="header-top">
             <div class="app-title">
-                <span style="font-size:20px;">✈️</span> CAL Duty <span class="text-xs font-medium text-secondary" style="border:1px solid var(--border-light); padding:1px 4px; border-radius:4px;">PRO v4.6 Landscape Lock</span>
+                <span style="font-size:20px;">✈️</span> CAL Duty <span class="text-xs font-medium text-secondary" style="border:1px solid var(--border-light); padding:1px 4px; border-radius:4px;">PRO v4.7 Global Time</span>
             </div>
             <div class="crew-selector">
                 <div class="crew-btn active" id="btn-S" onclick="setCrew('S')">Single</div>
@@ -538,6 +540,11 @@
                 <span id="nightBtnIcon">🌙</span>
             </button>
             <input type="date" id="flightDate" class="date-trigger" onchange="calc24hOverlap(); runAllCalc()">
+            
+            <!-- 🔥 NEW GLOBAL TOGGLE 🔥 -->
+            <button class="toggle-wrapper" id="globalTimeBtn" onclick="toggleAllModes()" style="justify-content:center; width:auto; padding:0 12px; font-weight:bold; font-size:11px; color:var(--brand-blue);">
+                ALL UTC
+            </button>
 
             <div class="toggle-wrapper" id="extFdtContainer">
                 <span class="toggle-label">Ext FDT</span>
@@ -766,6 +773,46 @@
         saveData();
         drawTimeline(); 
     }
+    
+    // 🔥 NEW FUNCTION: Toggle ALL modes 🔥
+    function toggleAllModes() {
+        let target = 'L';
+        // Simple heuristic: if the first station's STD is already L, we probably want to switch back to Z
+        if (app.stations[0] && app.stations[0].stdMode === 'L') {
+            target = 'Z';
+        }
+
+        app.stations.forEach(s => {
+            s.stdMode = target;
+            s.staMode = target;
+        });
+        saveData();
+        drawTimeline();
+    }
+    
+    // 🔥 NEW HELPER: Update Global Button UI 🔥
+    function updateGlobalBtnState() {
+        const btn = document.getElementById('globalTimeBtn');
+        if(!btn) return;
+        
+        // Check current state of first station
+        let isLocal = false;
+        if (app.stations[0] && app.stations[0].stdMode === 'L') {
+            isLocal = true;
+        }
+        
+        btn.innerText = isLocal ? "ALL LOCAL" : "ALL UTC";
+        
+        if(isLocal) {
+            btn.style.color = 'white';
+            btn.style.background = 'var(--brand-orange)';
+            btn.style.borderColor = 'var(--brand-orange)';
+        } else {
+            btn.style.color = 'var(--brand-blue)';
+            btn.style.background = 'var(--bg-input)';
+            btn.style.borderColor = 'var(--border-light)';
+        }
+    }
 
     function calcUtcFromLocal(localHHMM, zone) {
         const refDate = getUtcDate(document.getElementById('flightDate').value) || new Date();
@@ -967,6 +1014,7 @@
         con.innerHTML = html;
         updateLockButton();
         updateResultsOnly(); 
+        updateGlobalBtnState(); // Update the button visual whenever we redraw
     }
 
     function toggleLock() {
