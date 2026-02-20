@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>CAL Duty (Pro v4.7 Global Time)</title>
+    <title>CAL Duty (Pro v4.8.2 Logic Fix)</title>
     <style>
         /* === SYSTEM & VARIABLES === */
         :root {
@@ -152,26 +152,33 @@
             box-shadow: var(--shadow-sm);
         }
 
+        /* 🔥 FIX: Changed from Grid to Flex to prevent overlap in landscape 🔥 */
         .controls-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            display: flex;
+            flex-wrap: wrap;
             gap: 8px;
             align-items: center;
+            justify-content: flex-start; /* Items start from left */
         }
 
+        /* 🔥 FIX: Date Trigger Styling for Alignment 🔥 */
         .date-trigger {
             background: var(--bg-input);
             border: 1px solid var(--border-light);
             color: var(--text-primary);
-            padding: 0 12px; 
+            padding: 0 8px; 
             height: 34px;    
-            line-height: 32px; 
+            line-height: normal; /* Fix text alignment */
             border-radius: var(--radius-md);
             font-weight: 600;
             font-size: 13px;
-            width: 100%;
+            min-width: 120px; /* Ensure minimum width */
             text-align: center;
             -webkit-appearance: none; 
+            display: inline-flex; /* Use Flex for vertical centering */
+            align-items: center;
+            justify-content: center;
+            flex: 1 0 auto; /* Allow grow but maintain basis */
         }
 
         .toggle-wrapper {
@@ -185,10 +192,11 @@
             border: 1px solid var(--border-light);
             cursor: pointer;
             transition: all 0.2s;
+            flex: 0 0 auto; /* Prevent shrinking */
         }
-        .toggle-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
+        .toggle-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-right: 6px; }
         
-        .switch { position: relative; display: inline-block; width: 34px; height: 20px; }
+        .switch { position: relative; display: inline-block; width: 34px; height: 20px; flex-shrink: 0; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
@@ -215,6 +223,14 @@
             justify-content: space-between;
             cursor: pointer;
             border: 1px solid rgba(0,122,255,0.1);
+            width: 100%; /* Fill container */
+        }
+        
+        /* Helper for Prev FT container sizing */
+        .control-item-wrapper {
+            flex: 0 0 auto;
+            min-width: 140px; /* Preserve the width but respect flex */
+            position: relative;
         }
 
         /* === STATS === */
@@ -489,7 +505,7 @@
         .popover.show { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: 0; } }
 
-        /* RESPONSIVE RESET for Mobile */
+        /* RESPONSIVE RESET for Mobile Portrait */
         @media screen and (max-width: 820px) and (orientation: portrait) {
             html, body {
                 position: static;
@@ -517,7 +533,7 @@
             .station-card { width: 92%; max-width: 380px; }
             .controls-grid { display: flex; flex-wrap: wrap; gap: 8px; }
             .date-trigger { flex: 1 1 100%; order: -1; margin-bottom: 4px; }
-            .toggle-wrapper, .relative { flex: 1 1 auto; min-width: 80px; }
+            .toggle-wrapper, .control-item-wrapper { flex: 1 1 auto; min-width: 80px; }
             body::-webkit-scrollbar { display: none; }
         }
     </style>
@@ -527,7 +543,7 @@
     <header class="app-header">
         <div class="header-top">
             <div class="app-title">
-                <span style="font-size:20px;">✈️</span> CAL Duty <span class="text-xs font-medium text-secondary" style="border:1px solid var(--border-light); padding:1px 4px; border-radius:4px;">PRO v4.7 Global Time</span>
+                <span style="font-size:20px;">✈️</span> CAL Duty <span class="text-xs font-medium text-secondary" style="border:1px solid var(--border-light); padding:1px 4px; border-radius:4px;">PRO v4.8.2 Logic Fix</span>
             </div>
             <div class="crew-selector">
                 <div class="crew-btn active" id="btn-S" onclick="setCrew('S')">Single</div>
@@ -542,7 +558,6 @@
             </button>
             <input type="date" id="flightDate" class="date-trigger" onchange="calc24hOverlap(); runAllCalc()">
             
-            <!-- 🔥 NEW GLOBAL TOGGLE 🔥 -->
             <button class="toggle-wrapper" id="globalTimeBtn" onclick="toggleAllModes()" style="justify-content:center; width:auto; padding:0 12px; font-weight:bold; font-size:11px; color:var(--brand-blue);">
                 ALL UTC
             </button>
@@ -571,7 +586,7 @@
                 </label>
             </div>
 
-            <div class="relative" style="min-width:140px;">
+            <div class="control-item-wrapper">
                 <div class="prev-ft-badge" onclick="togglePrevPopup()">
                     <span class="text-secondary" style="font-size:10px;">PREV FT</span>
                     <input type="tel" id="prevFt" value="0000" readonly style="background:transparent; text-align:right; font-weight:bold; width:50px; color:var(--brand-blue);">
@@ -1371,22 +1386,106 @@
             if (i === 0) globalPauseMinutes = pause;
         });
 
+        // Calculate Limits First (Needed for Rest Logic)
+        let base = 14; 
+        if(app.crew==='M') base=18; if(app.crew==='D') base=24; 
+        
+        const isNight = document.getElementById('nightOps').checked;
+        let lim = isNight ? base - 2 : base;
+        
+        const totalExtension = stationLimitExtensions.reduce((a, b) => a + b, 0);
+        const isExt = document.getElementById('extFdt').checked;
+        const discretionMins = isExt ? 120 : 0;
+
+        let globalMaxFdpMins = (lim*60) + globalPauseMinutes + totalExtension + discretionMins; 
+        let isCapped = false;
+        if (globalMaxFdpMins > 1440) { globalMaxFdpMins = 1440; isCapped = true; } 
+
+        let limitText = `${base}h`;
+        if(isNight) limitText += `-2h`;
+        if(globalPauseMinutes > 0) limitText += `+S`; 
+        if(totalExtension > 0) limitText += `+E`; 
+        if(isExt) limitText += `+CD`; 
+
+        document.getElementById('disp-limit-dur').innerText = limitText;
+
         calcTotals();
 
+        // 1. Calculate Total Block Time (For Table Lookup)
+        let totalFtCalc = 0;
+        for(let k=0; k<app.stations.length-1; k++) {
+             if (app.stations[k].isAcm) continue;
+             
+             const o = parse(app.stations[k].out);       
+             const i = parse(app.stations[k+1].in);      
+             const sft = parse(app.sfts[k]);             
+             const s_std = parse(app.stations[k].std);   
+             const s_sta = parse(app.stations[k+1].sta); 
+             
+             const txOut = (app.stations[k].taxiOut !== undefined) ? app.stations[k].taxiOut : 15;
+             const txIn  = (app.stations[k+1].taxiIn !== undefined) ? app.stations[k+1].taxiIn : 15;
+
+             if(o!==null && i!==null) {
+                 totalFtCalc += diff(o, i); // Actual Block
+             }
+             else if(sft !== null) {
+                 totalFtCalc += (sft + txOut + txIn); // Manual FT + Taxi
+             }
+             else if(s_std !== null && s_sta !== null) {
+                 totalFtCalc += diff(s_std, s_sta); // Plan Block
+             }
+        }
+        const ftHours = totalFtCalc / 60;
+
+        // 2. Determine Estimated Duty End Time (For Rest Start)
+        const lastIdx = app.stations.length - 1;
+        const lastLegIdx = lastIdx - 1; 
+        
+        const lastActIn = parse(app.stations[lastIdx].in);
+        const lastActOut = parse(app.stations[lastLegIdx].out);
+        const lastManFt = parse(app.sfts[lastLegIdx]);
+        const lastStd = parse(app.stations[lastLegIdx].std);
+        const lastSta = parse(app.stations[lastIdx].sta);
+        
+        const l_txOut = (app.stations[lastLegIdx].taxiOut !== undefined) ? app.stations[lastLegIdx].taxiOut : 15;
+        const l_txIn  = (app.stations[lastIdx].taxiIn !== undefined) ? app.stations[lastIdx].taxiIn : 15;
+
+        let estimatedDutyEndTime = null;
+
+        if (lastActIn !== null) {
+            estimatedDutyEndTime = lastActIn;
+        } 
+        else if (lastActOut !== null && lastManFt !== null) {
+            estimatedDutyEndTime = lastActOut + lastManFt + l_txOut + l_txIn;
+        }
+        else if (lastStd !== null && lastManFt !== null) {
+            estimatedDutyEndTime = lastStd + lastManFt + l_txOut + l_txIn;
+        }
+        else if (lastSta !== null) {
+            estimatedDutyEndTime = lastSta;
+        }
+
+        if (estimatedDutyEndTime !== null) {
+            while (estimatedDutyEndTime >= 1440) estimatedDutyEndTime -= 1440;
+            while (estimatedDutyEndTime < 0) estimatedDutyEndTime += 1440;
+        }
+
+        // 3. ULR Detection (Using Consistent Logic)
         let isULR = false;
         for(let i=0; i<app.stations.length-1; i++) {
-            let legTime = 0;
-            const sft = parse(app.sfts[i]);
-            const actualOut = parse(app.stations[i].out);
-            const actualIn = parse(app.stations[i+1].in);
-            if (actualOut !== null && actualIn !== null) {
-                legTime = diff(actualOut, actualIn);
-            } else if (sft !== null) {
-                legTime = sft;
-            }
-            if (legTime >= 960) { 
-                isULR = true;
-            }
+             let legBlock = 0;
+             const o = parse(app.stations[i].out);
+             const in_ = parse(app.stations[i+1].in);
+             const sft = parse(app.sfts[i]);
+             const std = parse(app.stations[i].std);
+             const sta = parse(app.stations[i+1].sta);
+             const tx = (app.stations[i].taxiOut||15) + (app.stations[i+1].taxiIn||15);
+
+             if (o!==null && in_!==null) legBlock = diff(o, in_);
+             else if (sft!==null) legBlock = sft + tx;
+             else if (std!==null && sta!==null) legBlock = diff(std, sta);
+
+             if (legBlock >= 960) isULR = true;
         }
 
         const alertOverlay = document.getElementById('ulr-alert');
@@ -1458,28 +1557,6 @@
             }
         }
         document.getElementById('resReport').innerHTML = repHtml;
-        
-        let base = 14; 
-        if(app.crew==='M') base=18; if(app.crew==='D') base=24; 
-        
-        const isNight = document.getElementById('nightOps').checked;
-        let lim = isNight ? base - 2 : base;
-        
-        const totalExtension = stationLimitExtensions.reduce((a, b) => a + b, 0);
-        const isExt = document.getElementById('extFdt').checked;
-        const discretionMins = isExt ? 120 : 0;
-
-        let globalMaxFdpMins = (lim*60) + globalPauseMinutes + totalExtension + discretionMins; 
-        let isCapped = false;
-        if (globalMaxFdpMins > 1440) { globalMaxFdpMins = 1440; isCapped = true; } 
-
-        let limitText = `${base}h`;
-        if(isNight) limitText += `-2h`;
-        if(globalPauseMinutes > 0) limitText += `+S`; 
-        if(totalExtension > 0) limitText += `+E`; 
-        if(isExt) limitText += `+CD`; 
-
-        document.getElementById('disp-limit-dur').innerText = limitText;
 
         const fdpEndTime = rep + globalMaxFdpMins;
         const maxFdtEl = document.getElementById('resMaxFdtCard');
@@ -1516,18 +1593,11 @@
         const capMsg = document.getElementById('cap-msg-card');
         
         let effectiveLimit = globalMaxFdpMins;
-        let checkInVal = null;
-        for (let i = app.stations.length - 1; i > 0; i--) {
-            const val = parse(app.stations[i].in);
-            if (val !== null) {
-                checkInVal = val;
-                break; 
-            }
-        }
         
+        // Use estimatedDutyEndTime to check limit compliance
         let isActExceeded = false;
-        if (checkInVal !== null) {
-            let actualElapsed = checkInVal - rep;
+        if (estimatedDutyEndTime !== null) {
+            let actualElapsed = estimatedDutyEndTime - rep;
             if (actualElapsed < 0) actualElapsed += 1440;
             if (actualElapsed > effectiveLimit) isActExceeded = true;
         }
@@ -1570,26 +1640,11 @@
              }
         }
         
-        const lastIdx = app.stations.length - 1;
-        let lastInVal = parse(app.stations[lastIdx].in);
-        if (lastInVal === null) lastInVal = parse(app.stations[lastIdx].sta);
-        
-        if (lastInVal === null) {
+        // --- Final Rest Calculation ---
+        if (estimatedDutyEndTime === null) {
             document.getElementById('resNextRpt').innerHTML = "--:--";
             document.getElementById('min-rest-lbl').innerText = "Rest: --";
         } else {
-            let actualFdp = lastInVal - rep;
-            if (actualFdp < 0) actualFdp += 1440;
-
-            let totalFtCalc = 0;
-            for(let k=0; k<app.stations.length-1; k++) {
-                 if (app.stations[k].isAcm) continue;
-                 const o = parse(app.stations[k].out);
-                 const i = parse(app.stations[k+1].in);
-                 if(o!==null && i!==null) totalFtCalc += diff(o,i);
-                 else if(parse(app.sfts[k])) totalFtCalc += parse(app.sfts[k]);
-            }
-            const ftHours = totalFtCalc / 60;
             let tableRest = 0;
 
             if (isULR) {
@@ -1617,7 +1672,11 @@
                     else tableRest = 22; 
                 }
                 
-                const fdpHours = actualFdp / 60;
+                // Exception: Single Crew Limits in Multi Crew
+                let actualFdpMins = estimatedDutyEndTime - rep;
+                if (actualFdpMins < 0) actualFdpMins += 1440;
+                let fdpHours = actualFdpMins / 60;
+                
                 if (app.crew === 'M') {
                     if (ftHours <= 10 && fdpHours <= 14) {
                         let sRest = (ftHours <= 8) ? 10 : 18;
@@ -1643,7 +1702,7 @@
             const nextLegInput = document.getElementById('nextLegHigh');
             
             if (app.crew === 'S') {
-                const remaining24 = 600 - totalFtCalc; // 10 hours - current FT
+                const remaining24 = 600 - (ftHours * 60); 
                 if (remaining24 > 0 && remaining24 < 600) {
                       nextLegCheck.classList.remove('hidden');
                       nextLegLabel.innerText = `Next > ${fmt(remaining24, false)}?`;
@@ -1659,19 +1718,23 @@
                 nextLegCheck.classList.add('hidden');
             }
             // --------------------------
-
+            
+            // --- LOGIC FIX v4.8.2: Only apply FDP extension if LIMIT is exceeded ---
             let finalRestHours = tableRest;
-            if (actualFdp > globalMaxFdpMins) {
-                const fdpRestHours = Math.ceil(actualFdp / 60);
+            
+            // Check current FDP against MAX FDP
+            let actualFdpMins = estimatedDutyEndTime - rep;
+            if (actualFdpMins < 0) actualFdpMins += 1440;
+
+            if (actualFdpMins > globalMaxFdpMins) {
+                const fdpRestHours = Math.ceil(actualFdpMins / 60);
                 finalRestHours = Math.max(tableRest, fdpRestHours);
             }
             
             const finalRestMins = finalRestHours * 60;
             const postDuty = 30; 
             
-            let arrivalZAbs = rep + (lastInVal - rep);
-            if (lastInVal - rep < 0) arrivalZAbs += 1440;
-
+            let arrivalZAbs = estimatedDutyEndTime; 
             let nextRptZAbs = arrivalZAbs + postDuty + finalRestMins;
             const destCode = app.stations[lastIdx].code;
             let nextRptHtml = fmt(nextRptZAbs % 1440) + " Z"; 
@@ -1682,8 +1745,11 @@
             if (destCode in airportIanaZones) {
                 const zone = airportIanaZones[destCode];
                 const anchor = new Date(refDate);
-                const arrDate = new Date(anchor.getTime() + (arrivalZAbs * 60000));
-                const nextDate = new Date(anchor.getTime() + (nextRptZAbs * 60000));
+                let flowMins = estimatedDutyEndTime - rep;
+                if(flowMins < 0) flowMins += 1440;
+                
+                const arrDate = new Date(anchor.getTime() + (rep * 60000) + (flowMins * 60000));
+                const nextDate = new Date(arrDate.getTime() + (postDuty + finalRestMins) * 60000);
                 
                 const fmtLocal = new Intl.DateTimeFormat('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23', day: 'numeric' });
                 const arrParts = fmtLocal.formatToParts(arrDate);
