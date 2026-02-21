@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>CAL Duty (Pro v4.8.2 Logic Fix)</title>
+    <title>CAL Duty (Pro v5.0.2)</title>
     <style>
         /* === SYSTEM & VARIABLES === */
         :root {
@@ -24,11 +24,12 @@
             --brand-green: #34C759;
             --brand-red: #FF3B30;
             --brand-orange: #FF9500;
+            --brand-purple: #AF52DE; /* iOS Purple for ACARS/JZ */
             
             --border-light: #e2e8f0;
             --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
             --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
-            --shadow-float: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --shadow-float: 0 10px 25px -5px rgba(0,0,0,0.2);
 
             --radius-md: 12px;
             --radius-lg: 16px;
@@ -53,11 +54,12 @@
             --brand-green: #4ade80;
             --brand-red: #ef4444;
             --brand-orange: #fbbf24;
+            --brand-purple: #bf5af2;
             
             --border-light: #334155;
         }
 
-        /* === RESET & BASE (LOCKED SCROLL) === */
+        /* === RESET & BASE === */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         html, body {
@@ -66,13 +68,12 @@
             color: var(--text-primary);
             margin: 0;
             padding: 0;
-            /* 🔥 CRITICAL LOCK FOR IPAD LANDSCAPE 🔥 */
             width: 100%;
             height: 100%;
-            overflow-y: hidden; /* Disable vertical scroll */
-            overflow-x: hidden; /* Handle horizontal in container only */
-            position: fixed; /* Lock viewport */
-            overscroll-behavior-y: none; /* Disable bounce */
+            overflow-y: hidden;
+            overflow-x: hidden;
+            position: fixed;
+            overscroll-behavior-y: none;
             -webkit-overflow-scrolling: touch;
         }
         
@@ -97,12 +98,22 @@
         .gap-2 { gap: 8px; }
         .gap-4 { gap: 16px; }
 
+        /* === INFO ICON (Tooltips) === */
+        .info-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 14px; height: 14px; border-radius: 50%;
+            background: rgba(0, 122, 255, 0.1); color: var(--brand-blue);
+            font-size: 10px; font-weight: 800; cursor: pointer;
+            margin-left: 4px; vertical-align: middle; transition: all 0.2s;
+        }
+        .info-icon:active { transform: scale(0.9); background: rgba(0, 122, 255, 0.3); }
+
         /* === HEADER === */
         .app-header {
             background: var(--bg-glass);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            position: absolute; /* Changed from sticky to absolute for locked layout */
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
@@ -122,7 +133,7 @@
         .app-title {
             font-size: 18px;
             font-weight: 800;
-            background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
+            background: linear-gradient(135deg, var(--brand-blue), var(--brand-purple));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             display: flex;
@@ -152,33 +163,32 @@
             box-shadow: var(--shadow-sm);
         }
 
-        /* 🔥 FIX: Changed from Grid to Flex to prevent overlap in landscape 🔥 */
+        /* Responsive Controls Grid */
         .controls-grid {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             align-items: center;
-            justify-content: flex-start; /* Items start from left */
+            justify-content: flex-start;
         }
 
-        /* 🔥 FIX: Date Trigger Styling for Alignment 🔥 */
         .date-trigger {
             background: var(--bg-input);
             border: 1px solid var(--border-light);
             color: var(--text-primary);
             padding: 0 8px; 
             height: 34px;    
-            line-height: normal; /* Fix text alignment */
+            line-height: normal;
             border-radius: var(--radius-md);
             font-weight: 600;
             font-size: 13px;
-            min-width: 120px; /* Ensure minimum width */
+            min-width: 110px;
             text-align: center;
             -webkit-appearance: none; 
-            display: inline-flex; /* Use Flex for vertical centering */
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            flex: 1 0 auto; /* Allow grow but maintain basis */
+            flex: 1 1 auto;
         }
 
         .toggle-wrapper {
@@ -192,9 +202,10 @@
             border: 1px solid var(--border-light);
             cursor: pointer;
             transition: all 0.2s;
-            flex: 0 0 auto; /* Prevent shrinking */
+            flex: 1 1 auto;
+            min-width: 80px;
         }
-        .toggle-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-right: 6px; }
+        .toggle-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-right: 6px; white-space: nowrap; display:flex; align-items:center;}
         
         .switch { position: relative; display: inline-block; width: 34px; height: 20px; flex-shrink: 0; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -210,28 +221,22 @@
         input:checked + .slider:before { transform: translateX(14px); }
         input:disabled + .slider { opacity: 0.3; cursor: not-allowed; }
 
-        .prev-ft-badge {
-            background: var(--bg-accent);
-            color: var(--brand-blue);
+        .badge-input-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             padding: 0 12px; 
             height: 34px;    
             border-radius: var(--radius-md);
             font-size: 12px;
             font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            border: 1px solid rgba(0,122,255,0.1);
-            width: 100%; /* Fill container */
+            border: 1px solid var(--border-light);
+            flex: 1 1 auto;
+            min-width: 110px;
         }
         
-        /* Helper for Prev FT container sizing */
-        .control-item-wrapper {
-            flex: 0 0 auto;
-            min-width: 140px; /* Preserve the width but respect flex */
-            position: relative;
-        }
+        .badge-prev-ft { background: var(--bg-accent); color: var(--brand-blue); border-color: rgba(0,122,255,0.1); cursor: pointer; }
+        .badge-acars { background: rgba(175, 82, 222, 0.05); color: var(--brand-purple); border-color: rgba(175, 82, 222, 0.2); }
 
         /* === STATS === */
         .stats-dashboard {
@@ -240,8 +245,8 @@
             gap: 8px;
             padding: 8px 16px;
             background: var(--bg-app);
-            position: absolute; /* Fixed layout */
-            top: 110px; /* Below header */
+            position: absolute;
+            top: 155px;
             left: 0;
             width: 100%;
             z-index: 90;
@@ -269,7 +274,7 @@
         #timeline-container {
             display: flex;
             overflow-x: auto;
-            overflow-y: hidden; /* Strict lock */
+            overflow-y: hidden;
             scroll-snap-type: x mandatory;
             padding: 0 16px;
             gap: 0;
@@ -277,24 +282,18 @@
             -ms-overflow-style: none;
             align-items: center; 
             
-            /* Positioning for Locked Layout */
             position: absolute;
-            top: 170px; /* Below stats */
+            top: 215px;
             bottom: 80px; /* Above footer */
             left: 0;
             width: 100%;
             
             overscroll-behavior-y: none;
-            overscroll-behavior-x: auto; /* Allow horizontal bounce */
+            overscroll-behavior-x: auto;
         }
         #timeline-container::-webkit-scrollbar { display: none; }
 
-        .station-wrapper {
-            scroll-snap-align: center;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-        }
+        .station-wrapper { scroll-snap-align: center; flex-shrink: 0; display: flex; align-items: center; }
         
         .station-card {
             background: var(--bg-card);
@@ -308,12 +307,7 @@
             transition: transform 0.2s, width 0.3s;
         }
         
-        .station-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-        }
+        .station-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
         
         .station-code-input {
             font-size: 24px;
@@ -333,77 +327,48 @@
         .time-input-row { display: flex; gap: 8px; }
         
         .glass-input {
-            width: 100%;
-            height: 36px;
-            background: var(--bg-input);
-            border: 1px solid var(--border-light);
-            border-radius: 8px;
-            padding: 0 8px;
-            text-align: center;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-primary);
-            font-family: "SF Mono", monospace;
-            line-height: 34px; /* 🔥 FIX: Ensures text is vertically centered and not clipped */
+            width: 100%; height: 36px;
+            background: var(--bg-input); border: 1px solid var(--border-light);
+            border-radius: 8px; padding: 0 8px; text-align: center;
+            font-size: 16px; font-weight: 600; color: var(--text-primary);
+            font-family: "SF Mono", monospace; line-height: 34px;
         }
         .glass-input:focus { border-color: var(--brand-blue); background: var(--bg-card); }
         
-        /* 🔥 Smart Input Styles 🔥 */
         .smart-input-wrapper { position: relative; width: 100%; }
         .mode-badge {
-            position: absolute; 
-            right: 4px; 
-            top: 50%; 
-            transform: translateY(-50%);
-            font-size: 10px; 
-            font-weight: 800; 
-            padding: 2px 5px; 
-            border-radius: 4px;
-            cursor: pointer; 
-            user-select: none; 
-            z-index: 5;
-            transition: all 0.2s;
+            position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+            font-size: 10px; font-weight: 800; padding: 2px 5px; border-radius: 4px;
+            cursor: pointer; user-select: none; z-index: 5; transition: all 0.2s;
         }
         .mode-z { color: var(--text-tertiary); background: transparent; }
         .mode-l { color: white; background: var(--brand-orange); box-shadow: var(--shadow-sm); }
         
         .ghost-text {
-            position: absolute; 
-            bottom: -11px; 
-            right: 2px;
-            font-size: 9px; 
-            font-weight: 600; 
-            color: var(--text-secondary);
-            pointer-events: none; 
-            white-space: nowrap; 
-            font-family: "SF Mono", monospace;
-            opacity: 0.8;
+            position: absolute; bottom: -11px; right: 2px;
+            font-size: 9px; font-weight: 600; color: var(--text-secondary);
+            pointer-events: none; white-space: nowrap; font-family: "SF Mono", monospace; opacity: 0.8;
         }
 
         .taxi-badge {
-            display: flex;
-            align-items: center;
-            background: var(--bg-input);
-            border: 1px solid var(--border-light);
-            border-radius: 6px;
-            padding: 0 6px;
-            height: 36px;
-            flex-shrink: 0;
+            display: flex; align-items: center; background: var(--bg-input);
+            border: 1px solid var(--border-light); border-radius: 6px;
+            padding: 0 6px; height: 36px; flex-shrink: 0;
         }
         .taxi-val { width: 24px; font-size: 12px; font-weight: 700; text-align: center; color: var(--text-secondary); background: transparent; }
 
         .lbo-display {
-            background: var(--bg-input);
-            border-radius: 8px;
-            padding: 8px;
-            margin-top: 12px;
-            text-align: center;
-            border: 1px solid var(--border-light);
+            background: var(--bg-input); border-radius: 8px; padding: 8px;
+            margin-top: 12px; text-align: center; border: 1px solid var(--border-light);
+            transition: all 0.3s ease;
         }
         .lbo-label { font-size: 10px; font-weight: 700; color: var(--text-secondary); display: block; }
         .lbo-time { font-size: 18px; font-weight: 800; color: var(--text-primary); line-height: 1.2; }
+        
         .lbo-safe { border-left: 4px solid var(--brand-green); }
         .lbo-warn { border-left: 4px solid var(--brand-red); background: rgba(255, 59, 48, 0.05); }
+        .lbo-acars { border: 2px solid var(--brand-purple); background: rgba(175, 82, 222, 0.05); }
+        .lbo-acars .lbo-time { color: var(--brand-purple); }
 
         .lbo-locked {
             background-color: var(--bg-input);
@@ -414,55 +379,27 @@
         .lbo-locked::after { content: "🔒"; font-size: 10px; position: absolute; top: 4px; right: 4px; opacity: 0.6; }
 
         .hotel-section {
-            background: var(--bg-accent);
-            border-radius: 8px;
-            padding: 8px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            background: var(--bg-accent); border-radius: 8px; padding: 8px;
+            margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
         }
         .hotel-inputs { display: flex; gap: 4px; }
         .hotel-time { width: 50px; height: 28px; font-size: 13px; text-align: center; border-radius: 4px; border: 1px solid rgba(0,0,0,0.05); }
 
         .leg-connector {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 140px;
-            position: relative;
-            z-index: 1;
-            flex-shrink: 0;
-            margin-top: 0; 
+            display: flex; align-items: center; justify-content: center; width: 140px; position: relative; z-index: 1; flex-shrink: 0;
         }
-        .flight-line {
-            height: 2px;
-            background: var(--text-tertiary);
-            width: 100%;
-            position: absolute;
-            top: 50%;
-            z-index: -1;
-        }
+        .flight-line { height: 2px; background: var(--text-tertiary); width: 100%; position: absolute; top: 50%; z-index: -1; }
         .flight-pill {
-            background: var(--bg-card);
-            border: 1px solid var(--border-light);
-            border-radius: 12px;
-            padding: 8px;
-            width: 110px;
-            box-shadow: var(--shadow-sm);
-            text-align: center;
+            background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 12px;
+            padding: 8px; width: 110px; box-shadow: var(--shadow-sm); text-align: center;
         }
         .flight-pill.acm { background: #fff7ed; border-color: var(--brand-orange); }
         .dark-mode .flight-pill.acm { background: #431407; }
 
         .action-row { display: flex; justify-content: center; gap: 12px; margin-top: 8px; }
         .icon-btn {
-            width: 28px; height: 28px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px; font-weight: bold; color: white;
-            box-shadow: var(--shadow-sm);
-            cursor: pointer;
+            width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 16px; font-weight: bold; color: white; box-shadow: var(--shadow-sm); cursor: pointer;
         }
         .btn-add { background: var(--brand-green); }
         .btn-div { background: var(--brand-orange); }
@@ -470,23 +407,16 @@
 
         /* === FOOTER HUD === */
         .hud-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: var(--bg-glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-top: 1px solid var(--border-light);
-            padding: 10px 16px var(--safe-bottom) 16px;
-            z-index: 200;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid var(--border-light); padding: 10px 16px var(--safe-bottom) 16px;
+            z-index: 200; box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
         }
         .hud-grid { display: grid; grid-template-columns: 1fr 1fr 0.8fr 1.2fr; gap: 8px; }
         .hud-item { display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; transition: all 0.2s; }
-        .hud-label { font-size: 10px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 2px; }
+        .hud-label { font-size: 10px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 2px; display:flex; align-items:center;}
         .hud-value { font-size: 18px; font-weight: 800; color: var(--text-primary); line-height: 1; font-family: "SF Mono", monospace; }
-        .hud-sub { font-size: 10px; color: var(--text-secondary); margin-top: 2px; display: flex; align-items: center; gap: 2px; }
+        .hud-sub { font-size: 10px; color: var(--text-secondary); margin-top: 2px; display: flex; align-items: center; gap: 2px; text-align: center;}
         
         .val-danger { color: var(--brand-red) !important; }
         .val-safe { color: var(--brand-green) !important; }
@@ -505,45 +435,62 @@
         .popover.show { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: 0; } }
 
+        /* === INFO MODAL === */
+        .info-modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            z-index: 1000; display: none; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.2s ease;
+        }
+        .info-modal-overlay.show { display: flex; opacity: 1; }
+        .info-modal-card {
+            background: var(--bg-card); width: 85%; max-width: 340px;
+            border-radius: var(--radius-lg); padding: 20px;
+            box-shadow: var(--shadow-float); transform: scale(0.95); transition: transform 0.2s ease;
+            border: 1px solid var(--border-light);
+        }
+        .info-modal-overlay.show .info-modal-card { transform: scale(1); }
+        .info-modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-light); padding-bottom: 12px; margin-bottom: 12px;}
+        .info-modal-body { font-size: 13px; line-height: 1.6; color: var(--text-secondary); }
+        .info-modal-body b { color: var(--text-primary); }
+
         /* RESPONSIVE RESET for Mobile Portrait */
         @media screen and (max-width: 820px) and (orientation: portrait) {
-            html, body {
-                position: static;
-                overflow-y: auto;
-                overflow-x: hidden;
-            }
+            html, body { position: static; overflow-y: auto; overflow-x: hidden; }
             .app-header { position: sticky; top: 0; }
             .stats-dashboard { position: static; margin-top: 0; }
             #timeline-container {
-                position: static;
-                height: auto;
-                flex-direction: column; 
-                overflow-x: hidden; 
-                overflow-y: visible; 
-                padding-bottom: 120px; 
-                align-items: center; 
-                gap: 0; 
-                min-height: auto; 
-                padding-top: 16px;
+                position: static; height: auto; flex-direction: column; 
+                overflow-x: hidden; overflow-y: visible; padding-bottom: 120px; 
+                align-items: center; gap: 0; min-height: auto; padding-top: 16px;
             }
             .leg-connector { width: 100%; height: 110px; flex-direction: column; margin-top: 0; }
             .flight-line { width: 2px; height: 100%; top: 0; left: 50%; transform: translateX(-50%); }
             .stats-dashboard { grid-template-columns: 1fr 1fr; }
             .station-wrapper { width: 100%; justify-content: center; scroll-snap-align: start; }
             .station-card { width: 92%; max-width: 380px; }
-            .controls-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-            .date-trigger { flex: 1 1 100%; order: -1; margin-bottom: 4px; }
-            .toggle-wrapper, .control-item-wrapper { flex: 1 1 auto; min-width: 80px; }
             body::-webkit-scrollbar { display: none; }
         }
     </style>
 </head>
 <body class="light-mode">
 
+    <!-- GLOBAL INFO MODAL -->
+    <div id="infoModal" class="info-modal-overlay">
+        <div class="info-modal-card">
+            <div class="info-modal-header">
+                <h3 id="infoTitle" style="margin:0; font-size:16px; color:var(--brand-blue);">Title</h3>
+                <button onclick="closeInfo()" style="background:var(--bg-input); border-radius:50%; width:28px; height:28px; font-size:14px; font-weight:bold; color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; justify-content:center; border:1px solid var(--border-light);">✕</button>
+            </div>
+            <div id="infoBody" class="info-modal-body"></div>
+        </div>
+    </div>
+
     <header class="app-header">
         <div class="header-top">
             <div class="app-title">
-                <span style="font-size:20px;">✈️</span> CAL Duty <span class="text-xs font-medium text-secondary" style="border:1px solid var(--border-light); padding:1px 4px; border-radius:4px;">PRO v4.8.2 Logic Fix</span>
+                <span style="font-size:20px;">✈️</span> CAL Duty <span class="text-xs font-medium text-secondary" style="border:1px solid var(--border-light); padding:1px 4px; border-radius:4px;">Pro v5.0.2</span>
             </div>
             <div class="crew-selector">
                 <div class="crew-btn active" id="btn-S" onclick="setCrew('S')">Single</div>
@@ -553,17 +500,26 @@
         </div>
 
         <div class="controls-grid">
-            <button class="toggle-wrapper" onclick="toggleNightMode()" style="justify-content:center; width:auto; padding:0 12px;">
+            <button class="toggle-wrapper" onclick="toggleNightMode()" style="justify-content:center; flex: 0 0 auto; min-width: 44px; padding:0;">
                 <span id="nightBtnIcon">🌙</span>
             </button>
+            
             <input type="date" id="flightDate" class="date-trigger" onchange="calc24hOverlap(); runAllCalc()">
             
-            <button class="toggle-wrapper" id="globalTimeBtn" onclick="toggleAllModes()" style="justify-content:center; width:auto; padding:0 12px; font-weight:bold; font-size:11px; color:var(--brand-blue);">
+            <button class="toggle-wrapper" id="globalTimeBtn" onclick="toggleAllModes()" style="justify-content:center; font-weight:bold; font-size:11px; color:var(--brand-blue);">
                 ALL UTC
             </button>
 
+            <!-- ACARS LBO Input (Fleet Notification 2024-14) -->
+            <div class="badge-input-wrapper badge-acars" title="ACARS LBO from JZ">
+                <span style="display:flex; align-items:center; font-size:10px;">
+                    JZ LBO <span class="info-icon" onclick="showInfo('jz')">i</span>
+                </span>
+                <input type="tel" id="acarsLbo" placeholder="HHMM" style="background:transparent; text-align:right; font-weight:bold; width:50px; color:inherit;" oninput="updAcarsLbo(this.value)">
+            </div>
+
             <div class="toggle-wrapper" id="extFdtContainer">
-                <span class="toggle-label">Ext FDT</span>
+                <span class="toggle-label">Ext FDT <span class="info-icon" onclick="showInfo('ext')">i</span></span>
                 <label class="switch">
                     <input type="checkbox" id="extFdt" onchange="runAllCalc()">
                     <span class="slider"></span>
@@ -571,7 +527,7 @@
             </div>
             
             <div class="toggle-wrapper" id="night-container">
-                <span class="toggle-label">Night</span>
+                <span class="toggle-label">Night <span class="info-icon" onclick="showInfo('night')">i</span></span>
                 <label class="switch">
                     <input type="checkbox" id="nightOps" onchange="runAllCalc()">
                     <span class="slider"></span>
@@ -579,18 +535,33 @@
             </div>
 
             <div class="toggle-wrapper">
-                <span class="toggle-label">No Bunk</span>
+                <span class="toggle-label">No Bunk <span class="info-icon" onclick="showInfo('nobunk')">i</span></span>
                 <label class="switch">
                     <input type="checkbox" id="noBunk" onchange="runAllCalc()">
                     <span class="slider"></span>
                 </label>
             </div>
+            
+            <!-- Early Morning CAPSULE UI (3.4.3.4) -->
+            <div class="toggle-wrapper" style="padding:0 8px; flex: 1 1 auto; min-width: 125px;">
+                <span class="toggle-label" style="margin-right:2px;">Early <span class="info-icon" onclick="showInfo('early')">i</span></span>
+                <select id="earlyMorningSel" onchange="updEarlyMorning(this.value)" style="background:transparent; border:none; color:var(--brand-blue); font-weight:700; font-size:11px; outline:none; text-align:right; flex-grow:1; cursor:pointer; -webkit-appearance:none;">
+                    <option value="0">一般</option>
+                    <option value="2">連 2 天</option>
+                    <option value="3">連 3 天</option>
+                </select>
+                <span style="font-size:8px; color:var(--brand-blue); margin-left:4px; pointer-events:none;">▼</span>
+            </div>
 
-            <div class="control-item-wrapper">
-                <div class="prev-ft-badge" onclick="togglePrevPopup()">
-                    <span class="text-secondary" style="font-size:10px;">PREV FT</span>
-                    <input type="tel" id="prevFt" value="0000" readonly style="background:transparent; text-align:right; font-weight:bold; width:50px; color:var(--brand-blue);">
-                    <span>▼</span>
+            <div style="position: relative; flex: 1 1 auto; min-width:125px;">
+                <div class="badge-input-wrapper badge-prev-ft" onclick="togglePrevPopup()">
+                    <span style="display:flex; align-items:center; font-size:10px;">
+                        PREV FT <span class="info-icon" onclick="event.stopPropagation(); showInfo('prev')">i</span>
+                    </span>
+                    <div style="display:flex; align-items:center;">
+                        <input type="tel" id="prevFt" value="0000" readonly style="background:transparent; text-align:right; font-weight:bold; width:40px; color:inherit; pointer-events:none;">
+                        <span style="font-size:8px; margin-left:4px;">▼</span>
+                    </div>
                 </div>
                 <div id="prevPopup" class="popover">
                     <div class="text-sm font-bold text-primary mb-3">Previous Flight (24h Check)</div>
@@ -614,8 +585,8 @@
                 </div>
             </div>
             
-            <button class="toggle-wrapper" onclick="resetData()" style="justify-content:center; color:var(--brand-red); font-weight:bold; font-size:11px; padding:0 12px;">RESET</button>
-            <button class="toggle-wrapper" id="routeBtn" onclick="toggleRoutePopup()" style="justify-content:center; font-weight:bold; font-size:11px; padding:0 12px;">📂</button>
+            <button class="toggle-wrapper" onclick="resetData()" style="justify-content:center; color:var(--brand-red); font-weight:bold; font-size:11px; flex: 0 0 auto; min-width: 60px;">RESET</button>
+            <button class="toggle-wrapper" id="routeBtn" onclick="toggleRoutePopup()" style="justify-content:center; font-weight:bold; font-size:11px; flex: 0 0 auto; min-width: 44px;">📂</button>
             
              <div id="routePopup" class="popover">
                 <div class="text-sm font-bold text-primary mb-3">Saved Routes</div>
@@ -660,7 +631,11 @@
     <footer class="hud-footer">
         <div class="hud-grid">
             <div class="hud-item" id="report-box">
-                <span class="hud-label">Report (Z) <span id="lockBtn" class="lock-icon" onclick="toggleLock()">🔓</span></span>
+                <span class="hud-label">
+                    Report (Z) 
+                    <span class="info-icon" style="margin: 0 4px;" onclick="showInfo('report')">i</span> 
+                    <span id="lockBtn" class="lock-icon" style="margin-left:0;" onclick="toggleLock()">🔓</span>
+                </span>
                 <span id="resReport" class="hud-value">--:--</span>
                 <span id="reportLabel" class="hud-sub">--</span>
             </div>
@@ -689,6 +664,32 @@
     </footer>
 
 <script>
+    // === INFO SYSTEM DATA & LOGIC ===
+    const INFO_DATA = {
+        'jz': { title: '聯管通報 JZ LBO', text: '依據 Fleet Notification 2024-14，當航班延誤或轉降時，請輸入聯管透過 ACARS 傳送的最後後推時間。<br><br>系統將自動與自算 LBO 進行比對，並嚴格採用兩者中<b>最早</b>的時間作為最終限制。' },
+        'ext': { title: '延長任務 (Ext FDT)', text: '機長裁量權 (Captain\'s Discretion)。<br><br>勾選後系統將自動為 Max FDP 增加 2 小時的寬限額度。僅適用於 M 或 D 組員，S 組員不可使用。' },
+        'night': { title: '夜間航班限制 (Night Ops)', text: '表定第一段起飛落在當地時間 <b>2100L ~ 0700L</b> 之間。<br><br>勾選後，系統會將 Max FDP 上限自動扣除 2 小時。系統預設會依第一段 STD 的當地時間自動判斷是否勾選。' },
+        'nobunk': { title: '無睡眠設備 (No Bunk)', text: '機上無適當之水平睡眠設備 (如僅配備商務艙座位等)。<br><br>勾選後，多重(M)或雙重(D)組員在 24 小時內的最高飛航時間 (Max Flight Time) 將被下修限制為 <b>12 小時</b>。' },
+        'early': { title: '連續早班機 (Early Morning)', text: '起降涵蓋 <b>0200L ~ 0500L</b> (出發地當地時間) 的航班。<br><br>若連續 2 天執行，下次最低休時強制需達 <b>34 小時</b>；連續 3 天執行，最低休時強制需達 <b>54 小時</b>。系統會自動套用至 Next Rpt 計算中。' },
+        'prev': { title: '前趟飛時 (Prev FT)', text: '用於計算「連續 24 小時內」的飛航時間限制。<br><br>點選此按鈕並輸入前趟航班的抵達時間 (IN) 與飛時 (FT)，系統會自動推算與本次任務的「24小時重疊飛航分鐘數」，並計入 FT 總額審核是否超時。' },
+        'hotel': { title: '外站休息 (Hotel / Split)', text: '若兩段派飛中間有提供旅館休息，且休息時間大於 <b>3 小時</b>，系統會自動將其計算為 Split Duty (發生在首段後) 或 FDP Extension (後續段)，並依規定放寬 Max FDP 的時間上限。' },
+        'report': { title: '報到時間鎖定 (Report Lock)', text: '遇到航班<b>「延誤 (Delay)」</b>時使用。<br><br>點擊鎖定 🔒 可強制系統記住「原訂的報到時間」。之後即使您往後修改 STD 測試極限，系統仍會以原報到時間為基準來計算 FDP 上限，確保絕對合法。' }
+    };
+
+    function showInfo(key) {
+        const data = INFO_DATA[key];
+        if(!data) return;
+        document.getElementById('infoTitle').innerHTML = data.title;
+        document.getElementById('infoBody').innerHTML = data.text;
+        const modal = document.getElementById('infoModal');
+        modal.classList.add('show');
+    }
+
+    function closeInfo() {
+        document.getElementById('infoModal').classList.remove('show');
+    }
+
+
     const icaoToIata = {
         'RCTP': 'TPE', 'RCSS': 'TSA', 'RCKH': 'KHH', 'VHHH': 'HKG', 'VMMC': 'MFM',
         'ZSPD': 'PVG', 'ZBAA': 'PEK', 'RJAA': 'NRT', 'RJTT': 'HND', 'RJBB': 'KIX',
@@ -715,7 +716,9 @@
         sfts: ['', ''],
         lockedReport: null,
         isLocked: false,
-        nextLegHeavy: false 
+        nextLegHeavy: false,
+        acarsLbo: '',
+        earlyMorning: '0' 
     };
     let savedRoutes = [];
 
@@ -776,11 +779,8 @@
         updateGhostText(i, field, rawVal);
         saveData();
         
-        // 🔥 AUTO-LINK LOGIC: Update Prev FT if STD changes, else just update totals
-        if (field === 'std') {
-            calc24hOverlap(); // Recalculate Prev FT window
-        }
-        runAllCalc(false); // Update bars
+        if (field === 'std') calc24hOverlap(); 
+        runAllCalc(false); 
     }
 
     function toggleInputMode(i, field) {
@@ -790,43 +790,24 @@
         drawTimeline(); 
     }
     
-    // 🔥 NEW FUNCTION: Toggle ALL modes 🔥
     function toggleAllModes() {
         let target = 'L';
-        // Simple heuristic: if the first station's STD is already L, we probably want to switch back to Z
-        if (app.stations[0] && app.stations[0].stdMode === 'L') {
-            target = 'Z';
-        }
-
-        app.stations.forEach(s => {
-            s.stdMode = target;
-            s.staMode = target;
-        });
+        if (app.stations[0] && app.stations[0].stdMode === 'L') target = 'Z';
+        app.stations.forEach(s => { s.stdMode = target; s.staMode = target; });
         saveData();
         drawTimeline();
     }
     
-    // 🔥 NEW HELPER: Update Global Button UI 🔥
     function updateGlobalBtnState() {
         const btn = document.getElementById('globalTimeBtn');
         if(!btn) return;
-        
-        // Check current state of first station
         let isLocal = false;
-        if (app.stations[0] && app.stations[0].stdMode === 'L') {
-            isLocal = true;
-        }
-        
+        if (app.stations[0] && app.stations[0].stdMode === 'L') isLocal = true;
         btn.innerText = isLocal ? "ALL LOCAL" : "ALL UTC";
-        
         if(isLocal) {
-            btn.style.color = 'white';
-            btn.style.background = 'var(--brand-orange)';
-            btn.style.borderColor = 'var(--brand-orange)';
+            btn.style.color = 'white'; btn.style.background = 'var(--brand-orange)'; btn.style.borderColor = 'var(--brand-orange)';
         } else {
-            btn.style.color = 'var(--brand-blue)';
-            btn.style.background = 'var(--bg-input)';
-            btn.style.borderColor = 'var(--border-light)';
+            btn.style.color = 'var(--brand-blue)'; btn.style.background = 'var(--bg-input)'; btn.style.borderColor = 'var(--border-light)';
         }
     }
 
@@ -921,7 +902,9 @@
                         ${!isLast ? `
                         <div style="text-align:right;">
                             <label class="toggle-wrapper" style="padding:0 8px;">
-                                <span style="font-size:10px; font-weight:700; margin-right:6px;">HOTEL</span>
+                                <span style="font-size:10px; font-weight:700; margin-right:6px; display:flex; align-items:center;">
+                                    HOTEL <span class="info-icon" onclick="event.stopPropagation(); showInfo('hotel')">i</span>
+                                </span>
                                 <label class="switch" style="transform:scale(0.8);">
                                     <input type="checkbox" ${st.hotel?'checked':''} onchange="toggleHotel(${i},this.checked)">
                                     <span class="slider"></span>
@@ -944,13 +927,12 @@
             }
 
             if (!isFirst) {
-                // ARRIVAL BLOCK
                 const staMode = st.staMode || 'Z';
                 const staDisplay = getDisplayValue(i, 'sta', staMode);
                 html += `<div class="input-group">
                             <span class="input-label">Arrival (IN)</span>
                             <div class="time-input-row">
-                                <div class="taxi-badge">
+                                <div class="taxi-badge" title="Act Taxi In (Not for LBO)">
                                     <span style="font-size:9px; font-weight:700; color:var(--text-tertiary);">TX</span>
                                     <input type="tel" class="taxi-val" value="${st.taxiIn!==undefined?st.taxiIn:15}" oninput="updVal(${i},'taxiIn',this.value)">
                                 </div>
@@ -978,7 +960,6 @@
             }
 
             if (!isLast) {
-                 // DEPARTURE BLOCK
                  const stdMode = st.stdMode || 'Z';
                  const stdDisplay = getDisplayValue(i, 'std', stdMode);
 
@@ -999,7 +980,7 @@
                                 </div>
 
                                 <input type="tel" class="glass-input" id="out-${i}" placeholder="ACT OUT" value="${st.out||''}" oninput="updVal(${i},'out',this.value)" style="border-color:var(--brand-green);">
-                                <div class="taxi-badge">
+                                <div class="taxi-badge" title="Act Taxi Out (Not for LBO)">
                                     <span style="font-size:9px; font-weight:700; color:var(--text-tertiary);">TX</span>
                                     <input type="tel" class="taxi-val" value="${st.taxiOut!==undefined?st.taxiOut:15}" oninput="updVal(${i},'taxiOut',this.value)">
                                 </div>
@@ -1030,7 +1011,7 @@
         con.innerHTML = html;
         updateLockButton();
         updateResultsOnly(); 
-        updateGlobalBtnState(); // Update the button visual whenever we redraw
+        updateGlobalBtnState();
     }
 
     function toggleLock() {
@@ -1079,6 +1060,20 @@
         runAllCalc();
     }
 
+    // --- ACARS & EARLY MORNING UPDATERS ---
+    function updAcarsLbo(v) {
+        app.acarsLbo = v;
+        saveData();
+        runAllCalc();
+    }
+    
+    function updEarlyMorning(v) {
+        app.earlyMorning = v;
+        saveData();
+        runAllCalc();
+    }
+
+    // --- ROUTE MANAGEMENT ---
     function toggleRoutePopup() {
         const el = document.getElementById('routePopup');
         el.classList.toggle('show');
@@ -1193,31 +1188,16 @@
             }
         }
         saveData();
-        
-        // 🔥 Update Prev FT only if OUT changes (Actual times affect history)
-        if(f === 'out') {
-            calc24hOverlap();
-        }
+        if(f === 'out') calc24hOverlap();
         runAllCalc();
     }
 
-    function updSft(i, v) { 
-        app.sfts[i] = v; 
-        saveData(); 
-        runAllCalc(); // Only re-calc totals, do NOT shift prev FT
-    }
-      
-    function toggleHotel(i, checked) { 
-        app.stations[i]['hotel'] = checked; 
-        saveData(); 
-        drawTimeline(); 
-    }
-    
+    function updSft(i, v) { app.sfts[i] = v; saveData(); runAllCalc(); }
+    function toggleHotel(i, checked) { app.stations[i]['hotel'] = checked; saveData(); drawTimeline(); }
     function toggleAcm(i) {
         if(app.stations[i]) {
             app.stations[i].isAcm = !app.stations[i].isAcm;
-            saveData();
-            drawTimeline();
+            saveData(); drawTimeline();
         }
     }
 
@@ -1229,17 +1209,11 @@
 
     function addDivert(i) {
         app.stations.splice(i+1, 0, { 
-            id: Date.now(), 
-            code: 'DIV', 
-            std: '', stdMode: 'Z', out: '', in: '', sta: '', staMode: 'Z', 
-            hotel: false, ci:'', co:'', 
-            taxiOut: 15, taxiIn: 15,
-            isDivert: true,
-            isAcm: false
+            id: Date.now(), code: 'DIV', std: '', stdMode: 'Z', out: '', in: '', sta: '', staMode: 'Z', 
+            hotel: false, ci:'', co:'', taxiOut: 15, taxiIn: 15, isDivert: true, isAcm: false
         });
         app.sfts.splice(i, 0, ''); 
-        saveData(); 
-        drawTimeline();
+        saveData(); drawTimeline();
     }
 
     function remSt(i) { app.stations.splice(i, 1); app.sfts.splice(i-1, 1); saveData(); drawTimeline(); }
@@ -1252,15 +1226,11 @@
         const extChk = document.getElementById('extFdt');
         const extCont = document.getElementById('extFdtContainer');
         if (c === 'S') {
-            extChk.checked = false;
-            extChk.disabled = true;
-            extCont.style.opacity = '0.5';
+            extChk.checked = false; extChk.disabled = true; extCont.style.opacity = '0.5';
         } else {
-            extChk.disabled = false;
-            extCont.style.opacity = '1';
+            extChk.disabled = false; extCont.style.opacity = '1';
         }
-        saveData(); 
-        updateResultsOnly(); 
+        saveData(); updateResultsOnly(); 
     }
     
     function resetData() { 
@@ -1273,10 +1243,7 @@
     }
 
     function runAllCalc(redraw = false) { 
-        // calc24hOverlap() is intentionally removed here to prevent "ghost jumps"
-        saveData(); 
-        updateResultsOnly(); 
-        if (redraw) drawTimeline();
+        saveData(); updateResultsOnly(); if (redraw) drawTimeline();
     }
     
     function togglePrevPopup() {
@@ -1302,8 +1269,7 @@
         const pfInStr = document.getElementById('pf-in').value;
         const pfDurStr = document.getElementById('pf-dur').value;
         const curDateStr = document.getElementById('flightDate').value;
-        const s0 = app.stations[0];
-        const s1 = app.stations[1]; 
+        const s0 = app.stations[0]; const s1 = app.stations[1]; 
         
         const curStartMins = parse(s0.out) !== null ? parse(s0.out) : parse(s0.std);
         let curDurMins = parse(app.sfts[0]);
@@ -1319,9 +1285,7 @@
         
         if (!pfDateStr || !pfInStr || !pfDurStr || !curDateStr || curStartMins === null || curDurMins === null) return; 
 
-        const pfInMins = parse(pfInStr);
-        const pfDurMins = parse(pfDurStr);
-        const ONE_DAY = 24 * 60 * 60 * 1000;
+        const pfInMins = parse(pfInStr); const pfDurMins = parse(pfDurStr); const ONE_DAY = 24 * 60 * 60 * 1000;
         
         const curBaseDate = getUtcDate(curDateStr);
         const curStartTs = curBaseDate.getTime() + (curStartMins * 60000);
@@ -1336,9 +1300,7 @@
         const overlapEnd = Math.min(curEndTs, pfEndTs); 
         
         let overlapMins = 0;
-        if (overlapEnd > overlapStart) {
-            overlapMins = Math.floor((overlapEnd - overlapStart) / 60000);
-        }
+        if (overlapEnd > overlapStart) overlapMins = Math.floor((overlapEnd - overlapStart) / 60000);
         
         if (overlapMins > 0) {
             document.getElementById('prevFt').value = fmt(overlapMins, false).replace(':',''); 
@@ -1354,29 +1316,19 @@
         let globalPauseMinutes = 0; 
 
         app.stations.forEach((s, i) => {
-            let extension = 0;
-            let pause = 0;
+            let extension = 0; let pause = 0;
             if (s.hotel && i < app.stations.length - 1) {
                 const hTime = calcRest(s.ci, s.co);
                 const badge = document.getElementById(`rest-badge-${i}`);
                 if(badge) {
                     badge.style.display = 'block';
                     badge.innerText = `Rest: ${hTime>0 ? fmt(hTime,false) : '--:--'}`;
-                    if (hTime > 0 && hTime < 180) {
-                        badge.style.color = 'var(--brand-red)';
-                        badge.innerText += ' (<3h)';
-                    } else {
-                        badge.style.color = 'var(--brand-blue)';
-                    }
+                    if (hTime > 0 && hTime < 180) { badge.style.color = 'var(--brand-red)'; badge.innerText += ' (<3h)'; }
+                    else { badge.style.color = 'var(--brand-blue)'; }
                 }
                 if (hTime >= 180) {
-                    if (i === 0) {
-                        pause = hTime;
-                        if(badge) badge.innerText += ' (Split)';
-                    } else {
-                        extension = Math.floor(hTime / 2);
-                        if(badge) badge.innerText += ' (Ext)';
-                    }
+                    if (i === 0) { pause = hTime; if(badge) badge.innerText += ' (Split)'; } 
+                    else { extension = Math.floor(hTime / 2); if(badge) badge.innerText += ' (Ext)'; }
                 }
             } else {
                 const badge = document.getElementById(`rest-badge-${i}`);
@@ -1386,7 +1338,6 @@
             if (i === 0) globalPauseMinutes = pause;
         });
 
-        // Calculate Limits First (Needed for Rest Logic)
         let base = 14; 
         if(app.crew==='M') base=18; if(app.crew==='D') base=24; 
         
@@ -1409,90 +1360,47 @@
 
         document.getElementById('disp-limit-dur').innerText = limitText;
 
-        calcTotals();
+        calcTotals(); // This handles FT Warning logic
 
-        // 1. Calculate Total Block Time (For Table Lookup)
-        let totalFtCalc = 0;
+        // Block Time / ULR Detect
+        let totalFtCalc = 0; let isULR = false;
         for(let k=0; k<app.stations.length-1; k++) {
              if (app.stations[k].isAcm) continue;
-             
-             const o = parse(app.stations[k].out);       
-             const i = parse(app.stations[k+1].in);      
-             const sft = parse(app.sfts[k]);             
-             const s_std = parse(app.stations[k].std);   
-             const s_sta = parse(app.stations[k+1].sta); 
-             
+             const o = parse(app.stations[k].out); const i = parse(app.stations[k+1].in);      
+             const sft = parse(app.sfts[k]); const s_std = parse(app.stations[k].std); const s_sta = parse(app.stations[k+1].sta); 
              const txOut = (app.stations[k].taxiOut !== undefined) ? app.stations[k].taxiOut : 15;
              const txIn  = (app.stations[k+1].taxiIn !== undefined) ? app.stations[k+1].taxiIn : 15;
 
-             if(o!==null && i!==null) {
-                 totalFtCalc += diff(o, i); // Actual Block
-             }
-             else if(sft !== null) {
-                 totalFtCalc += (sft + txOut + txIn); // Manual FT + Taxi
-             }
-             else if(s_std !== null && s_sta !== null) {
-                 totalFtCalc += diff(s_std, s_sta); // Plan Block
-             }
+             let legBlock = 0;
+             if(o!==null && i!==null) legBlock = diff(o, i); 
+             else if(sft !== null) legBlock = (sft + txOut + txIn);
+             else if(s_std !== null && s_sta !== null) legBlock = diff(s_std, s_sta);
+             
+             totalFtCalc += legBlock;
+             if (legBlock >= 960) isULR = true;
         }
         const ftHours = totalFtCalc / 60;
 
-        // 2. Determine Estimated Duty End Time (For Rest Start)
-        const lastIdx = app.stations.length - 1;
-        const lastLegIdx = lastIdx - 1; 
-        
-        const lastActIn = parse(app.stations[lastIdx].in);
-        const lastActOut = parse(app.stations[lastLegIdx].out);
-        const lastManFt = parse(app.sfts[lastLegIdx]);
-        const lastStd = parse(app.stations[lastLegIdx].std);
-        const lastSta = parse(app.stations[lastIdx].sta);
-        
+        const alertOverlay = document.getElementById('ulr-alert');
+        if (isULR && app.crew !== 'D') alertOverlay.classList.remove('hidden');
+        else alertOverlay.classList.add('hidden');
+
+        // Estimate Duty End
+        const lastIdx = app.stations.length - 1; const lastLegIdx = lastIdx - 1; 
+        const lastActIn = parse(app.stations[lastIdx].in); const lastActOut = parse(app.stations[lastLegIdx].out);
+        const lastManFt = parse(app.sfts[lastLegIdx]); const lastStd = parse(app.stations[lastLegIdx].std); const lastSta = parse(app.stations[lastIdx].sta);
         const l_txOut = (app.stations[lastLegIdx].taxiOut !== undefined) ? app.stations[lastLegIdx].taxiOut : 15;
         const l_txIn  = (app.stations[lastIdx].taxiIn !== undefined) ? app.stations[lastIdx].taxiIn : 15;
 
         let estimatedDutyEndTime = null;
-
-        if (lastActIn !== null) {
-            estimatedDutyEndTime = lastActIn;
-        } 
-        else if (lastActOut !== null && lastManFt !== null) {
-            estimatedDutyEndTime = lastActOut + lastManFt + l_txOut + l_txIn;
-        }
-        else if (lastStd !== null && lastManFt !== null) {
-            estimatedDutyEndTime = lastStd + lastManFt + l_txOut + l_txIn;
-        }
-        else if (lastSta !== null) {
-            estimatedDutyEndTime = lastSta;
-        }
+        if (lastActIn !== null) estimatedDutyEndTime = lastActIn;
+        else if (lastActOut !== null && lastManFt !== null) estimatedDutyEndTime = lastActOut + lastManFt + l_txOut + l_txIn;
+        else if (lastStd !== null && lastManFt !== null) estimatedDutyEndTime = lastStd + lastManFt + l_txOut + l_txIn;
+        else if (lastSta !== null) estimatedDutyEndTime = lastSta;
 
         if (estimatedDutyEndTime !== null) {
             while (estimatedDutyEndTime >= 1440) estimatedDutyEndTime -= 1440;
             while (estimatedDutyEndTime < 0) estimatedDutyEndTime += 1440;
-        }
-
-        // 3. ULR Detection (Using Consistent Logic)
-        let isULR = false;
-        for(let i=0; i<app.stations.length-1; i++) {
-             let legBlock = 0;
-             const o = parse(app.stations[i].out);
-             const in_ = parse(app.stations[i+1].in);
-             const sft = parse(app.sfts[i]);
-             const std = parse(app.stations[i].std);
-             const sta = parse(app.stations[i+1].sta);
-             const tx = (app.stations[i].taxiOut||15) + (app.stations[i+1].taxiIn||15);
-
-             if (o!==null && in_!==null) legBlock = diff(o, in_);
-             else if (sft!==null) legBlock = sft + tx;
-             else if (std!==null && sta!==null) legBlock = diff(std, sta);
-
-             if (legBlock >= 960) isULR = true;
-        }
-
-        const alertOverlay = document.getElementById('ulr-alert');
-        if (isULR && app.crew !== 'D') {
-            alertOverlay.classList.remove('hidden');
-        } else {
-            alertOverlay.classList.add('hidden');
         }
 
         const s1 = parse(app.stations[0].std);
@@ -1500,12 +1408,10 @@
         const dateInput = document.getElementById('flightDate').value;
         const refDate = getUtcDate(dateInput) || new Date();
 
-        let rep = null;
-        let reportOffset = (code==='TPE'?90:60); 
+        let rep = null; let reportOffset = (code==='TPE'?90:60); 
         
         if (app.isLocked && app.lockedReport !== null) {
-            rep = app.lockedReport;
-            document.getElementById('reportLabel').innerText = "LOCKED";
+            rep = app.lockedReport; document.getElementById('reportLabel').innerText = "LOCKED";
         } else if (s1 !== null) {
             rep = s1 - reportOffset; if(rep<0) rep+=1440;
             document.getElementById('reportLabel').innerText = code==='TPE'?"STD-90":"STD-60";
@@ -1517,8 +1423,7 @@
                 nightContainer.style.border = "1px solid var(--border-light)";
                 const stdInfo = getLocalInfo(s1, airportIanaZones[code], refDate);
                 if (stdInfo) {
-                    const h = parseInt(stdInfo.timeStr.split(':')[0]);
-                    const m = parseInt(stdInfo.timeStr.split(':')[1]);
+                    const h = parseInt(stdInfo.timeStr.split(':')[0]); const m = parseInt(stdInfo.timeStr.split(':')[1]);
                     const isNightTime = (h > 21 || h < 7) || (h === 21 && m > 0);
                     document.getElementById('nightOps').checked = isNightTime;
                     const offsetSign = stdInfo.offset >= 0 ? '+' : '';
@@ -1529,32 +1434,24 @@
                 document.getElementById('loc-time-display').innerText = `STD: --:-- (Chk Night)`;
             }
         } else {
-            document.getElementById('loc-time-display').innerText = `STD: --:--`;
-            nightContainer.style.border = "1px solid var(--border-light)";
+            document.getElementById('loc-time-display').innerText = `STD: --:--`; nightContainer.style.border = "1px solid var(--border-light)";
         }
 
         if (rep === null) {
             document.getElementById('resReport').innerText="--:--"; 
-            const nextRptEl = document.getElementById('resNextRpt');
-            if(nextRptEl) nextRptEl.innerHTML = "--:--";
-            const minRestEl = document.getElementById('min-rest-lbl');
-            if(minRestEl) minRestEl.innerText = "Rest: --";
+            const nextRptEl = document.getElementById('resNextRpt'); if(nextRptEl) nextRptEl.innerHTML = "--:--";
+            const minRestEl = document.getElementById('min-rest-lbl'); if(minRestEl) minRestEl.innerText = "Rest: --";
             document.getElementById('disp-limit-dur').innerText = "--";
-            const cardMax = document.getElementById('resMaxFdtCard');
-            if(cardMax) cardMax.innerText = "--:--";
+            const cardMax = document.getElementById('resMaxFdtCard'); if(cardMax) cardMax.innerText = "--:--";
             return; 
         }
 
         let repHtml = fmt(rep);
         if (rep !== null && code in airportIanaZones) {
             let rptDate = new Date(refDate);
-            if (s1 !== null && (s1 - reportOffset) < 0) {
-                rptDate.setUTCDate(rptDate.getUTCDate() - 1);
-            }
+            if (s1 !== null && (s1 - reportOffset) < 0) rptDate.setUTCDate(rptDate.getUTCDate() - 1);
             const rptLoc = getLocalInfo(rep, airportIanaZones[code], rptDate);
-            if (rptLoc) {
-                repHtml += ` <span style="font-size:10px; color:var(--text-secondary); font-weight:normal;">(${rptLoc.timeStr}L)</span>`;
-            }
+            if (rptLoc) repHtml += ` <span style="font-size:10px; color:var(--text-secondary); font-weight:normal;">(${rptLoc.timeStr}L)</span>`;
         }
         document.getElementById('resReport').innerHTML = repHtml;
 
@@ -1563,51 +1460,32 @@
         if (maxFdtEl) {
             maxFdtEl.innerText = fmt(fdpEndTime);
             const capMsg = document.getElementById('cap-msg-card');
-            if (isCapped) {
-                if(capMsg) capMsg.innerText = " (Cap 24h)";
-            } else {
-                if(capMsg) capMsg.innerText = "";
-            }
+            if (isCapped) { if(capMsg) capMsg.innerText = " (Cap 24h)"; } else { if(capMsg) capMsg.innerText = ""; }
         }
         
-        let cbnOffset = 60;
-        if (code === 'TPE') cbnOffset = 140;
-        else if (code === 'TSA') cbnOffset = 90;
-        else if (code === 'KHH') cbnOffset = 110;
-
-        let cbnLimit = 14 * 60;
-        if (app.crew === 'M' || app.crew === 'D') cbnLimit = 20 * 60;
-
+        let cbnOffset = (code === 'TPE') ? 140 : (code === 'TSA' ? 90 : (code === 'KHH' ? 110 : 60));
+        let cbnLimit = (app.crew === 'M' || app.crew === 'D') ? 20 * 60 : 14 * 60;
         let cbnEndRelative = cbnLimit - (cbnOffset - reportOffset); 
-        
-        let cbnChoke = false;
-        let cbnEndDisplay = "";
+        let cbnChoke = false; let cbnEndDisplay = "";
         
         if (cbnEndRelative < globalMaxFdpMins) {
-             cbnChoke = true;
-             let cbnEndAbs = rep + cbnEndRelative;
-             cbnEndDisplay = fmt(cbnEndAbs);
+             cbnChoke = true; cbnEndDisplay = fmt(rep + cbnEndRelative);
         }
 
         const maxFdtBox = document.getElementById('max-fdt-box-card');
         const capMsg = document.getElementById('cap-msg-card');
-        
         let effectiveLimit = globalMaxFdpMins;
         
-        // Use estimatedDutyEndTime to check limit compliance
         let isActExceeded = false;
         if (estimatedDutyEndTime !== null) {
-            let actualElapsed = estimatedDutyEndTime - rep;
-            if (actualElapsed < 0) actualElapsed += 1440;
+            let actualElapsed = estimatedDutyEndTime - rep; if (actualElapsed < 0) actualElapsed += 1440;
             if (actualElapsed > effectiveLimit) isActExceeded = true;
         }
 
-        const lastSt = app.stations[app.stations.length - 1];
-        const lastStaVal = parse(lastSt.sta);
+        const lastSt = app.stations[app.stations.length - 1]; const lastStaVal = parse(lastSt.sta);
         let isStaExceeded = false;
         if (lastStaVal !== null) {
-             let staElapsed = lastStaVal - rep;
-             if (staElapsed < 0) staElapsed += 1440;
+             let staElapsed = lastStaVal - rep; if (staElapsed < 0) staElapsed += 1440;
              if (staElapsed > effectiveLimit) isStaExceeded = true;
         }
         
@@ -1626,247 +1504,168 @@
                 maxFdtBox.querySelector('.lbo-label').style.color = 'white';
                 if(capMsg) capMsg.innerText = "⚠️ STA EXCEEDS LIMIT";
              } else {
-                maxFdtBox.style.background = 'var(--bg-accent)';
-                maxFdtBox.classList.remove('station-divert');
-                maxFdtBox.style.borderColor = 'var(--border-light)';
-                
-                if (cbnChoke) {
-                    if(capMsg) capMsg.innerText = `(CBN: ${cbnEndDisplay}Z)`;
-                } else if (isCapped) {
-                     if(capMsg) capMsg.innerText = " (Cap 24h)";
-                 } else {
-                     if(capMsg) capMsg.innerText = "";
-                 }
+                maxFdtBox.style.background = 'var(--bg-accent)'; maxFdtBox.classList.remove('station-divert'); maxFdtBox.style.borderColor = 'var(--border-light)';
+                if (cbnChoke) { if(capMsg) capMsg.innerText = `(CBN: ${cbnEndDisplay}Z)`; } 
+                else if (isCapped) { if(capMsg) capMsg.innerText = " (Cap 24h)"; } 
+                else { if(capMsg) capMsg.innerText = ""; }
              }
         }
         
-        // --- Final Rest Calculation ---
+        // --- REST CALCULATION ---
         if (estimatedDutyEndTime === null) {
             document.getElementById('resNextRpt').innerHTML = "--:--";
             document.getElementById('min-rest-lbl').innerText = "Rest: --";
+            const tag = document.getElementById('ulr-tag'); if(tag) tag.remove();
         } else {
             let tableRest = 0;
+            let destIsHome = false;
 
             if (isULR) {
-                tableRest = 48; 
+                const destCode = app.stations[lastIdx].code.toUpperCase().trim();
+                destIsHome = ['TPE', 'TSA', 'KHH'].includes(destCode);
+                tableRest = destIsHome ? 96 : 48; // 96h is a safe 4-day approx to ensure 4 local nights
+                
                 if(!document.getElementById('ulr-tag')) {
-                    const tag = document.createElement('span');
-                    tag.id = 'ulr-tag';
-                    tag.className = 'text-xs bg-purple-600 text-white px-1 rounded ml-1';
-                    tag.style.fontSize = '9px';
-                    tag.innerText = 'ULR';
+                    const tag = document.createElement('span'); tag.id = 'ulr-tag';
+                    tag.className = 'text-xs text-white px-1 rounded ml-1'; tag.style.fontSize = '9px';
+                    tag.style.background = destIsHome ? 'var(--brand-blue)' : 'var(--brand-orange)';
                     document.getElementById('min-rest-lbl').appendChild(tag);
                 }
+                const tagEl = document.getElementById('ulr-tag');
+                if(tagEl) tagEl.innerText = destIsHome ? 'HB ULR' : 'ULR';
+
             } else {
-                const tag = document.getElementById('ulr-tag');
-                if(tag) tag.remove();
+                const tag = document.getElementById('ulr-tag'); if(tag) tag.remove();
 
                 if (app.crew === 'S') {
-                    if (ftHours <= 8) tableRest = 10;
-                    else tableRest = 18; 
+                    if (ftHours <= 8) tableRest = 10; else tableRest = 18; 
                 } else if (app.crew === 'M') {
-                    if (ftHours <= 12) tableRest = 18;
-                    else tableRest = 24; 
+                    if (ftHours <= 12) tableRest = 18; else tableRest = 24; 
                 } else if (app.crew === 'D') {
-                    if (ftHours <= 16) tableRest = 18;
-                    else tableRest = 22; 
+                    if (ftHours <= 16) tableRest = 18; else tableRest = 22; 
                 }
                 
-                // Exception: Single Crew Limits in Multi Crew
-                let actualFdpMins = estimatedDutyEndTime - rep;
-                if (actualFdpMins < 0) actualFdpMins += 1440;
+                let actualFdpMins = estimatedDutyEndTime - rep; if (actualFdpMins < 0) actualFdpMins += 1440;
                 let fdpHours = actualFdpMins / 60;
                 
-                if (app.crew === 'M') {
-                    if (ftHours <= 10 && fdpHours <= 14) {
-                        let sRest = (ftHours <= 8) ? 10 : 18;
-                        tableRest = Math.min(tableRest, sRest);
-                    }
-                }
-                
+                if (app.crew === 'M' && ftHours <= 10 && fdpHours <= 14) tableRest = Math.min(tableRest, (ftHours <= 8) ? 10 : 18);
                 if (app.crew === 'D') {
-                    if (ftHours <= 10 && fdpHours <= 14) {
-                        let sRest = (ftHours <= 8) ? 10 : 18;
-                        tableRest = Math.min(tableRest, sRest);
-                    }
-                    if (ftHours <= 16 && fdpHours <= 18) {
-                        let mRest = (ftHours <= 12) ? 18 : 24;
-                        tableRest = Math.min(tableRest, mRest);
-                    }
+                    if (ftHours <= 10 && fdpHours <= 14) tableRest = Math.min(tableRest, (ftHours <= 8) ? 10 : 18);
+                    if (ftHours <= 16 && fdpHours <= 18) tableRest = Math.min(tableRest, (ftHours <= 12) ? 18 : 24);
                 }
             }
             
-            // --- NEXT LEG LOGIC ---
-            const nextLegCheck = document.getElementById('next-leg-check');
-            const nextLegLabel = document.getElementById('nextLegLabel');
-            const nextLegInput = document.getElementById('nextLegHigh');
-            
+            // --- EARLY MORNING OVERRIDE ---
+            if (app.earlyMorning === '2') tableRest = Math.max(tableRest, 34);
+            else if (app.earlyMorning === '3') tableRest = Math.max(tableRest, 54);
+
+            // --- NEXT LEG LOGIC (Single) ---
+            const nextLegCheck = document.getElementById('next-leg-check'); const nextLegLabel = document.getElementById('nextLegLabel'); const nextLegInput = document.getElementById('nextLegHigh');
             if (app.crew === 'S') {
                 const remaining24 = 600 - (ftHours * 60); 
                 if (remaining24 > 0 && remaining24 < 600) {
-                      nextLegCheck.classList.remove('hidden');
-                      nextLegLabel.innerText = `Next > ${fmt(remaining24, false)}?`;
-                      nextLegInput.checked = app.nextLegHeavy;
-                      
-                      if (app.nextLegHeavy) {
-                          tableRest = Math.max(tableRest, 12); // Force 12h
-                      }
-                } else {
-                    nextLegCheck.classList.add('hidden');
-                }
-            } else {
-                nextLegCheck.classList.add('hidden');
-            }
-            // --------------------------
+                      nextLegCheck.classList.remove('hidden'); nextLegLabel.innerText = `Next > ${fmt(remaining24, false)}?`; nextLegInput.checked = app.nextLegHeavy;
+                      if (app.nextLegHeavy) tableRest = Math.max(tableRest, 12); 
+                } else { nextLegCheck.classList.add('hidden'); }
+            } else { nextLegCheck.classList.add('hidden'); }
             
-            // --- LOGIC FIX v4.8.2: Only apply FDP extension if LIMIT is exceeded ---
+            // Limit Extension check
             let finalRestHours = tableRest;
-            
-            // Check current FDP against MAX FDP
-            let actualFdpMins = estimatedDutyEndTime - rep;
-            if (actualFdpMins < 0) actualFdpMins += 1440;
-
-            if (actualFdpMins > globalMaxFdpMins) {
+            let actualFdpMins = estimatedDutyEndTime - rep; if (actualFdpMins < 0) actualFdpMins += 1440;
+            if (actualFdpMins > globalMaxFdpMins && !isULR) {
                 const fdpRestHours = Math.ceil(actualFdpMins / 60);
                 finalRestHours = Math.max(tableRest, fdpRestHours);
             }
             
-            const finalRestMins = finalRestHours * 60;
-            const postDuty = 30; 
-            
-            let arrivalZAbs = estimatedDutyEndTime; 
-            let nextRptZAbs = arrivalZAbs + postDuty + finalRestMins;
+            const finalRestMins = finalRestHours * 60; const postDuty = 30; 
+            let arrivalZAbs = estimatedDutyEndTime; let nextRptZAbs = arrivalZAbs + postDuty + finalRestMins;
             const destCode = app.stations[lastIdx].code;
             let nextRptHtml = fmt(nextRptZAbs % 1440) + " Z"; 
 
-            let localReportStr = "";
-            let dayOffsetStr = "";
+            let localReportStr = ""; let dayOffsetStr = "";
 
             if (destCode in airportIanaZones) {
-                const zone = airportIanaZones[destCode];
-                const anchor = new Date(refDate);
-                let flowMins = estimatedDutyEndTime - rep;
-                if(flowMins < 0) flowMins += 1440;
-                
+                const zone = airportIanaZones[destCode]; const anchor = new Date(refDate);
+                let flowMins = estimatedDutyEndTime - rep; if(flowMins < 0) flowMins += 1440;
                 const arrDate = new Date(anchor.getTime() + (rep * 60000) + (flowMins * 60000));
                 const nextDate = new Date(arrDate.getTime() + (postDuty + finalRestMins) * 60000);
                 
                 const fmtLocal = new Intl.DateTimeFormat('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23', day: 'numeric' });
-                const arrParts = fmtLocal.formatToParts(arrDate);
-                const nextParts = fmtLocal.formatToParts(nextDate);
+                const arrParts = fmtLocal.formatToParts(arrDate); const nextParts = fmtLocal.formatToParts(nextDate);
                 
-                const arrDay = arrParts.find(p => p.type === 'day').value;
-                const nextDay = nextParts.find(p => p.type === 'day').value;
-                const h = nextParts.find(p => p.type === 'hour').value;
-                const m = nextParts.find(p => p.type === 'minute').value;
+                const arrDay = arrParts.find(p => p.type === 'day').value; const nextDay = nextParts.find(p => p.type === 'day').value;
+                const h = nextParts.find(p => p.type === 'hour').value; const m = nextParts.find(p => p.type === 'minute').value;
                 
                 localReportStr = `${h}:${m}L`;
-                
                 const dayDiff = Math.floor((nextDate - arrDate) / (1000 * 60 * 60 * 24));
                 if (arrDay !== nextDay || dayDiff > 0) {
-                      let label = "+1";
-                      if (finalRestHours >= 48) label = "+2"; 
+                      let label = `+${dayDiff}`; if(dayDiff===0) label="+1";
                       dayOffsetStr = `<span style="font-size:10px; background:var(--brand-red); color:white; padding:0 2px; border-radius:2px; margin-left:2px;">${label}</span>`;
                 }
             }
 
-            if (localReportStr) {
-                nextRptHtml = `${localReportStr}${dayOffsetStr} <span style="font-size:11px; color:var(--text-secondary);">(${fmt(nextRptZAbs % 1440)}Z)</span>`;
+            if (isULR && destIsHome) {
+                nextRptHtml = `<span style="font-size:14px;">(Check 4 Local Nights)</span>`;
+                document.getElementById('min-rest-lbl').childNodes[0].nodeValue = `Rest: 4 Local Nights`;
             } else {
-                nextRptHtml = fmt(nextRptZAbs % 1440) + " Z"; 
+                if (localReportStr) nextRptHtml = `${localReportStr}${dayOffsetStr} <span style="font-size:11px; color:var(--text-secondary);">(${fmt(nextRptZAbs % 1440)}Z)</span>`;
+                else nextRptHtml = fmt(nextRptZAbs % 1440) + " Z"; 
+                document.getElementById('min-rest-lbl').childNodes[0].nodeValue = `Rest: ${finalRestHours}h`;
             }
-
             document.getElementById('resNextRpt').innerHTML = nextRptHtml;
-            document.getElementById('min-rest-lbl').childNodes[0].nodeValue = `Rest: ${finalRestHours}h`;
         }
 
         calcLBO(rep, globalMaxFdpMins, stationLimitExtensions, globalPauseMinutes);
         
         let landingCount = 0;
-        for(let k=0; k<app.stations.length-1; k++) {
-            if (!app.stations[k].isAcm) landingCount++;
-        }
-
+        for(let k=0; k<app.stations.length-1; k++) { if (!app.stations[k].isAcm) landingCount++; }
         const resLdgEl = document.getElementById('resLdg');
         if(resLdgEl) {
             resLdgEl.innerText = landingCount;
-            if(landingCount > 6) {
-                resLdgEl.classList.add('val-danger');
-            } else {
-                resLdgEl.classList.remove('val-danger');
-            }
+            if(landingCount > 6) resLdgEl.classList.add('val-danger'); else resLdgEl.classList.remove('val-danger');
         }
         updateTurns();
     }
       
     function updateTurns() {
         for(let i=1; i < app.stations.length - 1; i++) {
-             const div = document.getElementById(`turn-${i}`);
-             if(!div) continue;
-             const st = app.stations[i];
-             const actualIn = parse(st.in);
-             const actualOut = parse(st.out);
-             const schedIn = parse(st.sta);
-             const schedOut = parse(st.std);
-             let val = null;
-             let label = "Turn";
-             if (actualIn !== null && actualOut !== null) {
-                 val = diff(actualIn, actualOut);
-             } else if (schedIn !== null && schedOut !== null) {
-                 val = diff(schedIn, schedOut);
-                 label = "Turn (P)"; 
-             }
+             const div = document.getElementById(`turn-${i}`); if(!div) continue;
+             const st = app.stations[i]; const actualIn = parse(st.in); const actualOut = parse(st.out);
+             const schedIn = parse(st.sta); const schedOut = parse(st.std);
+             let val = null; let label = "Turn";
+             if (actualIn !== null && actualOut !== null) val = diff(actualIn, actualOut);
+             else if (schedIn !== null && schedOut !== null) { val = diff(schedIn, schedOut); label = "Turn (P)"; }
              div.innerText = val !== null ? `${label}: ${fmt(val, false)}` : `Turn: --:--`;
         }
     }
 
     function updateBar(elId, val, limit) {
-        const el = document.getElementById(elId);
-        const parentBox = el.closest('.stat-card');
-        if(!el) return;
-        if(!val || val === 0) { el.innerHTML = ''; return; }
-        const maxRef = Math.max(val, limit);
-        const okPct = (Math.min(val, limit) / maxRef) * 100;
-        const errPct = (Math.max(0, val - limit) / maxRef) * 100;
-        let isAlert = false;
-        if (parentBox && parentBox.classList.contains('stat-alert')) {
-            isAlert = true;
-        }
-        let safeColor = isAlert ? 'rgba(255,59,48,0.3)' : (val > limit ? 'var(--brand-blue)' : 'var(--brand-blue)');
+        const el = document.getElementById(elId); const parentBox = el.closest('.stat-card');
+        if(!el) return; if(!val || val === 0) { el.innerHTML = ''; return; }
+        const maxRef = Math.max(val, limit); const okPct = (Math.min(val, limit) / maxRef) * 100; const errPct = (Math.max(0, val - limit) / maxRef) * 100;
+        let isAlert = false; if (parentBox && parentBox.classList.contains('stat-alert')) isAlert = true;
+        let safeColor = isAlert ? 'rgba(255,59,48,0.3)' : 'var(--brand-blue)';
         if(elId === 'bar-sched') safeColor = 'var(--brand-green)';
         let excessColor = isAlert ? 'var(--brand-orange)' : 'var(--brand-red)'; 
-        let html = `<div style="display:flex; width:100%; height:100%;">`;
-        html += `<div class="progress-fill" style="width:${okPct}%; background:${safeColor};"></div>`;
-        if (errPct > 0) {
-            html += `<div class="progress-fill" style="width:${errPct}%; background:${excessColor};"></div>`;
-        }
-        html += `</div>`;
-        el.innerHTML = html;
+        let html = `<div style="display:flex; width:100%; height:100%;"><div class="progress-fill" style="width:${okPct}%; background:${safeColor};"></div>`;
+        if (errPct > 0) html += `<div class="progress-fill" style="width:${errPct}%; background:${excessColor};"></div>`;
+        html += `</div>`; el.innerHTML = html;
     }
 
     function calcTotals() {
         let prevVal = parse(document.getElementById('prevFt').value) || 0;
-        let totalAct = 0; // Purely actual flight time for current duty
-        let totalActWithPrev = prevVal; // Actual + Prev for limit checking
-        
-        let aggPlan = prevVal; 
-        let aggSched = prevVal; 
+        let totalAct = 0; let totalActWithPrev = prevVal; let aggPlan = prevVal; let aggSched = prevVal; 
         const noBunk = document.getElementById('noBunk').checked;
 
         for(let i=0; i<app.stations.length-1; i++) {
             const std=parse(app.stations[i].std), sta=parse(app.stations[i+1].sta);
             const out=parse(app.stations[i].out), inc=parse(app.stations[i+1].in);
             const sft=parse(app.sfts[i]);
-            const sftEl = document.getElementById(`sft-${i}`);
-            if(sftEl) sftEl.style.borderColor = 'var(--border-light)';
+            const sftEl = document.getElementById(`sft-${i}`); if(sftEl) sftEl.style.borderColor = 'var(--border-light)';
             const isAcm = app.stations[i].isAcm;
             const pEl = document.getElementById(`p-${i}`);
             if(pEl) {
-                if(std!==null && sta!==null) { 
-                    let d = diff(std,sta); 
-                    if (!isAcm) aggPlan += d; 
-                    pEl.innerText = fmt(d, false); 
-                } 
+                if(std!==null && sta!==null) { let d = diff(std,sta); if (!isAcm) aggPlan += d; pEl.innerText = fmt(d, false); } 
                 else pEl.innerText = "--";
             }
             if (sft !== null) {
@@ -1874,221 +1673,181 @@
                 const txIn = app.stations[i+1].taxiIn !== undefined ? app.stations[i+1].taxiIn : 15;
                 if (!isAcm) aggSched += (sft + txOut + txIn); 
             }
-            let ft = 0;
-            const aEl = document.getElementById(`a-${i}`);
+            let ft = 0; const aEl = document.getElementById(`a-${i}`);
             if(out!==null && inc!==null) { 
-                ft = diff(out,inc); 
-                if(aEl) aEl.innerText = fmt(ft, false); 
-                if (!isAcm) {
-                    totalAct += ft; 
-                    totalActWithPrev += ft;
-                }
+                ft = diff(out,inc); if(aEl) aEl.innerText = fmt(ft, false); 
+                if (!isAcm) { totalAct += ft; totalActWithPrev += ft; }
             }
             else if(sft!==null) { 
-                // Only for "Sched" calculation visual cue, NOT added to totalAct
                 let estimatedBlock = sft + (app.stations[i].taxiOut||15) + (app.stations[i+1].taxiIn||15);
                 if(aEl) aEl.innerText = fmt(estimatedBlock, false) + "*"; 
-            }
-            else { if(aEl) aEl.innerText = "--"; }
+            } else { if(aEl) aEl.innerText = "--"; }
         }
         
         let maxFt = 600; 
-        if (app.crew === 'M') {
-             maxFt = noBunk ? 720 : 960; 
-        } else if (app.crew === 'D') {
-             maxFt = noBunk ? 720 : 1080; 
-        }
+        if (app.crew === 'M') maxFt = noBunk ? 720 : 960; 
+        else if (app.crew === 'D') maxFt = noBunk ? 720 : 1080; 
 
-        const boxPlan = document.getElementById('box-plan');
-        const boxSched = document.getElementById('box-sched');
-        const boxAct = document.getElementById('box-act');
+        const boxPlan = document.getElementById('box-plan'); const boxSched = document.getElementById('box-sched'); const boxAct = document.getElementById('box-act');
 
-        document.getElementById('t-plan').innerHTML = fmt(aggPlan, false);
-        document.getElementById('t-sched').innerHTML = fmt(aggSched, false);
-        
-        // Actual Box Logic
-        let actHtml = fmt(totalAct, false); // Display pure actual
-        if (prevVal > 0) {
-            actHtml += `<span style="font-size:9px; color:var(--text-tertiary); margin-left:2px;">+${fmt(prevVal,false)}</span>`;
-        }
+        document.getElementById('t-plan').innerHTML = fmt(aggPlan, false); document.getElementById('t-sched').innerHTML = fmt(aggSched, false);
+        let actHtml = fmt(totalAct, false);
+        if (prevVal > 0) actHtml += `<span style="font-size:9px; color:var(--text-tertiary); margin-left:2px;">+${fmt(prevVal,false)}</span>`;
         document.getElementById('t-act').innerHTML = actHtml;
         
-        // Update labels
-        const planLabel = document.querySelector('#box-plan .stat-label');
-        if(planLabel) planLabel.innerText = prevVal > 0 ? "Plan (+Prev)" : "Plan";
-        
-        const schedLabel = document.querySelector('#box-sched .stat-label');
-        if(schedLabel) schedLabel.innerText = prevVal > 0 ? "Sched (+Prev)" : "Sched";
+        const planLabel = document.querySelector('#box-plan .stat-label'); if(planLabel) planLabel.innerText = prevVal > 0 ? "Plan (+Prev)" : "Plan";
+        const schedLabel = document.querySelector('#box-sched .stat-label'); if(schedLabel) schedLabel.innerText = prevVal > 0 ? "Sched (+Prev)" : "Sched";
         
         if (aggPlan > maxFt) boxPlan.classList.add('stat-alert'); else boxPlan.classList.remove('stat-alert');
         if (aggSched > maxFt) boxSched.classList.add('stat-alert'); else boxSched.classList.remove('stat-alert');
         
-        // Check Limit using totalActWithPrev
         if (totalActWithPrev > maxFt) {
              boxAct.classList.add('stat-alert');
-             let alertMsg = " ⚠️";
-             if (noBunk && (app.crew === 'M' || app.crew === 'D') && totalActWithPrev > 720) {
-                 alertMsg = "*";
-             }
+             let alertMsg = " ⚠️"; if (noBunk && (app.crew === 'M' || app.crew === 'D') && totalActWithPrev > 720) alertMsg = "*";
              document.getElementById('t-act').innerHTML += alertMsg;
-        } else {
-             boxAct.classList.remove('stat-alert');
-        }
+        } else { boxAct.classList.remove('stat-alert'); }
         
-        updateBar('bar-plan', aggPlan, maxFt);
-        updateBar('bar-sched', aggSched, maxFt);
-        updateBar('bar-act', totalActWithPrev, maxFt); // Bar reflects limit check
+        updateBar('bar-plan', aggPlan, maxFt); updateBar('bar-sched', aggSched, maxFt); updateBar('bar-act', totalActWithPrev, maxFt);
         document.getElementById('limits-out').innerText = `FT Limit: ${fmt(maxFt, false)}`;
     }
     
     function calcLBO(rep, globalMaxFdpMins, stationLimitExtensions, globalPauseMinutes) {
+        let acarsLboMins = parse(app.acarsLbo);
+
         for(let i=0; i<app.stations.length-1; i++) {
              let currentLimit = 14 * 60; 
              if(app.crew==='M') currentLimit = 18 * 60;
              if(app.crew==='D') currentLimit = 24 * 60;
              if(document.getElementById('nightOps').checked) currentLimit -= 120;
              if (globalPauseMinutes > 0) currentLimit += globalPauseMinutes; 
-             let midDutyBonus = 0;
-             for(let b=1; b<=i; b++) midDutyBonus += stationLimitExtensions[b] || 0;
+             let midDutyBonus = 0; for(let b=1; b<=i; b++) midDutyBonus += stationLimitExtensions[b] || 0;
              currentLimit += midDutyBonus;
              const isExt = document.getElementById('extFdt').checked;
              if (isExt) currentLimit += 120;
              if (currentLimit > 1440) currentLimit = 1440;
+             
              let timeNeeded = 0;
              for(let j=i; j<app.stations.length-1; j++) {
                 if (!app.stations[j] || !app.stations[j+1]) continue; 
                 let isFdpLeg = false;
-                if (!app.stations[j].isAcm) {
-                    isFdpLeg = true; 
-                } else {
+                if (!app.stations[j].isAcm) { isFdpLeg = true; } 
+                else {
                     for (let x = j + 1; x < app.stations.length - 1; x++) {
-                        if (!app.stations[x].isAcm) {
-                            isFdpLeg = true;
-                            break;
-                        }
+                        if (!app.stations[x].isAcm) { isFdpLeg = true; break; }
                     }
                 }
                 if (!isFdpLeg) continue; 
                 let seg = 0;
                 const s_sft=parse(app.sfts[j]), s_std=parse(app.stations[j].std), s_sta=parse(app.stations[j+1].sta);
-                if(s_sft!==null) {
-                    seg = s_sft + (app.stations[j].taxiOut||15) + (app.stations[j+1].taxiIn||15);
-                } 
+                
+                // NOTIFICATION 2024-14: Force 15+15 for LBO Calculation
+                const lboTaxiOut = 15; const lboTaxiIn = 15;
+
+                if(s_sft!==null) seg = s_sft + lboTaxiOut + lboTaxiIn;
                 else if(s_std!==null && s_sta!==null) seg = diff(s_std,s_sta);
-                else { seg = (app.stations[j].taxiOut||15) + (app.stations[j+1].taxiIn||15); }
+                else seg = lboTaxiOut + lboTaxiIn;
+                
                 timeNeeded += seg;
                 if (j > i && app.stations[j].hotel) {
                       const hTime = calcRest(app.stations[j].ci, app.stations[j].co);
-                      if(hTime >= 180) {
-                          timeNeeded += hTime; 
-                      }
+                      if(hTime >= 180) timeNeeded += hTime; 
                 }
                 if(j < app.stations.length-2) {
-                    const currArr = parse(app.stations[j+1].sta);
-                    const nextDep = parse(app.stations[j+1].std);
-                    let turn = 45; 
-                    if (currArr !== null && nextDep !== null) turn = Math.max(diff(currArr, nextDep), 45);
+                    const currArr = parse(app.stations[j+1].sta); const nextDep = parse(app.stations[j+1].std);
+                    let turn = 45; if (currArr !== null && nextDep !== null) turn = Math.max(diff(currArr, nextDep), 45);
                     timeNeeded += turn;
                 }
              }
              const lboFromReport = currentLimit - timeNeeded;
              let lboAbs = rep + lboFromReport;
-             const actualOut = parse(app.stations[i].out);
-             const nextIn = parse(app.stations[i+1].in);
+
+             // ACARS LBO Application
+             let usedAcars = false;
+             if (acarsLboMins !== null) {
+                 let acarsElapsed = acarsLboMins - rep;
+                 if (acarsElapsed < -720) acarsElapsed += 1440; // Next day
+                 if (acarsElapsed > 0) {
+                     let absoluteAcars = rep + acarsElapsed;
+                     if (absoluteAcars < lboAbs) {
+                         lboAbs = absoluteAcars; usedAcars = true;
+                     }
+                 }
+             }
+
+             const actualOut = parse(app.stations[i].out); const nextIn = parse(app.stations[i+1].in);
              const isSectorFlown = (actualOut !== null && nextIn !== null);
              if (isSectorFlown) {
                  if (app.stations[i].frozenLbo === undefined || app.stations[i].frozenLbo === null) {
                      app.stations[i].frozenLbo = lboAbs;
-                 } else {
-                     lboAbs = app.stations[i].frozenLbo;
-                 }
-             } else {
-                 app.stations[i].frozenLbo = null;
-             }
-             const lboEl = document.getElementById(`lbo-${i}`);
-             const lboDet = document.getElementById(`lbo-detail-${i}`);
-             const lboBox = document.getElementById(`lbo-box-${i}`);
+                 } else { lboAbs = app.stations[i].frozenLbo; }
+             } else { app.stations[i].frozenLbo = null; }
+             
+             const lboEl = document.getElementById(`lbo-${i}`); const lboDet = document.getElementById(`lbo-detail-${i}`); const lboBox = document.getElementById(`lbo-box-${i}`);
              let isImpossible = false;
              if (app.stations[i].hotel) {
                 const co = parse(app.stations[i].co);
                 if (co !== null) {
-                    let coElapsed = co - rep; 
-                    if (coElapsed < 0) coElapsed += 1440;
-                    if (lboFromReport < coElapsed) {
-                        isImpossible = true;
-                    }
+                    let coElapsed = co - rep; if (coElapsed < 0) coElapsed += 1440;
+                    if (lboFromReport < coElapsed) isImpossible = true;
                 }
              }
              if(lboEl) {
-                lboEl.classList.remove('lbo-locked');
-                lboBox.classList.remove('lbo-warn', 'lbo-safe');
-                if (isImpossible) {
-                    lboEl.innerText = "IMPOSSIBLE";
-                    lboEl.style.color = 'var(--brand-red)';
-                } else {
-                    lboEl.innerText = fmt(lboAbs)+" Z";
-                    lboEl.style.color = 'var(--text-primary)';
-                    if (isSectorFlown && app.stations[i].frozenLbo !== null) {
-                        lboBox.classList.add('lbo-locked');
-                    }
+                lboEl.classList.remove('lbo-locked'); lboBox.classList.remove('lbo-warn', 'lbo-safe', 'lbo-acars');
+                if (isImpossible) { lboEl.innerText = "IMPOSSIBLE"; lboEl.style.color = 'var(--brand-red)'; } 
+                else {
+                    lboEl.innerText = fmt(lboAbs)+" Z"; lboEl.style.color = 'var(--text-primary)';
+                    if (isSectorFlown && app.stations[i].frozenLbo !== null) lboBox.classList.add('lbo-locked');
+                    if (usedAcars && !isSectorFlown) lboBox.classList.add('lbo-acars');
                 }
              }
              let detText = "";
-             if (globalPauseMinutes > 0) detText += `Split+${fmt(globalPauseMinutes,false)} `;
-             if (midDutyBonus > 0) detText += `Ext+${fmt(midDutyBonus,false)}`;
-             if (isExt) detText += `CD+2h`; 
+             if (usedAcars) { detText += `LIMITED BY JZ ACARS`; }
+             else {
+                 if (globalPauseMinutes > 0) detText += `Split+${fmt(globalPauseMinutes,false)} `;
+                 if (midDutyBonus > 0) detText += `Ext+${fmt(midDutyBonus,false)}`;
+                 if (isExt) detText += `CD+2h`; 
+             }
              if (lboDet) lboDet.innerText = detText;
-             const outEl = document.getElementById(`out-${i}`);
-             if(outEl) outEl.style.borderColor = 'var(--border-light)';
+             
+             const outEl = document.getElementById(`out-${i}`); if(outEl) outEl.style.borderColor = 'var(--border-light)';
              if (!isImpossible && actualOut !== null) {
-                let outElapsed = actualOut - rep; 
-                if(outElapsed < 0) outElapsed += 1440;
-                let actualOutAbs = rep + outElapsed;
-                let diffTime = actualOutAbs - lboAbs;
+                let outElapsed = actualOut - rep; if(outElapsed < 0) outElapsed += 1440;
+                let actualOutAbs = rep + outElapsed; let diffTime = actualOutAbs - lboAbs;
                 if(diffTime > 0) {
                     if(outEl) outEl.style.borderColor = 'var(--brand-red)';
                     if(lboBox) lboBox.classList.add('lbo-warn');
                 } else {
-                    if(lboBox) lboBox.classList.add('lbo-safe');
+                    if(lboBox && !usedAcars) lboBox.classList.add('lbo-safe');
                 }
              }
         }
     }
 
     function calcRest(ci, co) {
-        const i = parse(ci);
-        const o = parse(co);
+        const i = parse(ci); const o = parse(co);
         if(i === null || o === null) return 0;
-        let diff = o - i;
-        if(diff < 0) diff += 1440;
+        let diff = o - i; if(diff < 0) diff += 1440;
         return diff;
     }
 
     function parse(v) { 
-        if(!v) return null; 
-        let c=v.replace(/\D/g,''); 
-        if(c.length===0) return null;
-        while(c.length<4) c='0'+c; 
-        return parseInt(c.substring(0,2))*60 + parseInt(c.substring(2,4)); 
+        if(!v) return null; let c=v.replace(/\D/g,''); if(c.length===0) return null;
+        while(c.length<4) c='0'+c; return parseInt(c.substring(0,2))*60 + parseInt(c.substring(2,4)); 
     }
     function fmt(m, mod=true) { while(m<0) m+=1440; let h=Math.floor(m/60), n=m%60; if(mod) h%=24; return `${String(h).padStart(2,'0')}:${String(n).padStart(2,'0')}`; }
     function diff(s,e) { let d=e-s; if(d<0) d+=1440; return d; }
 
     function getLocalInfo(utcMins, ianaZone, refDate) {
         if (!ianaZone) return null;
-        const y = refDate.getUTCFullYear();
-        const m = refDate.getUTCMonth();
-        const d = refDate.getUTCDate();
+        const y = refDate.getUTCFullYear(); const m = refDate.getUTCMonth(); const d = refDate.getUTCDate();
         const utcDate = new Date(Date.UTC(y, m, d, Math.floor(utcMins/60), utcMins%60));
         try {
             const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: ianaZone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23', day: 'numeric', month: 'numeric' });
             const parts = fmt.formatToParts(utcDate);
-            const h = parseInt(parts.find(p => p.type === 'hour').value);
-            const min = parseInt(parts.find(p => p.type === 'minute').value);
+            const h = parseInt(parts.find(p => p.type === 'hour').value); const min = parseInt(parts.find(p => p.type === 'minute').value);
             const timeStr = `${String(h).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
             const localStr = new Intl.DateTimeFormat('en-GB', { timeZone: ianaZone, hour: 'numeric', hourCycle: 'h23' }).format(utcDate);
-            const localH = parseInt(localStr.split(':')[0]);
-            const utcH = Math.floor(utcMins/60)%24;
+            const localH = parseInt(localStr.split(':')[0]); const utcH = Math.floor(utcMins/60)%24;
             let offset = localH - utcH; if (offset < -12) offset += 24; if (offset > 12) offset -= 24;
             return { timeStr, offset };
         } catch (e) { return null; }
@@ -2108,40 +1867,30 @@
             isLocked: app.isLocked,
             lockedReport: app.lockedReport,
             nextLegHeavy: app.nextLegHeavy,
+            acarsLbo: app.acarsLbo,
+            earlyMorning: app.earlyMorning,
             nightMode: localStorage.getItem('nightMode')
         };
         localStorage.setItem('calData158', JSON.stringify(data));
     }
 
-    // Global Click Listener to Close Popups
+    // Global Click Listener to Close Popups & Modals
     window.addEventListener('click', function(e) {
-        const prevPopup = document.getElementById('prevPopup');
-        const prevBadge = document.querySelector('.prev-ft-badge');
-        if (prevPopup.classList.contains('show')) {
-            if (!prevPopup.contains(e.target) && !prevBadge.contains(e.target)) {
-                prevPopup.classList.remove('show');
-            }
-        }
+        const prevPopup = document.getElementById('prevPopup'); const prevBadge = document.querySelector('.badge-prev-ft');
+        if (prevPopup.classList.contains('show')) { if (!prevPopup.contains(e.target) && !prevBadge.contains(e.target)) prevPopup.classList.remove('show'); }
 
-        const routePopup = document.getElementById('routePopup');
-        const routeBtn = document.getElementById('routeBtn');
-        if (routePopup.classList.contains('show')) {
-            if (!routePopup.contains(e.target) && !routeBtn.contains(e.target)) {
-                routePopup.classList.remove('show');
-            }
-        }
+        const routePopup = document.getElementById('routePopup'); const routeBtn = document.getElementById('routeBtn');
+        if (routePopup.classList.contains('show')) { if (!routePopup.contains(e.target) && !routeBtn.contains(e.target)) routePopup.classList.remove('show'); }
+        
+        const infoModal = document.getElementById('infoModal');
+        if (e.target === infoModal) closeInfo();
     });
 
     window.onload = () => { 
         const isDark = localStorage.getItem('nightMode') === 'true';
-        if(isDark) {
-            document.body.classList.add('dark-mode');
-            document.getElementById('nightBtnIcon').innerText = '☀️';
-        }
+        if(isDark) { document.body.classList.add('dark-mode'); document.getElementById('nightBtnIcon').innerText = '☀️'; }
         const routes = localStorage.getItem('calSavedRoutes');
-        if(routes) {
-            try { savedRoutes = JSON.parse(routes); } catch(e) {}
-        }
+        if(routes) { try { savedRoutes = JSON.parse(routes); } catch(e) {} }
         const d = localStorage.getItem('calData158'); 
         let savedCrew = 'S';
         const today = new Date().toISOString().split('T')[0];
@@ -2149,10 +1898,7 @@
         if(d) { 
             try { 
                 const p=JSON.parse(d); 
-                app.stations=p.stations; 
-                app.sfts=p.sfts; 
-                app.crew=p.crew; 
-                savedCrew=p.crew; 
+                app.stations=p.stations; app.sfts=p.sfts; app.crew=p.crew; savedCrew=p.crew; 
                 document.getElementById('nightOps').checked=p.isNight;
                 if(p.isNoBunk) document.getElementById('noBunk').checked=p.isNoBunk;
                 if(p.extFdt) document.getElementById('extFdt').checked=p.extFdt;
@@ -2164,6 +1910,10 @@
                 if(p.isLocked !== undefined) app.isLocked = p.isLocked;
                 if(p.lockedReport !== undefined) app.lockedReport = p.lockedReport;
                 if(p.nextLegHeavy !== undefined) app.nextLegHeavy = p.nextLegHeavy;
+                
+                if(p.acarsLbo !== undefined) { app.acarsLbo = p.acarsLbo; document.getElementById('acarsLbo').value = p.acarsLbo; }
+                if(p.earlyMorning !== undefined) { app.earlyMorning = p.earlyMorning; document.getElementById('earlyMorningSel').value = p.earlyMorning; }
+                
             } catch(e){} 
         }
         setCrew(savedCrew);
