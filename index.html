@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>CAL Duty (Pro v4.8.2 Logic Fix)</title>
+    <title>CAL Duty (Pro v5.8.3)</title>
     <style>
         /* === SYSTEM & VARIABLES === */
         :root {
@@ -24,17 +24,28 @@
             --brand-green: #34C759;
             --brand-red: #FF3B30;
             --brand-orange: #FF9500;
+            --brand-purple: #AF52DE; 
             
             --border-light: #e2e8f0;
             --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
             --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
-            --shadow-float: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --shadow-float: 0 10px 25px -5px rgba(0,0,0,0.2);
 
             --radius-md: 12px;
             --radius-lg: 16px;
             --radius-full: 999px;
             
             --safe-bottom: env(safe-area-inset-bottom);
+
+            /* Semantic Design Tokens */
+            --semantic-danger: var(--brand-red);
+            --semantic-warning: var(--brand-orange);
+            --semantic-info: var(--brand-blue);
+            --semantic-success: var(--brand-green);
+            --danger-bg-soft: color-mix(in srgb, var(--brand-red) 8%, var(--bg-card) 92%);
+            --warning-bg-soft: color-mix(in srgb, var(--brand-orange) 10%, var(--bg-card) 90%);
+            --info-bg-soft: color-mix(in srgb, var(--brand-blue) 9%, var(--bg-card) 91%);
+            --success-bg-soft: color-mix(in srgb, var(--brand-green) 9%, var(--bg-card) 91%);
         }
 
         /* Dark Mode Palette */
@@ -53,11 +64,12 @@
             --brand-green: #4ade80;
             --brand-red: #ef4444;
             --brand-orange: #fbbf24;
+            --brand-purple: #bf5af2;
             
             --border-light: #334155;
         }
 
-        /* === RESET & BASE (LOCKED SCROLL) === */
+        /* === RESET & BASE === */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         html, body {
@@ -66,14 +78,14 @@
             color: var(--text-primary);
             margin: 0;
             padding: 0;
-            /* 🔥 CRITICAL LOCK FOR IPAD LANDSCAPE 🔥 */
             width: 100%;
             height: 100%;
-            overflow-y: hidden; /* Disable vertical scroll */
-            overflow-x: hidden; /* Handle horizontal in container only */
-            position: fixed; /* Lock viewport */
-            overscroll-behavior-y: none; /* Disable bounce */
+            overflow: hidden; 
+            position: fixed;
+            overscroll-behavior-y: none;
             -webkit-overflow-scrolling: touch;
+            display: flex;
+            flex-direction: column;
         }
         
         input, button, select { font-family: inherit; outline: none; border: none; }
@@ -88,46 +100,117 @@
         .font-bold { font-weight: 700; }
         .font-mono { font-family: "SF Mono", SFMono-Regular, ui-monospace, monospace; letter-spacing: -0.5px; }
         
-        /* Layout Utilities */
         .flex { display: flex; }
         .flex-col { flex-direction: column; }
         .items-center { align-items: center; }
         .justify-between { justify-content: space-between; }
         .justify-center { justify-content: center; }
         .gap-2 { gap: 8px; }
-        .gap-4 { gap: 16px; }
+
+        .info-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 14px; height: 14px; border-radius: 50%;
+            background: rgba(0, 122, 255, 0.1); color: var(--brand-blue);
+            font-size: 10px; font-weight: 800; cursor: pointer;
+            margin-left: 4px; vertical-align: middle; transition: all 0.2s;
+        }
+        .info-icon:active { transform: scale(0.9); background: rgba(0, 122, 255, 0.3); }
 
         /* === HEADER === */
         .app-header {
             background: var(--bg-glass);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            position: absolute; /* Changed from sticky to absolute for locked layout */
-            top: 0;
-            left: 0;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            position: relative;
+            flex-shrink: 0;
             width: 100%;
             z-index: 100;
-            padding: 12px 16px;
+            padding: 12px 16px 8px 16px;
             border-bottom: 1px solid var(--border-light);
             box-shadow: var(--shadow-sm);
         }
 
+        /* DYNAMIC RESPONSIVE HEADER GRID */
         .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            gap: 12px;
+            flex-wrap: wrap; 
         }
 
         .app-title {
             font-size: 18px;
             font-weight: 800;
-            background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
+            background: linear-gradient(135deg, var(--brand-blue), var(--brand-purple));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             display: flex;
             align-items: center;
             gap: 6px;
+            flex-shrink: 0;
+            order: 1;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            order: 2; 
+        }
+
+        .header-primary-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1 1 100%; 
+            order: 3; 
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding-top: 4px;
+        }
+        .header-primary-group::-webkit-scrollbar { display: none; }
+        .header-primary-group > * { flex: 0 0 auto !important; }
+
+        @media screen and (min-width: 768px) {
+            .header-top { flex-wrap: nowrap; }
+            .header-actions { order: 3; } 
+            .header-primary-group {
+                flex: 1 1 auto;
+                order: 2; 
+                padding-top: 0;
+            }
+        }
+
+        /* DYNAMIC CENTER ZONE FOR CHIPS */
+        .header-center-zone {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding-left: 8px;
+            border-left: 1px solid var(--border-light);
+            margin-left: 2px;
+        }
+        .header-center-zone:empty { display: none; }
+
+        .cond-chip {
+            background: var(--info-bg-soft);
+            color: var(--semantic-info);
+            border: 1px solid color-mix(in srgb, var(--brand-blue) 30%, var(--border-light) 70%);
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        body.dark-mode .cond-chip {
+            background: color-mix(in srgb, var(--brand-blue) 15%, var(--bg-card) 85%);
         }
 
         .crew-selector {
@@ -152,49 +235,93 @@
             box-shadow: var(--shadow-sm);
         }
 
-        /* 🔥 FIX: Changed from Grid to Flex to prevent overlap in landscape 🔥 */
-        .controls-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            align-items: center;
-            justify-content: flex-start; /* Items start from left */
-        }
-
-        /* 🔥 FIX: Date Trigger Styling for Alignment 🔥 */
-        .date-trigger {
+        .header-toggle-btn {
             background: var(--bg-input);
             border: 1px solid var(--border-light);
-            color: var(--text-primary);
-            padding: 0 8px; 
-            height: 34px;    
-            line-height: normal; /* Fix text alignment */
             border-radius: var(--radius-md);
-            font-weight: 600;
-            font-size: 13px;
-            min-width: 120px; /* Ensure minimum width */
-            text-align: center;
-            -webkit-appearance: none; 
-            display: inline-flex; /* Use Flex for vertical centering */
+            width: 34px;
+            height: 34px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            flex: 1 0 auto; /* Allow grow but maintain basis */
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (hover: hover) { .header-toggle-btn:hover { background: var(--border-light); } }
+        .header-toggle-btn:active { transform: scale(0.95); }
+        .header-toggle-btn svg { transition: transform 0.3s; }
+        .header-toggle-btn.collapsed svg { transform: rotate(-180deg); }
+
+        .toolbar-wrapper {
+            display: grid;
+            grid-template-rows: 1fr;
+            transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin-top 0.3s ease;
+            margin-top: 4px;
+        }
+        .toolbar-wrapper.collapsed {
+            grid-template-rows: 0fr;
+            margin-top: 0;
+        }
+        .toolbar-inner {
+            min-height: 0; 
+            overflow: hidden; 
+            opacity: 1;
+            transition: opacity 0.2s ease;
+        }
+        .toolbar-wrapper.collapsed .toolbar-inner {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .controls-grid {
+            display: flex;
+            flex-wrap: nowrap; 
+            overflow-x: auto;  
+            -webkit-overflow-scrolling: touch; 
+            scrollbar-width: none;
+            gap: 8px;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+        }
+        .controls-grid::-webkit-scrollbar { display: none; }
+        .controls-grid > * { flex: 0 0 auto !important; }
+
+        .date-trigger, .toggle-wrapper, .badge-input-wrapper {
+            background: var(--bg-input);
+            border: 1px solid var(--border-light);
+            height: 34px;    
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .date-trigger {
+            padding: 0 8px; 
+            color: var(--text-primary);
+            justify-content: center;
+            min-width: 110px;
         }
 
         .toggle-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--bg-input);
             padding: 0 10px; 
-            height: 34px;    
-            border-radius: var(--radius-md);
-            border: 1px solid var(--border-light);
+            justify-content: space-between;
             cursor: pointer;
-            transition: all 0.2s;
-            flex: 0 0 auto; /* Prevent shrinking */
+            min-width: 80px;
         }
-        .toggle-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-right: 6px; }
+        @media (hover: hover) {
+            .date-trigger:hover, .toggle-wrapper:hover, .badge-input-wrapper:hover {
+                border-color: color-mix(in srgb, var(--brand-blue) 30%, var(--border-light));
+            }
+        }
+        .toggle-wrapper:active { transform: scale(0.98); }
+
+        .toggle-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-right: 6px; white-space: nowrap; display:flex; align-items:center;}
         
         .switch { position: relative; display: inline-block; width: 34px; height: 20px; flex-shrink: 0; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -210,28 +337,65 @@
         input:checked + .slider:before { transform: translateX(14px); }
         input:disabled + .slider { opacity: 0.3; cursor: not-allowed; }
 
-        .prev-ft-badge {
-            background: var(--bg-accent);
-            color: var(--brand-blue);
+        .badge-input-wrapper {
             padding: 0 12px; 
-            height: 34px;    
-            border-radius: var(--radius-md);
-            font-size: 12px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
             justify-content: space-between;
-            cursor: pointer;
-            border: 1px solid rgba(0,122,255,0.1);
-            width: 100%; /* Fill container */
+            min-width: 110px;
+        }
+        .badge-input-wrapper:focus-within {
+            border-color: var(--brand-blue);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-blue) 20%, transparent);
         }
         
-        /* Helper for Prev FT container sizing */
-        .control-item-wrapper {
-            flex: 0 0 auto;
-            min-width: 140px; /* Preserve the width but respect flex */
-            position: relative;
+        .badge-prev-ft { background: var(--bg-accent); color: var(--brand-blue); border-color: rgba(0,122,255,0.1); cursor: pointer; }
+        .badge-acars { background: rgba(175, 82, 222, 0.05); color: var(--brand-purple); border-color: rgba(175, 82, 222, 0.2); }
+
+        /* LEGAL STATUS STRIP */
+        .legal-status-strip {
+            margin: 6px 16px 0 16px;
+            min-height: 28px;
+            border-radius: 10px;
+            border: 1px solid var(--border-light);
+            background: var(--bg-card);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 10px;
+            font-size: 11px;
+            line-height: 1;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
         }
+        .legal-status-strip .status-dot {
+            width: 8px; height: 8px; border-radius: 999px;
+            background: var(--semantic-info);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--semantic-info) 18%, transparent 82%);
+            flex: 0 0 auto;
+        }
+        .legal-status-strip .status-title {
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            color: var(--text-primary);
+            min-width: 48px;
+        }
+        .legal-status-strip .status-text {
+            color: var(--text-secondary);
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .legal-status-strip[data-state="safe"] { background: var(--success-bg-soft); border-color: color-mix(in srgb, var(--semantic-success) 34%, var(--border-light) 66%); }
+        .legal-status-strip[data-state="safe"] .status-dot { background: var(--semantic-success); box-shadow: 0 0 0 2px color-mix(in srgb, var(--semantic-success) 18%, transparent 82%); }
+        .legal-status-strip[data-state="safe"] .status-title { color: var(--semantic-success); }
+
+        .legal-status-strip[data-state="caution"] { background: var(--warning-bg-soft); border-color: color-mix(in srgb, var(--semantic-warning) 38%, var(--border-light) 62%); }
+        .legal-status-strip[data-state="caution"] .status-dot { background: var(--semantic-warning); box-shadow: 0 0 0 2px color-mix(in srgb, var(--semantic-warning) 20%, transparent 80%); }
+        .legal-status-strip[data-state="caution"] .status-title { color: var(--semantic-warning); }
+
+        .legal-status-strip[data-state="danger"] { background: var(--danger-bg-soft); border-color: color-mix(in srgb, var(--semantic-danger) 45%, var(--border-light) 55%); }
+        .legal-status-strip[data-state="danger"] .status-dot { background: var(--semantic-danger); box-shadow: 0 0 0 2px color-mix(in srgb, var(--semantic-danger) 18%, transparent 82%); }
+        .legal-status-strip[data-state="danger"] .status-title { color: var(--semantic-danger); }
 
         /* === STATS === */
         .stats-dashboard {
@@ -240,9 +404,8 @@
             gap: 8px;
             padding: 8px 16px;
             background: var(--bg-app);
-            position: absolute; /* Fixed layout */
-            top: 110px; /* Below header */
-            left: 0;
+            position: relative;
+            flex-shrink: 0;
             width: 100%;
             z-index: 90;
         }
@@ -257,382 +420,360 @@
             justify-content: center;
             position: relative;
             border: 1px solid var(--border-light);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        
+        .stat-card.act-focus { border: 2px solid var(--brand-blue); box-shadow: 0 4px 12px rgba(0,122,255,0.15); transform: translateY(-2px); z-index: 2; }
+        body.dark-mode .stat-card.act-focus { box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+        .stat-card.dimmed { opacity: 0.6; transform: scale(0.98); }
+
         .stat-label { font-size: 9px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 2px; }
         .stat-value { font-size: 14px; font-weight: 700; font-family: "SF Mono", monospace; }
         .progress-bar-bg { width: 100%; height: 4px; background: var(--border-light); border-radius: 2px; margin-top: 4px; overflow: hidden; }
         .progress-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
-        .stat-alert { border: 1px solid var(--brand-red); background: rgba(255, 59, 48, 0.05); }
-        .stat-alert .stat-value { color: var(--brand-red); }
+        
+        .stat-alert { background: var(--danger-bg-soft) !important; border-color: color-mix(in srgb, var(--semantic-danger) 45%, var(--border-light) 55%) !important; opacity: 1 !important; transform: scale(1) !important;}
+        .stat-alert .stat-value { color: var(--semantic-danger); }
 
-        /* === TIMELINE === */
-        #timeline-container {
+        /* === TIMELINE MINIMAP === */
+        .duty-timeline-wrapper {
+            position: relative;
+            flex-shrink: 0;
+            margin: 2px 16px 0 16px; 
+            width: calc(100% - 32px);
+            z-index: 80; 
             display: flex;
-            overflow-x: auto;
-            overflow-y: hidden; /* Strict lock */
-            scroll-snap-type: x mandatory;
-            padding: 0 16px;
-            gap: 0;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-            align-items: center; 
-            
-            /* Positioning for Locked Layout */
-            position: absolute;
-            top: 170px; /* Below stats */
-            bottom: 80px; /* Above footer */
-            left: 0;
-            width: 100%;
-            
-            overscroll-behavior-y: none;
-            overscroll-behavior-x: auto; /* Allow horizontal bounce */
+            flex-direction: column;
+            gap: 2px; 
+            animation: fadeIn 0.3s ease;
+        }
+
+        .dt-content { display: flex; width: 100%; flex-direction: column;}
+        .dt-header { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 2px; }
+        .dt-header-col { display: flex; flex-direction: column; gap: 2px; }
+        .dt-title { font-size: 9px; color: var(--text-tertiary); font-weight: bold; }
+        .dt-val { font-size: 12px; font-weight: 800; font-family: monospace; color: var(--text-primary); }
+        
+        .dt-track { position: relative; width: 100%; height: 10px; margin-top: 14px; }
+        .dt-track-inner {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-card); border: 1px solid var(--border-light);
+            border-radius: var(--radius-full); box-shadow: inset var(--shadow-sm); overflow: hidden;
+        }
+        .dt-ghost { position: absolute; top: -1px; bottom: -1px; left: 0; border: 1px dashed var(--text-tertiary); border-radius: var(--radius-full); background: rgba(148, 163, 184, 0.15); z-index: 1; pointer-events: none; box-sizing: border-box; display: none; transition: width 0.5s ease; }
+        body.dark-mode .dt-ghost { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.5); }
+        .dt-post-duty { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(45deg, var(--border-light), var(--border-light) 4px, transparent 4px, transparent 8px); z-index: 1; display: none; transition: left 0.5s ease; }
+        body.dark-mode .dt-post-duty { background: repeating-linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.1) 4px, transparent 4px, transparent 8px); }
+        .dt-rest { position: absolute; top: 0; bottom: 0; background: rgba(52, 199, 89, 0.15); z-index: 1; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; color: #15803d; letter-spacing: 0.5px; overflow: hidden; white-space: nowrap; transition: left 0.5s ease, width 0.5s ease; }
+        body.dark-mode .dt-rest { background: rgba(48, 209, 88, 0.2); color: #4ade80; }
+        .dt-fill { position: absolute; top: 0; left: 0; height: 100%; background: linear-gradient(90deg, var(--brand-blue), var(--brand-purple)); border-radius: var(--radius-full); transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease, border-radius 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.1); z-index: 2; }
+        @keyframes pulseHatch { 0% { opacity: 0.8; } 50% { opacity: 1; box-shadow: 0 0 10px rgba(255,59,48,0.8); } 100% { opacity: 0.8; } }
+        .dt-fill-danger { position: absolute; top: 0; height: 100%; background: repeating-linear-gradient(45deg, var(--brand-red), var(--brand-red) 4px, #b91c1c 4px, #b91c1c 8px); border-radius: 0 var(--radius-full) var(--radius-full) 0; box-shadow: 0 0 8px rgba(255,59,48,0.5); z-index: 2; animation: pulseHatch 1.5s infinite; display: none; transition: width 0.5s ease; }
+        .dt-now-marker { position: absolute; top: -4px; bottom: -4px; width: 2px; background: #06b6d4; box-shadow: 0 0 6px #06b6d4; z-index: 20; display: none; transition: left 1s ease; pointer-events: none; }
+        .dt-now-marker::before { content: 'NOW'; position: absolute; top: -13px; left: 50%; transform: translateX(-50%); font-size: 7px; font-weight: 900; color: #083344; background: #cffafe; padding: 1px 3px; border-radius: 4px; border: 1px solid #06b6d4; letter-spacing: 0.5px; }
+        body.dark-mode .dt-now-marker::before { background: #083344; color: #22d3ee; border-color: #22d3ee; }
+        .dt-segment { position: absolute; top: 1px; bottom: 1px; background: rgba(255, 255, 255, 0.3); border-radius: 4px; z-index: 10; box-shadow: 1px 0 0 rgba(0,0,0,0.1); cursor: pointer; transition: background 0.2s, border 0.2s; -webkit-tap-highlight-color: transparent; }
+        body.dark-mode .dt-segment { background: rgba(0, 0, 0, 0.25); }
+        .dt-segment.selected { background: rgba(255, 255, 255, 0.6); border: 2px solid white; box-shadow: 0 0 6px rgba(255,255,255,0.8); }
+        body.dark-mode .dt-segment.selected { background: rgba(255, 255, 255, 0.4); border: 2px solid white; }
+        .dt-limit-marker { position: absolute; top: -14px; bottom: -2px; width: 0px; border-left: 2px dashed rgba(255, 59, 48, 0.4); z-index: 15; transition: left 0.5s ease; pointer-events: none; }
+        .dt-limit-marker::before { content: '▼'; position: absolute; top: 0px; left: -4px; font-size: 8px; color: var(--brand-red); line-height: 1; }
+        .dt-limit-text { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); font-size: 8px; font-weight: 900; color: var(--brand-red); letter-spacing: 0.5px; white-space: nowrap; background: var(--bg-card); padding: 1px 3px; border-radius: 4px; box-shadow: 0 1px 2px rgba(255, 59, 48, 0.2); border: 1px solid rgba(255, 59, 48, 0.1); }
+        body.dark-mode .dt-limit-text { border-color: rgba(255, 59, 48, 0.3); background: #2a1111;}
+        .dt-ruler { position: relative; width: 100%; height: 24px; margin-top: 2px; }
+        .dt-tick { position: absolute; display: flex; flex-direction: column; align-items: center; font-size: 9px; color: var(--text-tertiary); transform: translateX(-50%); white-space: nowrap; font-weight: 700; transition: left 0.5s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .dt-tick span:first-child { font-family: monospace; font-size: 10px; }
+        .dt-tick.stagger { transform: translateX(-50%) translateY(12px); } 
+        .dt-tick.minor span:first-child { color: var(--text-tertiary); font-size: 9px; }
+        .dt-tick.actual-out span:first-child { color: var(--brand-green); font-size: 10px; font-weight: 800;}
+        .dt-tick.actual-in span:first-child { color: var(--brand-blue); font-size: 10px; font-weight: 800;}
+        .dt-segment-info { text-align: center; height: 16px; margin-top: 4px; font-size: 10px; font-weight: 800; color: var(--brand-blue); opacity: 0; transition: opacity 0.3s; background: rgba(0,122,255,0.05); border-radius: 4px; padding: 2px 0; display:flex; justify-content:center; align-items:center; }
+        body.dark-mode .dt-segment-info { background: rgba(59,130,246,0.15); color: #60a5fa; }
+
+        /* === TIMELINE CONTAINERS === */
+        #timeline-container {
+            position: relative; flex: 1; min-height: 0; width: 100%; z-index: 85; display: flex; overflow-x: auto;
+            overflow-y: hidden !important; scroll-snap-type: x mandatory; padding: 16px 16px 65px 16px; gap: 0; scrollbar-width: none;
+            -ms-overflow-style: none; align-items: flex-start; overscroll-behavior-y: none; overscroll-behavior-x: auto;
         }
         #timeline-container::-webkit-scrollbar { display: none; }
-
-        .station-wrapper {
-            scroll-snap-align: center;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-        }
+        .station-wrapper { scroll-snap-align: center; flex-shrink: 0; display: flex; align-items: center; margin-top: auto; margin-bottom: auto; }
+        .leg-connector { display: flex; align-items: center; justify-content: center; width: 140px; position: relative; z-index: 1; flex-shrink: 0; margin-top: auto; margin-bottom: auto; }
+        .station-card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius-lg); width: 280px; padding: 16px; box-shadow: var(--shadow-md); position: relative; z-index: 2; transition: transform 0.2s, width 0.3s; }
+        .station-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .station-code-input { font-size: 24px; font-weight: 800; color: var(--text-primary); background: transparent; text-transform: uppercase; width: 80px; padding: 0; }
         
-        .station-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius-lg);
-            width: 280px;
-            padding: 16px;
-            box-shadow: var(--shadow-md);
-            position: relative;
-            z-index: 2;
-            transition: transform 0.2s, width 0.3s;
-        }
-        
-        .station-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-        }
-        
-        .station-code-input {
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--text-primary);
-            background: transparent;
-            text-transform: uppercase;
-            width: 80px;
-            padding: 0;
-        }
-        
-        .station-divert { border: 2px solid var(--brand-orange); background: #fffbeb; }
-        body.dark-mode .station-divert { background: #451a03; border-color: var(--brand-orange); }
+        .station-divert { border: 2px solid color-mix(in srgb, var(--semantic-warning) 55%, var(--border-light) 45%); background: var(--warning-bg-soft) !important; }
+        body.dark-mode .station-divert { background: color-mix(in srgb, var(--semantic-warning) 14%, var(--bg-card) 86%) !important; }
 
         .input-group { margin-bottom: 10px; position: relative; }
         .input-label { font-size: 10px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 4px; display: block; }
         .time-input-row { display: flex; gap: 8px; }
         
-        .glass-input {
-            width: 100%;
-            height: 36px;
-            background: var(--bg-input);
-            border: 1px solid var(--border-light);
-            border-radius: 8px;
-            padding: 0 8px;
-            text-align: center;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-primary);
-            font-family: "SF Mono", monospace;
-            line-height: 34px; /* 🔥 FIX: Ensures text is vertically centered and not clipped */
-        }
-        .glass-input:focus { border-color: var(--brand-blue); background: var(--bg-card); }
+        .glass-input { width: 100%; height: 36px; background: var(--bg-input); border: 1px solid var(--border-light); border-radius: 8px; padding: 0 8px; text-align: center; font-size: 16px; font-weight: 600; color: var(--text-primary); font-family: "SF Mono", monospace; line-height: 34px; transition: border-color 0.2s, box-shadow 0.2s; }
+        .glass-input:focus { border-color: var(--brand-blue); background: var(--bg-card); box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-blue) 20%, transparent); outline:none;}
         
-        /* 🔥 Smart Input Styles 🔥 */
+        /* HHMM Validation UX */
+        .glass-input.hhmm-invalid { border-color: var(--brand-red) !important; box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-red) 18%, transparent) !important; background: color-mix(in srgb, var(--brand-red) 6%, var(--bg-card) 94%); }
+        .glass-input.hhmm-valid { border-color: color-mix(in srgb, var(--brand-blue) 55%, var(--border-light) 45%); }
+
         .smart-input-wrapper { position: relative; width: 100%; }
-        .mode-badge {
-            position: absolute; 
-            right: 4px; 
-            top: 50%; 
-            transform: translateY(-50%);
-            font-size: 10px; 
-            font-weight: 800; 
-            padding: 2px 5px; 
-            border-radius: 4px;
-            cursor: pointer; 
-            user-select: none; 
-            z-index: 5;
-            transition: all 0.2s;
-        }
+        .mode-badge { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); font-size: 10px; font-weight: 800; padding: 2px 5px; border-radius: 4px; cursor: pointer; user-select: none; z-index: 5; transition: all 0.2s; }
         .mode-z { color: var(--text-tertiary); background: transparent; }
         .mode-l { color: white; background: var(--brand-orange); box-shadow: var(--shadow-sm); }
-        
-        .ghost-text {
-            position: absolute; 
-            bottom: -11px; 
-            right: 2px;
-            font-size: 9px; 
-            font-weight: 600; 
-            color: var(--text-secondary);
-            pointer-events: none; 
-            white-space: nowrap; 
-            font-family: "SF Mono", monospace;
-            opacity: 0.8;
-        }
-
-        .taxi-badge {
-            display: flex;
-            align-items: center;
-            background: var(--bg-input);
-            border: 1px solid var(--border-light);
-            border-radius: 6px;
-            padding: 0 6px;
-            height: 36px;
-            flex-shrink: 0;
-        }
+        .ghost-text { position: absolute; bottom: -11px; right: 2px; font-size: 9px; font-weight: 600; color: var(--text-secondary); pointer-events: none; white-space: nowrap; font-family: "SF Mono", monospace; opacity: 0.8; }
+        .taxi-badge { display: flex; align-items: center; background: var(--bg-input); border: 1px solid var(--border-light); border-radius: 6px; padding: 0 6px; height: 36px; flex-shrink: 0; }
         .taxi-val { width: 24px; font-size: 12px; font-weight: 700; text-align: center; color: var(--text-secondary); background: transparent; }
 
-        .lbo-display {
-            background: var(--bg-input);
-            border-radius: 8px;
-            padding: 8px;
-            margin-top: 12px;
-            text-align: center;
-            border: 1px solid var(--border-light);
-        }
+        .lbo-display { background: var(--bg-input); border-radius: 8px; padding: 8px; margin-top: 12px; text-align: center; border: 1px solid var(--border-light); transition: all 0.3s ease; }
         .lbo-label { font-size: 10px; font-weight: 700; color: var(--text-secondary); display: block; }
         .lbo-time { font-size: 18px; font-weight: 800; color: var(--text-primary); line-height: 1.2; }
         .lbo-safe { border-left: 4px solid var(--brand-green); }
-        .lbo-warn { border-left: 4px solid var(--brand-red); background: rgba(255, 59, 48, 0.05); }
-
-        .lbo-locked {
-            background-color: var(--bg-input);
-            border: 1px dashed var(--text-tertiary) !important;
-            color: var(--text-secondary) !important;
-            position: relative;
-        }
+        .lbo-warn { border-left: 4px solid var(--brand-orange); background: var(--warning-bg-soft) !important; }
+        .lbo-acars { border: 2px solid var(--brand-purple); background: rgba(175, 82, 222, 0.05); }
+        .lbo-acars .lbo-time { color: var(--brand-purple); }
+        .lbo-locked { background-color: var(--bg-input); border: 1px dashed var(--text-tertiary) !important; color: var(--text-secondary) !important; position: relative; }
         .lbo-locked::after { content: "🔒"; font-size: 10px; position: absolute; top: 4px; right: 4px; opacity: 0.6; }
 
-        .hotel-section {
-            background: var(--bg-accent);
-            border-radius: 8px;
-            padding: 8px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+        .hotel-section { background: var(--bg-accent); border-radius: 8px; padding: 8px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
         .hotel-inputs { display: flex; gap: 4px; }
         .hotel-time { width: 50px; height: 28px; font-size: 13px; text-align: center; border-radius: 4px; border: 1px solid rgba(0,0,0,0.05); }
 
-        .leg-connector {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 140px;
-            position: relative;
-            z-index: 1;
-            flex-shrink: 0;
-            margin-top: 0; 
-        }
-        .flight-line {
-            height: 2px;
-            background: var(--text-tertiary);
-            width: 100%;
-            position: absolute;
-            top: 50%;
-            z-index: -1;
-        }
-        .flight-pill {
-            background: var(--bg-card);
-            border: 1px solid var(--border-light);
-            border-radius: 12px;
-            padding: 8px;
-            width: 110px;
-            box-shadow: var(--shadow-sm);
-            text-align: center;
-        }
+        .flight-line { height: 2px; background: var(--text-tertiary); width: 100%; position: absolute; top: 50%; z-index: -1; }
+        .flight-pill { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 12px; padding: 8px; width: 110px; box-shadow: var(--shadow-sm); text-align: center; }
         .flight-pill.acm { background: #fff7ed; border-color: var(--brand-orange); }
         .dark-mode .flight-pill.acm { background: #431407; }
 
         .action-row { display: flex; justify-content: center; gap: 12px; margin-top: 8px; }
-        .icon-btn {
-            width: 28px; height: 28px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px; font-weight: bold; color: white;
-            box-shadow: var(--shadow-sm);
-            cursor: pointer;
-        }
+        .icon-btn { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; color: white; box-shadow: var(--shadow-sm); cursor: pointer; transition: transform 0.2s;}
+        .icon-btn:active { transform: scale(0.9); }
         .btn-add { background: var(--brand-green); }
         .btn-div { background: var(--brand-orange); }
-        .btn-del { position: absolute; top: -8px; right: -8px; background: var(--brand-red); width: 24px; height: 24px; font-size: 12px; z-index: 10; border: 2px solid var(--bg-app); }
+        .btn-del { position: absolute; top: -10px; right: -10px; background: var(--brand-red); width: 24px; height: 24px; font-size: 12px; z-index: 50; border: 2px solid var(--bg-card); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; box-shadow: 0 2px 6px rgba(255, 59, 48, 0.4); transition: transform 0.2s; }
+        .btn-del:active { transform: scale(0.9); }
 
         /* === FOOTER HUD === */
-        .hud-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: var(--bg-glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-top: 1px solid var(--border-light);
-            padding: 10px 16px var(--safe-bottom) 16px;
-            z-index: 200;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-        }
-        .hud-grid { display: grid; grid-template-columns: 1fr 1fr 0.8fr 1.2fr; gap: 8px; }
+        .hud-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--border-light); padding: 4px 16px calc(env(safe-area-inset-bottom) + 4px) 16px; z-index: 200; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); }
+        .hud-grid { display: grid; grid-template-columns: 1fr 1fr 0.8fr 1.2fr; gap: 8px; align-items: center; }
         .hud-item { display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; transition: all 0.2s; }
-        .hud-label { font-size: 10px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 2px; }
-        .hud-value { font-size: 18px; font-weight: 800; color: var(--text-primary); line-height: 1; font-family: "SF Mono", monospace; }
-        .hud-sub { font-size: 10px; color: var(--text-secondary); margin-top: 2px; display: flex; align-items: center; gap: 2px; }
-        
+        .hud-label { font-size: 9px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 0px; display:flex; align-items:center;} 
+        .hud-value { font-size: 16px; font-weight: 800; color: var(--text-primary); line-height: 1.1; font-family: "SF Mono", monospace; margin: 1px 0; } 
+        .hud-sub { font-size: 9px; color: var(--text-secondary); margin-top: 0px; display: flex; align-items: center; gap: 2px; text-align: center;} 
         .val-danger { color: var(--brand-red) !important; }
         .val-safe { color: var(--brand-green) !important; }
         .hidden { display: none !important; }
-        
         .hud-item.locked .hud-label { color: var(--brand-red); }
         .hud-item.locked .hud-value { color: var(--brand-red); }
         .lock-icon { font-size: 10px; margin-left: 4px; padding: 2px 4px; background: var(--bg-input); border-radius: 4px; cursor: pointer; }
         
-        .popover {
-            position: absolute; top: 110%; right: 0;
-            background: var(--bg-card); border: 1px solid var(--border-light);
-            border-radius: 12px; padding: 12px; box-shadow: var(--shadow-float);
-            z-index: 300; width: 240px; display: none; animation: fadeIn 0.2s ease;
-        }
+        .popover { position: absolute; top: calc(100% + 4px); right: 16px; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 12px; padding: 12px; box-shadow: var(--shadow-float); z-index: 300; width: 250px; display: none; animation: fadeIn 0.2s ease; }
         .popover.show { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: 0; } }
 
-        /* RESPONSIVE RESET for Mobile Portrait */
+        /* === INFO MODAL === */
+        .info-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s ease; }
+        .info-modal-overlay.show { display: flex; opacity: 1; }
+        .info-modal-card { background: var(--bg-card); width: 85%; max-width: 360px; border-radius: var(--radius-lg); padding: 0; box-shadow: var(--shadow-float); transform: scale(0.95); transition: transform 0.2s ease; border: 1px solid var(--border-light); overflow: hidden; }
+        .info-modal-overlay.show .info-modal-card { transform: scale(1); }
+        .info-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--bg-input); border-bottom: 1px solid var(--border-light);}
+        .info-modal-body { padding: 20px; font-size: 13px; line-height: 1.6; color: var(--text-secondary); max-height: 70vh; overflow-y: auto;}
+        .info-ref { display: inline-block; background: var(--bg-accent); color: var(--brand-blue); font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 6px; margin-bottom: 12px; letter-spacing: 0.5px; border: 1px solid rgba(0,122,255,0.1); }
+        .info-zh { font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 6px; line-height: 1.5; letter-spacing: 0.02em; }
+        .info-en { font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 16px; line-height: 1.5; letter-spacing: 0.01em; }
+        .info-divider { height: 1px; background: var(--border-light); margin: 16px 0; }
+
+        /* 🚨 RESPONSIVE RESET */
+        @media screen and (max-width: 820px) and (orientation: portrait), 
+               screen and (max-height: 600px) and (orientation: landscape) {
+            html, body { position: static; overflow-y: auto; overflow-x: hidden; display: block; height: auto; }
+            .app-header { position: sticky; top: 0; z-index: 1000;}
+            .stats-dashboard { position: static; margin-top: 12px; }
+            .duty-timeline-wrapper { position: relative; margin: 12px 16px 0 16px; z-index: 80; width: calc(100% - 32px);}
+            #timeline-container { position: relative; height: auto; overflow-x: auto; overflow-y: visible; padding-top: 16px; padding-bottom: 65px; gap: 0; min-height: auto; z-index: 85; display: flex; }
+            body::-webkit-scrollbar { display: none; }
+        }
         @media screen and (max-width: 820px) and (orientation: portrait) {
-            html, body {
-                position: static;
-                overflow-y: auto;
-                overflow-x: hidden;
-            }
-            .app-header { position: sticky; top: 0; }
-            .stats-dashboard { position: static; margin-top: 0; }
-            #timeline-container {
-                position: static;
-                height: auto;
-                flex-direction: column; 
-                overflow-x: hidden; 
-                overflow-y: visible; 
-                padding-bottom: 120px; 
-                align-items: center; 
-                gap: 0; 
-                min-height: auto; 
-                padding-top: 16px;
-            }
+            #timeline-container { flex-direction: column; align-items: center; padding-top: 24px;} 
             .leg-connector { width: 100%; height: 110px; flex-direction: column; margin-top: 0; }
             .flight-line { width: 2px; height: 100%; top: 0; left: 50%; transform: translateX(-50%); }
             .stats-dashboard { grid-template-columns: 1fr 1fr; }
-            .station-wrapper { width: 100%; justify-content: center; scroll-snap-align: start; }
+            .station-wrapper { width: 100%; justify-content: center; }
             .station-card { width: 92%; max-width: 380px; }
-            .controls-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-            .date-trigger { flex: 1 1 100%; order: -1; margin-bottom: 4px; }
-            .toggle-wrapper, .control-item-wrapper { flex: 1 1 auto; min-width: 80px; }
-            body::-webkit-scrollbar { display: none; }
+            .header-center-zone { border-left: none; padding-left: 0; margin-left: 0; }
         }
+        @media screen and (max-height: 600px) and (orientation: landscape),
+               screen and (max-width: 1024px) and (orientation: landscape) {
+            #timeline-container { flex-direction: row; padding-top: 16px;} 
+        }
+
     </style>
 </head>
 <body class="light-mode">
 
+    <!-- GLOBAL INFO MODAL -->
+    <div id="infoModal" class="info-modal-overlay">
+        <div class="info-modal-card">
+            <div class="info-modal-header">
+                <h3 id="infoTitle" style="margin:0; font-size:16px; color:var(--brand-blue);">Title</h3>
+                <button onclick="closeInfo()" style="background:var(--bg-input); border-radius:50%; width:28px; height:28px; font-size:14px; font-weight:bold; color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; justify-content:center; border:1px solid var(--border-light);">✕</button>
+            </div>
+            <div id="infoBody" class="info-modal-body"></div>
+        </div>
+    </div>
+
     <header class="app-header">
+        
+        <!-- 🚀 DYNAMIC RESPONSIVE ONE-LINE HEADER TOP -->
         <div class="header-top">
+            
+            <!-- 1. Logo (Left) -->
             <div class="app-title">
-                <span style="font-size:20px;">✈️</span> CAL Duty <span class="text-xs font-medium text-secondary" style="border:1px solid var(--border-light); padding:1px 4px; border-radius:4px;">PRO v4.8.2 Logic Fix</span>
+                <span style="font-size:20px;">✈️</span> CAL Duty 
+                <span class="text-xs font-medium text-secondary" style="border:1px solid var(--border-light); padding:1px 4px; border-radius:4px; cursor:pointer;" onclick="showInfo('changelog')">Pro v5.8.3 ⓘ</span>
             </div>
-            <div class="crew-selector">
-                <div class="crew-btn active" id="btn-S" onclick="setCrew('S')">Single</div>
-                <div class="crew-btn" id="btn-M" onclick="setCrew('M')">Multi</div>
-                <div class="crew-btn" id="btn-D" onclick="setCrew('D')">Double</div>
+
+            <!-- 2. Primary Responsive Group (Center on iPad, Wraps to Bottom on Mobile) -->
+            <div class="header-primary-group">
+                <input type="date" id="flightDate" class="date-trigger" onchange="calc24hOverlap(); runAllCalc()">
+                <button class="toggle-wrapper" id="globalTimeBtn" onclick="toggleAllModes()" style="justify-content:center; font-weight:bold; font-size:11px; color:var(--brand-blue);">
+                    ALL UTC
+                </button>
+                <button class="toggle-wrapper" id="routeBtn" onclick="toggleRoutePopup(event)" style="justify-content:center; font-weight:bold; font-size:11px; flex: 0 0 auto; min-width: 44px;" title="Saved Routes">
+                    📂
+                </button>
+                <button class="toggle-wrapper" onclick="toggleNightMode()" style="justify-content:center; flex: 0 0 auto; min-width: 44px; padding:0;" title="Night Mode">
+                    <span id="nightBtnIcon">🌙</span>
+                </button>
+                
+                <!-- 動態摘要區 (填補剩餘空白，當收起進階面板時，提示開啟的規則) -->
+                <div class="header-center-zone" id="headerCenterZone"></div>
             </div>
+
+            <!-- 3. Header Actions (Right) -->
+            <div class="header-actions">
+                <div class="crew-selector">
+                    <div class="crew-btn active" id="btn-S" onclick="setCrew('S')">Single</div>
+                    <div class="crew-btn" id="btn-M" onclick="setCrew('M')">Multi</div>
+                    <div class="crew-btn" id="btn-D" onclick="setCrew('D')">Double</div>
+                </div>
+                
+                <button id="headerToggleBtn" class="header-toggle-btn" onclick="toggleToolbar()" title="Toggle Settings">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m18 15-6-6-6 6"/>
+                    </svg>
+                </button>
+            </div>
+
         </div>
 
-        <div class="controls-grid">
-            <button class="toggle-wrapper" onclick="toggleNightMode()" style="justify-content:center; width:auto; padding:0 12px;">
-                <span id="nightBtnIcon">🌙</span>
-            </button>
-            <input type="date" id="flightDate" class="date-trigger" onchange="calc24hOverlap(); runAllCalc()">
-            
-            <button class="toggle-wrapper" id="globalTimeBtn" onclick="toggleAllModes()" style="justify-content:center; width:auto; padding:0 12px; font-weight:bold; font-size:11px; color:var(--brand-blue);">
-                ALL UTC
-            </button>
+        <!-- 🔴 進階與例外區 (預設收折，節省大量垂直空間) -->
+        <div class="toolbar-wrapper" id="toolbarWrapper">
+            <div class="toolbar-inner">
+                <div class="controls-grid" style="padding-top: 8px; border-top: 1px dashed var(--border-light); margin-top: 4px;">
+                    <div class="badge-input-wrapper badge-acars" title="ACARS LBO from JZ">
+                        <span style="display:flex; align-items:center; font-size:10px;">
+                            JZ LBO <span class="info-icon" onclick="showInfo('jz')">i</span>
+                        </span>
+                        <input type="tel" id="acarsLbo" placeholder="HHMM" style="background:transparent; text-align:right; font-weight:bold; width:50px; color:inherit;" oninput="updAcarsLbo(this.value)">
+                    </div>
 
-            <div class="toggle-wrapper" id="extFdtContainer">
-                <span class="toggle-label">Ext FDT</span>
-                <label class="switch">
-                    <input type="checkbox" id="extFdt" onchange="runAllCalc()">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            
-            <div class="toggle-wrapper" id="night-container">
-                <span class="toggle-label">Night</span>
-                <label class="switch">
-                    <input type="checkbox" id="nightOps" onchange="runAllCalc()">
-                    <span class="slider"></span>
-                </label>
-            </div>
+                    <div class="toggle-wrapper" id="extFdtContainer">
+                        <span class="toggle-label">Ext FDT <span class="info-icon" onclick="showInfo('ext')">i</span></span>
+                        <label class="switch">
+                            <input type="checkbox" id="extFdt" onchange="runAllCalc()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="toggle-wrapper" id="night-container">
+                        <span class="toggle-label">Night <span class="info-icon" onclick="showInfo('night')">i</span></span>
+                        <label class="switch">
+                            <input type="checkbox" id="nightOps" onchange="runAllCalc()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
 
-            <div class="toggle-wrapper">
-                <span class="toggle-label">No Bunk</span>
-                <label class="switch">
-                    <input type="checkbox" id="noBunk" onchange="runAllCalc()">
-                    <span class="slider"></span>
-                </label>
-            </div>
+                    <div class="toggle-wrapper">
+                        <span class="toggle-label">No Bunk <span class="info-icon" onclick="showInfo('nobunk')">i</span></span>
+                        <label class="switch">
+                            <input type="checkbox" id="noBunk" onchange="runAllCalc()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="toggle-wrapper" id="early-container" style="padding:0 8px; flex: 1 1 auto; min-width: 125px;">
+                        <span class="toggle-label" style="margin-right:2px;">Early <span class="info-icon" onclick="showInfo('early')">i</span></span>
+                        <select id="earlyMorningSel" onchange="updEarlyMorning(this.value)" style="background:transparent; border:none; color:var(--brand-blue); font-weight:700; font-size:11px; outline:none; text-align:right; flex-grow:1; cursor:pointer; -webkit-appearance:none;">
+                            <option value="0">None</option>
+                            <option value="2">2 Days</option>
+                            <option value="3">3 Days</option>
+                        </select>
+                        <span style="font-size:8px; color:var(--brand-blue); margin-left:4px; pointer-events:none;">▼</span>
+                    </div>
 
-            <div class="control-item-wrapper">
-                <div class="prev-ft-badge" onclick="togglePrevPopup()">
-                    <span class="text-secondary" style="font-size:10px;">PREV FT</span>
-                    <input type="tel" id="prevFt" value="0000" readonly style="background:transparent; text-align:right; font-weight:bold; width:50px; color:var(--brand-blue);">
-                    <span>▼</span>
-                </div>
-                <div id="prevPopup" class="popover">
-                    <div class="text-sm font-bold text-primary mb-3">Previous Flight (24h Check)</div>
-                    <div class="flex flex-col gap-2">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-secondary">DATE (Z)</span>
-                            <input type="date" id="pf-date" class="glass-input" style="width:120px; font-size:12px;" onchange="calc24hOverlap(); runAllCalc()">
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-secondary">IN (Z)</span>
-                            <input type="tel" id="pf-in" class="glass-input" style="width:70px;" placeholder="HHMM" oninput="calc24hOverlap(); runAllCalc()">
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-secondary">FT</span>
-                            <input type="tel" id="pf-dur" class="glass-input" style="width:70px;" placeholder="HHMM" oninput="calc24hOverlap(); runAllCalc()">
-                        </div>
-                        <div style="margin-top:8px; display:flex; justify-content:center;">
-                            <button onclick="togglePrevPopup()" class="crew-btn active" style="width:100%; background:var(--brand-green); color:white;">✅ OK</button>
+                    <div id="prev-container" style="flex: 1 1 auto; min-width:125px;">
+                        <div class="badge-input-wrapper badge-prev-ft" onclick="togglePrevPopup(event)">
+                            <span style="display:flex; align-items:center; font-size:10px;">
+                                PREV FT <span class="info-icon" onclick="event.stopPropagation(); showInfo('prev')">i</span>
+                            </span>
+                            <div style="display:flex; align-items:center;">
+                                <input type="tel" id="prevFt" value="0000" readonly style="background:transparent; text-align:right; font-weight:bold; width:40px; color:inherit; pointer-events:none;">
+                                <span style="font-size:8px; margin-left:4px;">▼</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <button class="toggle-wrapper" onclick="resetData()" style="justify-content:center; color:var(--brand-red); font-weight:bold; font-size:11px; padding:0 12px;">RESET</button>
-            <button class="toggle-wrapper" id="routeBtn" onclick="toggleRoutePopup()" style="justify-content:center; font-weight:bold; font-size:11px; padding:0 12px;">📂</button>
-            
-             <div id="routePopup" class="popover">
-                <div class="text-sm font-bold text-primary mb-3">Saved Routes</div>
-                <div class="flex gap-2 mb-2">
-                    <input type="text" id="routeName" class="glass-input" placeholder="Name" style="font-size:12px; line-height:34px;">
-                    <button id="saveBtn" onclick="saveRoute()" class="crew-btn active" style="padding:4px 8px;">Save</button>
-                </div>
-                <div id="routeList" style="max-height:150px; overflow-y:auto; border-top:1px solid var(--border-light); padding-top:4px;"></div>
-                <div class="flex justify-between mt-2 pt-2 border-t" style="border-color:var(--border-light);">
-                    <button onclick="exportRoutes()" class="text-xs text-secondary">Export</button>
-                    <button onclick="importRoutes()" class="text-xs text-secondary">Import</button>
+                    
+                    <button class="toggle-wrapper" onclick="resetData()" style="justify-content:center; color:var(--brand-red); font-weight:bold; font-size:11px; flex: 0 0 auto; min-width: 60px;">RESET</button>
                 </div>
             </div>
         </div>
+
+        <!-- 浮動視窗 (Popovers) -->
+        <div id="prevPopup" class="popover" onclick="event.stopPropagation();">
+            <div class="text-sm font-bold text-primary mb-3">Previous Flight (24h Check)</div>
+            <div class="flex flex-col gap-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-secondary">DATE (Z)</span>
+                    <input type="date" id="pf-date" class="glass-input" style="width:120px; font-size:12px;" onchange="calc24hOverlap(); runAllCalc()">
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-secondary">IN (Z)</span>
+                    <input type="tel" id="pf-in" class="glass-input" style="width:70px;" placeholder="HHMM" oninput="calc24hOverlap(); runAllCalc()">
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-secondary">FT</span>
+                    <input type="tel" id="pf-dur" class="glass-input" style="width:70px;" placeholder="HHMM" oninput="calc24hOverlap(); runAllCalc()">
+                </div>
+                <div style="margin-top:8px; display:flex; justify-content:center;">
+                    <button onclick="togglePrevPopup()" class="crew-btn active" style="width:100%; background:var(--brand-green); color:white;">✅ OK</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="routePopup" class="popover" onclick="event.stopPropagation();">
+            <div class="text-sm font-bold text-primary mb-3">Saved Routes</div>
+            <div class="flex gap-2 mb-2">
+                <input type="text" id="routeName" class="glass-input" placeholder="Name" style="font-size:12px; line-height:34px;">
+                <button id="saveBtn" onclick="saveRoute()" class="crew-btn active" style="padding:4px 8px;">Save</button>
+            </div>
+            <div id="routeList" style="max-height:150px; overflow-y:auto; border-top:1px solid var(--border-light); padding-top:4px;"></div>
+            <div class="flex justify-between mt-2 pt-2 border-t" style="border-color:var(--border-light);">
+                <button onclick="exportRoutes()" class="text-xs text-secondary">Export</button>
+                <button onclick="importRoutes()" class="text-xs text-secondary">Import</button>
+            </div>
+        </div>
+
         <div id="ulr-alert" class="hidden" style="background:var(--brand-red); color:white; text-align:center; font-size:10px; font-weight:bold; border-radius:4px; margin-top:4px; padding:2px;">⚠️ ULR DETECTED: REQUIRE 4 PILOTS</div>
     </header>
 
+    <!-- LEGAL STATUS STRIP -->
+    <div class="legal-status-strip" id="legalStatusStrip" data-state="info">
+        <span class="status-dot"></span>
+        <span class="status-title" id="legalStatusTitle">STATUS</span>
+        <span class="status-text" id="legalStatusText">Ready</span>
+    </div>
+
+    <!-- === STATS DASHBOARD === -->
     <div class="stats-dashboard">
         <div class="stat-card">
             <span class="stat-label">Local (STD)</span>
@@ -655,12 +796,57 @@
         </div>
     </div>
 
+    <!-- DYNAMIC DUTY LIFECYCLE TIMELINE MINIMAP -->
+    <div class="duty-timeline-wrapper" id="dutyTimelineWrapper">
+        <div id="dtContent" style="display:flex; width: 100%; flex-direction: column;">
+            <div class="dt-header">
+                <div class="dt-header-col">
+                    <span class="dt-title">REPORT</span>
+                    <span class="dt-val" id="dt-rpt-label">--:--</span>
+                </div>
+                
+                <div style="display:flex; align-items:baseline; gap: 8px; transform: translateY(1px);">
+                    <span style="font-size:9px; font-weight:700; color:var(--text-tertiary);">SCHED <span id="dt-sch-val" style="font-family:monospace; font-size:10px;">--:--</span></span>
+                    <span style="color:var(--brand-blue); font-size:15px; font-weight:800; font-family:monospace; letter-spacing:-0.5px;" id="dt-pct-label">0%</span>
+                    <span style="font-size:9px; font-weight:700; color:var(--brand-blue);" id="dt-act-title">ACT <span id="dt-act-val" style="font-family:monospace; font-size:10px;">--:--</span></span>
+                </div>
+
+                <div class="dt-header-col" style="align-items:flex-end;">
+                    <span class="dt-title" id="dt-end-title">MAX LIMIT</span>
+                    <span class="dt-val" id="dt-end-val">--:--</span>
+                </div>
+            </div>
+            
+            <div class="dt-track">
+                <div class="dt-track-inner">
+                    <div class="dt-rest" id="dtRest" title="Rest Period"></div>
+                    <div class="dt-post-duty" id="dtPostDuty" title="Post-flight Duty (30m)"></div>
+                    <div class="dt-ghost" id="dtGhost" title="Scheduled FDP"></div>
+                    <div class="dt-fill" id="dtFill"></div>
+                    <div class="dt-fill-danger" id="dtFillDanger"></div>
+                </div>
+                <div id="dtSegments"></div>
+                <div class="dt-limit-marker" id="dtMaxMarker">
+                    <span class="dt-limit-text">MAX</span>
+                </div>
+                <div class="dt-now-marker" id="dtNowMarker"></div>
+            </div>
+            
+            <div class="dt-ruler" id="dtRuler"></div>
+            <div id="dtSegmentInfo" class="dt-segment-info"></div>
+        </div>
+    </div>
+
     <div id="timeline-container"></div>
 
     <footer class="hud-footer">
         <div class="hud-grid">
             <div class="hud-item" id="report-box">
-                <span class="hud-label">Report (Z) <span id="lockBtn" class="lock-icon" onclick="toggleLock()">🔓</span></span>
+                <span class="hud-label">
+                    Report (Z) 
+                    <span class="info-icon" style="margin: 0 4px;" onclick="showInfo('report')">i</span> 
+                    <span id="lockBtn" class="lock-icon" style="margin-left:0;" onclick="toggleLock()">🔓</span>
+                </span>
                 <span id="resReport" class="hud-value">--:--</span>
                 <span id="reportLabel" class="hud-sub">--</span>
             </div>
@@ -689,6 +875,182 @@
     </footer>
 
 <script>
+    // === INFO SYSTEM DATA & BILINGUAL TEXTS ===
+    const INFO_DATA = {
+        'changelog': {
+            title: '版本更新資訊 (Changelog)',
+            text: `<div class="info-zh"><b>v5.8.3 雙語註解完整還原版 (Bilingual Restored)</b><br>• 📝 <b>解除極限壓縮 (Unminified)</b>：恢復被移除的結構化註解與雙語說明。<br>• 🔮 <b>動態執勤窗 (Live Tracking Window)</b>：僅在「報到前 12h ~ 極限後 12h」內啟動即時追蹤，完美支援模擬試算。<br>• 📐 <b>嚴格 Actual 邏輯 (Strict Actuals)</b>：未輸入真實時間不顯示預估值。</div>
+                   <div class="info-divider"></div>
+                   <div class="info-en"><b>v5.8.3 Bilingual Restored Edition</b><br>• Restored bilingual comments and unminified code structure for better maintainability.<br>• Live Tracking Window added to prevent false alerts on simulated past/future flights.<br>• Strict Actual logic applied to prevent estimation leakages into actual flight times.</div>`
+        },
+        'jz': { 
+            title: '聯管通報 JZ LBO', 
+            text: `<div class="info-ref">B744 Fleet Notification 2024-14</div>
+                   <div class="info-zh">當航班遇有延誤或轉降時，聯管處將以 ACARS 主動提供最後合法計劃後推時間。若客艙組員 FDP limit 較早，則應以先到的時間計算。<br><br>⚠️ 系統將自動與自算 LBO 比對，並嚴格採用兩者中<b>最早 (Earliest)</b> 的時間。</div>
+                   <div class="info-divider"></div>
+                   <div class="info-en">When Flight was delayed or diverted, JZ will proactively provide latest legally pushback time via ACARS. If FDP limit of cabin crew reaches earlier, the last legal block out time should be based on the earlier FDP limit.</div>` 
+        },
+        'ext': { 
+            title: '延長任務 (Ext. FDT)', 
+            text: `<div class="info-ref">FOM 3.4.3.3 C.</div>
+                   <div class="info-zh">機長裁量權 (Captain's Discretion)。<br>僅限多重派遣 (M)，在遭遇不可抗力之轉降情況下，機長可同意延長最大飛行任務期間不超過 2 小時。單重 (S) 不可使用。</div>
+                   <div class="info-divider"></div>
+                   <div class="info-en">For multiple crew dispatch only, in the event of diversion due to natural disasters or events beyond control, the PIC may agree to extend the maximum flight duty period for not more than 2 hours.</div>` 
+        },
+        'night': { 
+            title: '夜間航班限制 (Night Ops)', 
+            text: `<div class="info-ref">FOM 3.4.3.5</div>
+                   <div class="info-zh">表定第一段起飛時間介於當地時間 <b>2100L 至 0700L</b> 之間 (不含)。<br>單重、多重與雙重派遣之最大飛行任務期間 (Max FDP) 將自正常限制中扣除 2 小時。系統預設會自動判斷勾選。</div>
+                   <div class="info-divider"></div>
+                   <div class="info-en">Flights scheduled to depart between the hours of 2100L and 0700L (not included). Maximum flight duty period will be reduced 2 hours from the normal limits.</div>` 
+        },
+        'nobunk': { 
+            title: '無睡眠設備 (No Bunk)', 
+            text: `<div class="info-ref">FOM 3.4.3.1 B/C</div>
+                   <div class="info-zh">當機上無適當之睡眠設備 (僅提供商務艙座位等) 時。<br>⚠️ 勾選後，多重 (M) 或雙重 (D) 派遣於連續 24 小時內之最高飛行時間將被下修限制為 <b>12 小時</b>。</div>
+                   <div class="info-divider"></div>
+                   <div class="info-en">With at least a business class seat whenever a bunk is not available, Max. Flight Time in 24 Consecutive Hours is limited to 12 hours for Multiple/Double Crew.</div>` 
+        },
+        'early': { 
+            title: '連續早班機 (Early Morning)', 
+            text: `<div class="info-ref">FOM 3.4.3.4</div>
+                   <div class="info-zh">起降涵蓋首段出發地當地時間 <b>0200L 至 0500L</b> 之航班。<br>• 連續 2 天執行：下次最低休時強制需達 <b>34 小時</b>。<br>• 連續 3 天執行：最低休時強制需達 <b>54 小時</b>。</div>
+                   <div class="info-divider"></div>
+                   <div class="info-en">Flight duties starting or ending within, or encompassing 0200L-0500L of the first sector departure airport. 2 consecutive days require 34hrs rest; 3 consecutive days require 54hrs rest.</div>` 
+        },
+        'prev': { 
+            title: '前趟飛時 (Prev FT)', 
+            text: `<div class="info-ref">FOM 3.4.3.1 / 24h Rolling</div>
+                   <div class="info-zh">用於檢查「連續 24 小時內」之最大飛行時間限制。<br>輸入前趟航班之抵達時間 (IN Z) 與飛時 (FT)，系統將自動推算與本次任務的 24 小時重疊分鐘數，並計入 FT 總額審核。</div>
+                   <div class="info-divider"></div>
+                   <div class="info-en">Used to ensure compliance with Max. Flight Time in 24 Consecutive Hours. Input the previous flight's arrival time and flight time to calculate overlapping block time.</div>` 
+        },
+        'hotel': { 
+            title: '外站休息 (Hotel / Split)', 
+            text: `<div class="info-ref">FOM 3.4.3.3 A/B</div>
+                   <div class="info-zh">報到後或首段起飛後，若於適當住宿地點獲得連續 <b>3 小時以上</b> 之休息。<br>該休息時間得依規定計入為 Split Duty (首段後) 或放寬最大飛行任務期間 FDP Extension (後續段)。</div>
+                   <div class="info-divider"></div>
+                   <div class="info-en">After reporting or after commencement of the first sector, if provided 3 or more consecutive hours of rest at an appropriate accommodation, the FDP may be paused or extended by half of the rest period.</div>` 
+        },
+        'report': { 
+            title: '報到時間鎖定 (Report Lock)', 
+            text: `<div class="info-ref">FOM 3.4.6 / Delay</div>
+                   <div class="info-zh">遇到航班<b>「延誤 (Delay)」</b>時使用。點擊鎖定 🔒 可強制系統記住原訂報到時間。<br>⚠️ 往後修改 STD 測試極限時，系統仍會以<b>原報到時間</b>為基準計算，確保絕對合法。</div>
+                   <div class="info-divider"></div>
+                   <div class="info-en">Use when flight is delayed. Lock the original reporting time, as the FDP limits must be strictly calculated based on the original scheduled reporting time for regulatory compliance.</div>` 
+        }
+    };
+
+    function showInfo(key) {
+        const data = INFO_DATA[key];
+        if(!data) return;
+        document.getElementById('infoTitle').innerHTML = data.title;
+        document.getElementById('infoBody').innerHTML = data.text;
+        document.getElementById('infoModal').classList.add('show');
+    }
+    
+    function closeInfo() { 
+        document.getElementById('infoModal').classList.remove('show'); 
+    }
+
+    // --- TOOLBAR TOGGLE & DYNAMIC SUMMARY ---
+    // 工具列收折與動態標籤生成邏輯
+    function toggleToolbar() {
+        const wrapper = document.getElementById('toolbarWrapper');
+        const btn = document.getElementById('headerToggleBtn');
+        const isCollapsed = wrapper.classList.toggle('collapsed');
+        btn.classList.toggle('collapsed', isCollapsed);
+        
+        // Hide popovers when collapsing to avoid ghost floating UI
+        // 收起工具列時關閉所有氣泡視窗避免殘影
+        if(isCollapsed) document.querySelectorAll('.popover').forEach(p => p.classList.remove('show'));
+        localStorage.setItem('toolbarCollapsed', isCollapsed);
+        refreshConditionsSummary(); 
+    }
+
+    function refreshConditionsSummary() {
+        const centerZone = document.getElementById('headerCenterZone');
+        if (!centerZone) return;
+        
+        const isCollapsed = document.getElementById('toolbarWrapper').classList.contains('collapsed');
+        centerZone.innerHTML = ''; // Clear existing chips / 清空目前的標籤
+        
+        // Only show chips if toolbar is collapsed / 如果沒有收起工具列，就保持空白
+        if (!isCollapsed) return;
+
+        const chips = [];
+        if (document.getElementById('extFdt').checked) chips.push('Ext FDT');
+        if (document.getElementById('nightOps').checked) chips.push('Night');
+        if (document.getElementById('noBunk').checked) chips.push('No Bunk');
+        
+        const earlyVal = document.getElementById('earlyMorningSel').value;
+        if (earlyVal !== '0') chips.push(`Early ${earlyVal}D`);
+        
+        const acars = document.getElementById('acarsLbo').value.trim();
+        if (acars) chips.push(`JZ ${acars}`);
+        
+        const prev = document.getElementById('prevFt').value.trim();
+        if (prev && prev !== '0000') chips.push(`Prev ${prev}`);
+
+        // Generate chip HTML elements / 將陣列中的設定轉換為 HTML 的藍色小標籤 (Chips)
+        chips.forEach(text => {
+            const chip = document.createElement('span');
+            chip.className = 'cond-chip';
+            chip.innerHTML = text;
+            centerZone.appendChild(chip);
+        });
+    }
+
+    // === HHMM VALIDATION UX ===
+    // 判斷是否為時間輸入框 / Check if the element is an HHMM input field
+    function isHHMMFieldTarget(el) {
+        if (!el || el.tagName !== 'INPUT' || el.type !== 'tel' || el.classList.contains('taxi-val') || el.readOnly) return false;
+        const id = el.id || '';
+        if (['acarsLbo', 'pf-in', 'pf-dur'].includes(id)) return true;
+        if (/^(in|out|ci|co)-\d+$/.test(id)) return true;
+        return false;
+    }
+    
+    // 初始化時間自動補零與驗證邏輯 / Initialize Auto-pad zero and validation
+    function initHHMMUX() {
+        // Blur event: Auto-pad and validate / 離開輸入框時自動補零與驗證
+        document.addEventListener('blur', function(e){
+            const el = e.target;
+            if (!isHHMMFieldTarget(el)) return;
+            const before = String(el.value || '');
+            const trimmed = before.replace(/\D/g, '').slice(0, 4);
+            if (!trimmed) { el.classList.remove('hhmm-invalid', 'hhmm-valid'); return; }
+
+            let finalVal = trimmed;
+            // Pad zero if less than 4 digits (e.g. 930 -> 0930) / 若長度不足 4 碼，自動補零
+            if (trimmed.length > 0 && trimmed.length < 4) finalVal = trimmed.padStart(4, '0');
+            if (before !== finalVal) {
+                el.value = finalVal;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            // Time logic validation (00-23, 00-59) / 檢查時間邏輯是否合理
+            const h = parseInt(finalVal.slice(0,2), 10);
+            const m = parseInt(finalVal.slice(2,4), 10);
+            if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+                el.classList.add('hhmm-valid'); el.classList.remove('hhmm-invalid');
+            } else {
+                el.classList.add('hhmm-invalid'); el.classList.remove('hhmm-valid');
+            }
+        }, true);
+        
+        // Input event: Allow only numbers and max 4 digits / 輸入時限制僅允許數字與最多 4 碼
+        document.addEventListener('input', function(e){
+            const el = e.target;
+            if (!isHHMMFieldTarget(el)) return;
+            el.classList.remove('hhmm-invalid', 'hhmm-valid');
+            const cleaned = el.value.replace(/\D/g, '').slice(0, 4);
+            if (String(el.value) !== cleaned) el.value = cleaned;
+        });
+    }
+
+    // === CORE LOGIC & STATE ===
     const icaoToIata = {
         'RCTP': 'TPE', 'RCSS': 'TSA', 'RCKH': 'KHH', 'VHHH': 'HKG', 'VMMC': 'MFM',
         'ZSPD': 'PVG', 'ZBAA': 'PEK', 'RJAA': 'NRT', 'RJTT': 'HND', 'RJBB': 'KIX',
@@ -709,16 +1071,23 @@
         { id: 2, code: 'HKG', std: '', stdMode: 'Z', out: '', in: '', sta: '', staMode: 'Z', hotel: false, ci: '', co: '', taxiOut: 15, taxiIn: 15, isDivert: false, isAcm: false },
         { id: 3, code: 'TPE', std: null, stdMode: 'Z', out: null, in: '', sta: '', staMode: 'Z', hotel: false, ci: '', co: '', taxiOut: 15, taxiIn: 15, isDivert: false, isAcm: false }
     ];
+    
+    // 全局狀態物件 (Global App State)
     let app = { 
         crew: 'S', 
         stations: JSON.parse(JSON.stringify(DEFAULTS)), 
         sfts: ['', ''],
-        lockedReport: null,
-        isLocked: false,
-        nextLegHeavy: false 
+        lockedReport: null, 
+        isLocked: false, 
+        nextLegHeavy: false, 
+        acarsLbo: '', 
+        earlyMorning: '0',
+        _stats: {} // Storing calculation results for Status Strip / 用於跨函數儲存計算結果，供 Status Strip 讀取與警告判定
     };
+    
     let savedRoutes = [];
 
+    // IANA 時區對應表 (用於 Local Time 計算 / For Local Time Calculation)
     const airportIanaZones = {
         'TPE': 'Asia/Taipei', 'TSA': 'Asia/Taipei', 'KHH': 'Asia/Taipei', 
         'HKG': 'Asia/Hong_Kong', 'MFM': 'Asia/Macau', 'PVG': 'Asia/Shanghai', 'PEK': 'Asia/Shanghai', 
@@ -743,16 +1112,13 @@
         return new Date(Date.UTC(y, m - 1, d)); 
     }
 
-    /* 🧠 Smart Input Logic 🧠 */
     function getDisplayValue(i, field, mode) {
         const utcVal = app.stations[i][field];
         if (!utcVal) return '';
         if (mode === 'Z') return utcVal;
-
         const code = app.stations[i].code.trim().toUpperCase();
         const zone = airportIanaZones[code];
         if (!zone) return utcVal; 
-
         const refDate = getUtcDate(document.getElementById('flightDate').value) || new Date();
         const info = getLocalInfo(parse(utcVal), zone, refDate);
         return info ? info.timeStr.replace(':','') : utcVal;
@@ -760,7 +1126,6 @@
 
     function handleSmartInput(i, field, rawVal) {
         const mode = app.stations[i][field + 'Mode'] || 'Z';
-        
         if (mode === 'Z') {
             app.stations[i][field] = rawVal;
         } else {
@@ -769,104 +1134,74 @@
             if (zone && rawVal.length === 4) {
                 const calculatedUtc = calcUtcFromLocal(rawVal, zone);
                 app.stations[i][field] = calculatedUtc;
-            } else {
-                if(rawVal.length === 0) app.stations[i][field] = '';
-            }
+            } else { if(rawVal.length === 0) app.stations[i][field] = ''; }
         }
         updateGhostText(i, field, rawVal);
         saveData();
-        
-        // 🔥 AUTO-LINK LOGIC: Update Prev FT if STD changes, else just update totals
-        if (field === 'std') {
-            calc24hOverlap(); // Recalculate Prev FT window
-        }
-        runAllCalc(false); // Update bars
+        if (field === 'std') calc24hOverlap(); 
+        runAllCalc(false); 
     }
 
     function toggleInputMode(i, field) {
         const current = app.stations[i][field + 'Mode'] || 'Z';
         app.stations[i][field + 'Mode'] = (current === 'Z') ? 'L' : 'Z';
-        saveData();
-        drawTimeline(); 
+        saveData(); drawTimeline(); 
     }
     
-    // 🔥 NEW FUNCTION: Toggle ALL modes 🔥
     function toggleAllModes() {
         let target = 'L';
-        // Simple heuristic: if the first station's STD is already L, we probably want to switch back to Z
-        if (app.stations[0] && app.stations[0].stdMode === 'L') {
-            target = 'Z';
-        }
-
-        app.stations.forEach(s => {
-            s.stdMode = target;
-            s.staMode = target;
-        });
-        saveData();
-        drawTimeline();
+        if (app.stations[0] && app.stations[0].stdMode === 'L') target = 'Z';
+        app.stations.forEach(s => { s.stdMode = target; s.staMode = target; });
+        saveData(); drawTimeline();
     }
     
-    // 🔥 NEW HELPER: Update Global Button UI 🔥
     function updateGlobalBtnState() {
         const btn = document.getElementById('globalTimeBtn');
         if(!btn) return;
-        
-        // Check current state of first station
         let isLocal = false;
-        if (app.stations[0] && app.stations[0].stdMode === 'L') {
-            isLocal = true;
-        }
-        
+        if (app.stations[0] && app.stations[0].stdMode === 'L') isLocal = true;
         btn.innerText = isLocal ? "ALL LOCAL" : "ALL UTC";
-        
-        if(isLocal) {
-            btn.style.color = 'white';
-            btn.style.background = 'var(--brand-orange)';
-            btn.style.borderColor = 'var(--brand-orange)';
-        } else {
-            btn.style.color = 'var(--brand-blue)';
-            btn.style.background = 'var(--bg-input)';
-            btn.style.borderColor = 'var(--border-light)';
+        if(isLocal) { 
+            btn.style.color = 'white'; 
+            btn.style.background = 'var(--brand-orange)'; 
+            btn.style.borderColor = 'var(--brand-orange)'; 
+        } else { 
+            btn.style.color = 'var(--brand-blue)'; 
+            btn.style.background = 'var(--bg-input)'; 
+            btn.style.borderColor = 'var(--border-light)'; 
         }
     }
 
     function calcUtcFromLocal(localHHMM, zone) {
         const refDate = getUtcDate(document.getElementById('flightDate').value) || new Date();
-        const h = parseInt(localHHMM.substring(0,2));
-        const m = parseInt(localHHMM.substring(2,4));
+        const h = parseInt(localHHMM.substring(0,2)); const m = parseInt(localHHMM.substring(2,4));
         if(isNaN(h) || isNaN(m)) return '';
-
-        const guessUtc = new Date(refDate);
-        guessUtc.setUTCHours(h, m);
-
+        const guessUtc = new Date(refDate); guessUtc.setUTCHours(h, m);
+        
+        // 透過 Intl API 獲取準確的當地時間進行時區偏移計算 / Get exact local offset via Intl API
         const formatLocal = new Intl.DateTimeFormat('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
         const parts = formatLocal.formatToParts(guessUtc);
-        const lh = parseInt(parts.find(p=>p.type==='hour').value);
-        const lm = parseInt(parts.find(p=>p.type==='minute').value);
+        const lh = parseInt(parts.find(p=>p.type==='hour').value); const lm = parseInt(parts.find(p=>p.type==='minute').value);
         
         let diffMinutes = (lh*60+lm) - (h*60+m);
-        if (diffMinutes > 720) diffMinutes -= 1440;
+        if (diffMinutes > 720) diffMinutes -= 1440; 
         if (diffMinutes < -720) diffMinutes += 1440;
-
+        
         let totalMins = (h*60+m) - diffMinutes;
-        if (totalMins < 0) totalMins += 1440;
+        if (totalMins < 0) totalMins += 1440; 
         if (totalMins >= 1440) totalMins -= 1440;
-
-        const uh = Math.floor(totalMins/60);
-        const um = totalMins%60;
-        return String(uh).padStart(2,'0') + String(um).padStart(2,'0');
+        
+        return String(Math.floor(totalMins/60)).padStart(2,'0') + String(totalMins%60).padStart(2,'0');
     }
 
     function updateGhostText(i, field, rawVal) {
         const el = document.getElementById(`${field}-ghost-${i}`);
         if (!el || rawVal.length < 4) { if(el) el.innerText = ''; return; }
-        
         const mode = app.stations[i][field + 'Mode'] || 'Z';
         const code = app.stations[i].code.trim().toUpperCase();
         const zone = airportIanaZones[code];
-        
         if (!zone) { el.innerText = ''; return; }
-
+        
         if (mode === 'L') {
             const utc = calcUtcFromLocal(rawVal, zone);
             el.innerText = `= ${utc.substring(0,2)}:${utc.substring(2,4)}Z`;
@@ -880,14 +1215,15 @@
         }
     }
 
+    // === DOM DRAWING & RENDERING ===
+    // 繪製動態時間軸主結構 / Render Timeline Structure
     function drawTimeline() {
         const con = document.getElementById('timeline-container');
         let html = '';
-        
         app.stations.forEach((st, i) => {
-            const isFirst = i === 0;
-            const isLast = i === app.stations.length - 1;
-
+            const isFirst = i === 0; const isLast = i === app.stations.length - 1;
+            
+            // Render Flight Leg Connector / 繪製航段連接卡 (Flight Leg)
             if (!isFirst) {
                 const sft = app.sfts[i-1] || '';
                 const isAcmLeg = app.stations[i-1].isAcm; 
@@ -909,19 +1245,20 @@
                     </div>
                 </div>`;
             }
-
+            
             const cardClass = st.isDivert ? 'station-card station-divert' : 'station-card';
-            
             html += `<div class="station-wrapper"><div class="${cardClass}">`;
+            if(!isFirst && !isLast) html += `<div class="btn-del" onclick="remSt(${i})" title="Delete Station">✕</div>`;
             
-            if(!isFirst && !isLast) html += `<div class="icon-btn btn-del" onclick="remSt(${i})">✕</div>`;
-
+            // Render Station Header / 繪製航站標題與按鈕
             html += `<div class="station-header">
                         <input type="text" id="code-${i}" class="station-code-input" value="${st.code}" onchange="updVal(${i},'code',this.value)">
                         ${!isLast ? `
                         <div style="text-align:right;">
                             <label class="toggle-wrapper" style="padding:0 8px;">
-                                <span style="font-size:10px; font-weight:700; margin-right:6px;">HOTEL</span>
+                                <span style="font-size:10px; font-weight:700; margin-right:6px; display:flex; align-items:center;">
+                                    HOTEL <span class="info-icon" onclick="event.stopPropagation(); showInfo('hotel')">i</span>
+                                </span>
                                 <label class="switch" style="transform:scale(0.8);">
                                     <input type="checkbox" ${st.hotel?'checked':''} onchange="toggleHotel(${i},this.checked)">
                                     <span class="slider"></span>
@@ -931,6 +1268,7 @@
                         </div>` : ''}
                     </div>`;
 
+            // Render Hotel Block / 繪製飯店休息區塊
             if (!isLast && st.hotel) {
                 html += `
                 <div class="hotel-section">
@@ -943,75 +1281,53 @@
                 </div>`;
             }
 
+            // Render Arrival Block / 繪製抵達 (IN) 輸入區塊
             if (!isFirst) {
-                // ARRIVAL BLOCK
                 const staMode = st.staMode || 'Z';
                 const staDisplay = getDisplayValue(i, 'sta', staMode);
                 html += `<div class="input-group">
                             <span class="input-label">Arrival (IN)</span>
                             <div class="time-input-row">
-                                <div class="taxi-badge">
+                                <div class="taxi-badge" title="Act Taxi In (Not for LBO)">
                                     <span style="font-size:9px; font-weight:700; color:var(--text-tertiary);">TX</span>
                                     <input type="tel" class="taxi-val" value="${st.taxiIn!==undefined?st.taxiIn:15}" oninput="updVal(${i},'taxiIn',this.value)">
                                 </div>
-                                <input type="tel" class="glass-input" id="in-${i}" placeholder="ACT IN" value="${st.in||''}" oninput="updVal(${i},'in',this.value)" style="border-color:var(--brand-red);">
-                                
+                                <input type="tel" class="glass-input" id="in-${i}" placeholder="ACT IN" value="${st.in||''}" oninput="updVal(${i},'in',this.value)" style="border-color:var(--brand-blue);">
                                 <div class="smart-input-wrapper">
-                                    <input type="tel" class="glass-input" placeholder="STA" 
-                                        value="${staDisplay}" 
-                                        oninput="handleSmartInput(${i}, 'sta', this.value)"
-                                        onfocus="updateGhostText(${i}, 'sta', this.value)"
-                                        onblur="document.getElementById('sta-ghost-${i}').innerText=''"
-                                        >
-                                    <div class="mode-badge ${staMode==='L'?'mode-l':'mode-z'}" onclick="toggleInputMode(${i}, 'sta')">
-                                        ${staMode}
-                                    </div>
+                                    <input type="tel" class="glass-input" placeholder="STA" value="${staDisplay}" oninput="handleSmartInput(${i}, 'sta', this.value)" onfocus="updateGhostText(${i}, 'sta', this.value)" onblur="document.getElementById('sta-ghost-${i}').innerText=''">
+                                    <div class="mode-badge ${staMode==='L'?'mode-l':'mode-z'}" onclick="toggleInputMode(${i}, 'sta')">${staMode}</div>
                                     <div id="sta-ghost-${i}" class="ghost-text"></div>
                                 </div>
-
                             </div>
                          </div>`;
             }
 
-            if (!isFirst && !isLast) {
-                html += `<div id="turn-${i}" style="text-align:center; font-size:10px; font-weight:bold; color:var(--text-secondary); margin:6px 0; font-family:monospace;">Turn: --:--</div>`;
-            }
+            if (!isFirst && !isLast) html += `<div id="turn-${i}" style="text-align:center; font-size:10px; font-weight:bold; color:var(--text-secondary); margin:6px 0; font-family:monospace;">Turn: --:--</div>`;
 
+            // Render Departure Block & LBO / 繪製出發 (OUT) 輸入區塊與 LBO
             if (!isLast) {
-                 // DEPARTURE BLOCK
                  const stdMode = st.stdMode || 'Z';
                  const stdDisplay = getDisplayValue(i, 'std', stdMode);
-
                  html += `<div class="input-group">
                             <span class="input-label">Departure (OUT)</span>
                             <div class="time-input-row">
                                 <div class="smart-input-wrapper">
-                                    <input type="tel" class="glass-input" placeholder="STD" 
-                                        value="${stdDisplay}" 
-                                        oninput="handleSmartInput(${i}, 'std', this.value)"
-                                        onfocus="updateGhostText(${i}, 'std', this.value)"
-                                        onblur="document.getElementById('std-ghost-${i}').innerText=''"
-                                        >
-                                    <div class="mode-badge ${stdMode==='L'?'mode-l':'mode-z'}" onclick="toggleInputMode(${i}, 'std')">
-                                        ${stdMode}
-                                    </div>
+                                    <input type="tel" class="glass-input" placeholder="STD" value="${stdDisplay}" oninput="handleSmartInput(${i}, 'std', this.value)" onfocus="updateGhostText(${i}, 'std', this.value)" onblur="document.getElementById('std-ghost-${i}').innerText=''">
+                                    <div class="mode-badge ${stdMode==='L'?'mode-l':'mode-z'}" onclick="toggleInputMode(${i}, 'std')">${stdMode}</div>
                                     <div id="std-ghost-${i}" class="ghost-text"></div>
                                 </div>
-
                                 <input type="tel" class="glass-input" id="out-${i}" placeholder="ACT OUT" value="${st.out||''}" oninput="updVal(${i},'out',this.value)" style="border-color:var(--brand-green);">
-                                <div class="taxi-badge">
+                                <div class="taxi-badge" title="Act Taxi Out (Not for LBO)">
                                     <span style="font-size:9px; font-weight:700; color:var(--text-tertiary);">TX</span>
                                     <input type="tel" class="taxi-val" value="${st.taxiOut!==undefined?st.taxiOut:15}" oninput="updVal(${i},'taxiOut',this.value)">
                                 </div>
                             </div>
                          </div>`;
-
                  html += `<div class="lbo-display" id="lbo-box-${i}">
                             <span class="lbo-label">LAST LEGAL PUSH (Z)</span>
                             <div id="lbo-${i}" class="lbo-time">--:--</div>
                             <div id="lbo-detail-${i}" style="font-size:9px; color:var(--text-secondary); font-family:monospace;"></div>
                           </div>`;
-
                  html += `<div class="action-row">
                             <div class="icon-btn btn-add" onclick="addSt(${i})">+</div>
                             <div class="icon-btn btn-div" onclick="addDivert(${i})">⤵</div>
@@ -1023,47 +1339,36 @@
                             <div id="cap-msg-card" style="font-size:10px; color:var(--brand-red); font-weight:bold;"></div>
                           </div>`;
             }
-
             html += `</div></div>`;
         });
         
         con.innerHTML = html;
         updateLockButton();
         updateResultsOnly(); 
-        updateGlobalBtnState(); // Update the button visual whenever we redraw
+        updateGlobalBtnState();
+        
+        // 觸發輸入框屬性初始化 (限制為數字鍵盤) / Ensure tel inputs trigger number pad
+        document.querySelectorAll('input[type="tel"]').forEach(el => {
+            if (!isHHMMFieldTarget(el)) return;
+            el.setAttribute('inputmode', 'numeric'); el.setAttribute('maxlength', '4');
+        });
     }
 
     function toggleLock() {
-        if (app.isLocked) {
-            app.isLocked = false;
-            app.lockedReport = null;
-        } else {
-            const s0 = app.stations[0];
-            const std = parse(s0.std);
-            if (std === null) return;
-            const code = s0.code.toUpperCase().trim();
-            const reportOffset = (code === 'TPE') ? 90 : 60;
-            let rep = std - reportOffset;
-            if (rep < 0) rep += 1440;
-            app.lockedReport = rep;
-            app.isLocked = true;
+        if (app.isLocked) { app.isLocked = false; app.lockedReport = null; } 
+        else {
+            const s0 = app.stations[0]; const std = parse(s0.std); if (std === null) return;
+            const code = s0.code.toUpperCase().trim(); const reportOffset = (code === 'TPE') ? 90 : 60;
+            let rep = std - reportOffset; if (rep < 0) rep += 1440;
+            app.lockedReport = rep; app.isLocked = true;
         }
-        saveData();
-        updateLockButton();
-        runAllCalc();
+        saveData(); updateLockButton(); runAllCalc();
     }
 
     function updateLockButton() {
-        const btn = document.getElementById('lockBtn');
-        const box = document.getElementById('report-box');
-        if (app.isLocked) {
-            btn.innerHTML = `🔒`;
-            if(box) box.classList.add('locked');
-        } else {
-            btn.innerHTML = `🔓`;
-            btn.style.color = 'var(--text-secondary)';
-            if(box) box.classList.remove('locked');
-        }
+        const btn = document.getElementById('lockBtn'); const box = document.getElementById('report-box');
+        if (app.isLocked) { btn.innerHTML = `🔒`; if(box) box.classList.add('locked'); } 
+        else { btn.innerHTML = `🔓`; btn.style.color = 'var(--text-secondary)'; if(box) box.classList.remove('locked'); }
     }
 
     function toggleNightMode() {
@@ -1073,77 +1378,75 @@
         document.getElementById('nightBtnIcon').innerText = isDark ? '☀️' : '🌙';
     }
     
-    function toggleNextLegHigh(checked) {
-        app.nextLegHeavy = checked;
-        saveData();
-        runAllCalc();
+    function toggleNextLegHigh(checked) { app.nextLegHeavy = checked; saveData(); runAllCalc(); }
+    function updAcarsLbo(v) { app.acarsLbo = v; saveData(); runAllCalc(); }
+    function updEarlyMorning(v) { app.earlyMorning = v; saveData(); runAllCalc(); }
+
+    function togglePrevPopup(e) {
+        if(e) e.stopPropagation();
+        const el = document.getElementById('prevPopup');
+        const isClosed = !el.classList.contains('show');
+        document.querySelectorAll('.popover').forEach(p => p.classList.remove('show')); 
+        if (isClosed) {
+            const curDateVal = document.getElementById('flightDate').value;
+            if (curDateVal) {
+                const d = getUtcDate(curDateVal); d.setUTCDate(d.getUTCDate() - 1); 
+                const yyyy = d.getUTCFullYear(); const mm = String(d.getUTCMonth() + 1).padStart(2, '0'); const dd = String(d.getUTCDate()).padStart(2, '0');
+                document.getElementById('pf-date').value = `${yyyy}-${mm}-${dd}`;
+            }
+            calc24hOverlap(); el.classList.add('show');
+        }
     }
 
-    function toggleRoutePopup() {
+    function toggleRoutePopup(e) {
+        if(e) e.stopPropagation();
         const el = document.getElementById('routePopup');
-        el.classList.toggle('show');
-        renderRouteList();
+        const isClosed = !el.classList.contains('show');
+        document.querySelectorAll('.popover').forEach(p => p.classList.remove('show')); 
+        if(isClosed) { el.classList.add('show'); renderRouteList(); }
     }
 
     function saveRoute() {
         const name = document.getElementById('routeName').value.trim();
         if(!name) { alert('Please enter a name'); return; }
-        const routeData = {
-            name: name,
-            stations: JSON.parse(JSON.stringify(app.stations)),
-            sfts: JSON.parse(JSON.stringify(app.sfts)),
-            crew: app.crew,
-            isNight: document.getElementById('nightOps').checked,
-            isNoBunk: document.getElementById('noBunk').checked,
-            extFdt: document.getElementById('extFdt').checked
-        };
-        savedRoutes.push(routeData);
+        savedRoutes.push({ 
+            name: name, 
+            stations: JSON.parse(JSON.stringify(app.stations)), 
+            sfts: JSON.parse(JSON.stringify(app.sfts)), 
+            crew: app.crew, 
+            isNight: document.getElementById('nightOps').checked, 
+            isNoBunk: document.getElementById('noBunk').checked, 
+            extFdt: document.getElementById('extFdt').checked 
+        });
         localStorage.setItem('calSavedRoutes', JSON.stringify(savedRoutes));
-        const btn = document.getElementById('saveBtn');
-        const origText = btn.innerText;
+        const btn = document.getElementById('saveBtn'); const origText = btn.innerText;
         btn.innerText = "Saved!";
-        setTimeout(() => { 
-            btn.innerText = origText; 
-            document.getElementById('routeName').value = '';
-            renderRouteList();
-        }, 1000);
+        setTimeout(() => { btn.innerText = origText; document.getElementById('routeName').value = ''; renderRouteList(); }, 1000);
     }
 
     function loadRoute(idx) {
-        if(!savedRoutes[idx]) return;
-        const r = savedRoutes[idx];
-        app.stations = JSON.parse(JSON.stringify(r.stations));
-        app.sfts = JSON.parse(JSON.stringify(r.sfts));
+        if(!savedRoutes[idx]) return; const r = savedRoutes[idx];
+        app.stations = JSON.parse(JSON.stringify(r.stations)); app.sfts = JSON.parse(JSON.stringify(r.sfts));
         if (r.isNight !== undefined) document.getElementById('nightOps').checked = r.isNight;
         if (r.isNoBunk !== undefined) document.getElementById('noBunk').checked = r.isNoBunk;
         if (r.extFdt !== undefined) document.getElementById('extFdt').checked = r.extFdt;
-        setCrew(r.crew); 
-        drawTimeline(); 
-        runAllCalc();
+        setCrew(r.crew); drawTimeline(); runAllCalc();
         document.getElementById('routePopup').classList.remove('show');
     }
 
     function deleteRoute(idx) {
-        if(confirm('Delete this route?')) {
-            savedRoutes.splice(idx, 1);
-            localStorage.setItem('calSavedRoutes', JSON.stringify(savedRoutes));
-            renderRouteList();
-        }
+        if(confirm('Delete this route?')) { savedRoutes.splice(idx, 1); localStorage.setItem('calSavedRoutes', JSON.stringify(savedRoutes)); renderRouteList(); }
     }
 
     function renderRouteList() {
         const list = document.getElementById('routeList');
-        if(savedRoutes.length === 0) {
-            list.innerHTML = '<div style="font-size:10px; color:#999; text-align:center; padding:5px;">No saved routes</div>';
-            return;
-        }
+        if(savedRoutes.length === 0) { list.innerHTML = '<div style="font-size:10px; color:#999; text-align:center; padding:5px;">No saved routes</div>'; return; }
         let html = '';
         savedRoutes.forEach((r, i) => {
-            html += `
-            <div style="display:flex; justify-content:space-between; padding:6px; border-bottom:1px solid var(--border-light); align-items:center; cursor:pointer;" onclick="loadRoute(${i})">
-                <span style="font-size:12px; font-weight:600;">${r.name}</span>
-                <span style="color:var(--brand-red); font-weight:bold; padding:4px;" onclick="event.stopPropagation(); deleteRoute(${i})">✕</span>
-            </div>`;
+            html += `<div style="display:flex; justify-content:space-between; padding:6px; border-bottom:1px solid var(--border-light); align-items:center; cursor:pointer;" onclick="loadRoute(${i})">
+                        <span style="font-size:12px; font-weight:600;">${r.name}</span>
+                        <span style="color:var(--brand-red); font-weight:bold; padding:4px;" onclick="event.stopPropagation(); deleteRoute(${i})">✕</span>
+                    </div>`;
         });
         list.innerHTML = html;
     }
@@ -1151,11 +1454,7 @@
     function exportRoutes() {
         if(savedRoutes.length === 0) { alert('No routes to export.'); return; }
         const dataStr = JSON.stringify(savedRoutes);
-        navigator.clipboard.writeText(dataStr).then(() => {
-            alert('Routes copied to clipboard!');
-        }).catch(() => {
-            prompt('Copy this data manually:', dataStr);
-        });
+        navigator.clipboard.writeText(dataStr).then(() => alert('Routes copied!')).catch(() => prompt('Copy manually:', dataStr));
     }
 
     function importRoutes() {
@@ -1164,14 +1463,9 @@
         try {
             const imported = JSON.parse(dataStr);
             if(Array.isArray(imported)) {
-                if(imported.length > 0 && (!imported[0].stations || !imported[0].crew)) {
-                        alert('Invalid data format.'); return;
-                }
-                savedRoutes = imported;
-                localStorage.setItem('calSavedRoutes', JSON.stringify(savedRoutes));
-                renderRouteList();
-                alert('Routes imported successfully!');
-            } else { alert('Invalid data format.'); }
+                if(imported.length > 0 && (!imported[0].stations || !imported[0].crew)) { alert('Invalid data format.'); return; }
+                savedRoutes = imported; localStorage.setItem('calSavedRoutes', JSON.stringify(savedRoutes)); renderRouteList(); alert('Routes imported successfully!');
+            } else alert('Invalid data format.');
         } catch(e) { alert('Error parsing data.'); }
     }
 
@@ -1182,977 +1476,694 @@
         else { 
             if (f === 'code') {
                 let val = v.toUpperCase().trim();
-                if (val.length === 4 && icaoToIata[val]) {
-                    val = icaoToIata[val];
-                    const el = document.getElementById(`code-${i}`);
-                    if(el) el.value = val;
-                }
+                if (val.length === 4 && icaoToIata[val]) { val = icaoToIata[val]; const el = document.getElementById(`code-${i}`); if(el) el.value = val; }
                 app.stations[i][f] = val;
-            } else {
-                app.stations[i][f] = v; 
-            }
+            } else app.stations[i][f] = v; 
         }
-        saveData();
-        
-        // 🔥 Update Prev FT only if OUT changes (Actual times affect history)
-        if(f === 'out') {
-            calc24hOverlap();
-        }
-        runAllCalc();
+        saveData(); if(f === 'out') calc24hOverlap(); runAllCalc();
     }
 
-    function updSft(i, v) { 
-        app.sfts[i] = v; 
-        saveData(); 
-        runAllCalc(); // Only re-calc totals, do NOT shift prev FT
-    }
-      
-    function toggleHotel(i, checked) { 
-        app.stations[i]['hotel'] = checked; 
-        saveData(); 
-        drawTimeline(); 
-    }
-    
-    function toggleAcm(i) {
-        if(app.stations[i]) {
-            app.stations[i].isAcm = !app.stations[i].isAcm;
-            saveData();
-            drawTimeline();
-        }
-    }
+    function updSft(i, v) { app.sfts[i] = v; saveData(); runAllCalc(); }
+    function toggleHotel(i, checked) { app.stations[i]['hotel'] = checked; saveData(); drawTimeline(); }
+    function toggleAcm(i) { if(app.stations[i]) { app.stations[i].isAcm = !app.stations[i].isAcm; saveData(); drawTimeline(); } }
 
-    function addSt(i) { 
-        app.stations.splice(i+1, 0, { id: Date.now(), code: 'XXX', std: '', stdMode: 'Z', out: '', in: '', sta: '', staMode: 'Z', hotel: false, ci:'', co:'', taxiOut: 15, taxiIn: 15, isDivert: false, isAcm: false }); 
-        app.sfts.splice(i, 0, ''); 
-        saveData(); drawTimeline(); 
-    }
-
-    function addDivert(i) {
-        app.stations.splice(i+1, 0, { 
-            id: Date.now(), 
-            code: 'DIV', 
-            std: '', stdMode: 'Z', out: '', in: '', sta: '', staMode: 'Z', 
-            hotel: false, ci:'', co:'', 
-            taxiOut: 15, taxiIn: 15,
-            isDivert: true,
-            isAcm: false
-        });
-        app.sfts.splice(i, 0, ''); 
-        saveData(); 
-        drawTimeline();
-    }
-
+    function addSt(i) { app.stations.splice(i+1, 0, { id: Date.now(), code: 'XXX', std: '', stdMode: 'Z', out: '', in: '', sta: '', staMode: 'Z', hotel: false, ci:'', co:'', taxiOut: 15, taxiIn: 15, isDivert: false, isAcm: false }); app.sfts.splice(i, 0, ''); saveData(); drawTimeline(); }
+    function addDivert(i) { app.stations.splice(i+1, 0, { id: Date.now(), code: 'DIV', std: '', stdMode: 'Z', out: '', in: '', sta: '', staMode: 'Z', hotel: false, ci:'', co:'', taxiOut: 15, taxiIn: 15, isDivert: true, isAcm: false }); app.sfts.splice(i, 0, ''); saveData(); drawTimeline(); }
     function remSt(i) { app.stations.splice(i, 1); app.sfts.splice(i-1, 1); saveData(); drawTimeline(); }
     
     function setCrew(c) { 
-        app.crew = c; 
-        document.querySelectorAll('.crew-btn').forEach(b => b.classList.remove('active')); 
-        document.getElementById(`btn-${c}`).classList.add('active'); 
-        
-        const extChk = document.getElementById('extFdt');
-        const extCont = document.getElementById('extFdtContainer');
-        if (c === 'S') {
-            extChk.checked = false;
-            extChk.disabled = true;
-            extCont.style.opacity = '0.5';
-        } else {
-            extChk.disabled = false;
-            extCont.style.opacity = '1';
-        }
-        saveData(); 
-        updateResultsOnly(); 
+        app.crew = c; document.querySelectorAll('.crew-btn').forEach(b => b.classList.remove('active')); document.getElementById(`btn-${c}`).classList.add('active'); 
+        const extChk = document.getElementById('extFdt'); const extCont = document.getElementById('extFdtContainer');
+        if (c === 'S') { extChk.checked = false; extChk.disabled = true; extCont.style.opacity = '0.5'; } else { extChk.disabled = false; extCont.style.opacity = '1'; }
+        saveData(); updateResultsOnly(); 
     }
     
     function resetData() { 
-        const saved = localStorage.getItem('calSavedRoutes');
-        const night = localStorage.getItem('nightMode');
+        const saved = localStorage.getItem('calSavedRoutes'); const night = localStorage.getItem('nightMode'); const headerState = localStorage.getItem('toolbarCollapsed');
         localStorage.removeItem('calData158'); 
-        if(saved) localStorage.setItem('calSavedRoutes', saved);
-        if(night) localStorage.setItem('nightMode', night);
+        if(saved) localStorage.setItem('calSavedRoutes', saved); if(night) localStorage.setItem('nightMode', night); if(headerState) localStorage.setItem('toolbarCollapsed', headerState);
         location.reload(); 
     }
 
+    // 🚀 LEGAL STATUS STRIP UPDATE LOGIC (SMART HUD)
+    // 負責更新「全局狀態列」的智慧引擎
+    function refreshLegalStatusStrip() {
+        const strip = document.getElementById('legalStatusStrip');
+        if (!strip) return;
+        const title = document.getElementById('legalStatusTitle');
+        const text = document.getElementById('legalStatusText');
+        
+        const st = app._stats;
+        let s_state = 'info';
+        let s_text = 'Set report time / route to begin legal status evaluation';
+
+        if (st.isReady) {
+            let d_msgs = [];
+            // Alert Check: Any strict limit exceeded / 檢查是否有任何硬性極限超標
+            if (st.ldg > 6) d_msgs.push('Ldg > 6');
+            if (st.isFtExceeded) d_msgs.push('FT Limit');
+            if (st.isFdpExceeded) d_msgs.push('FDP Limit');
+            
+            // Only report Live Duty Exceeded if currently tracking / 僅在執勤窗口內通報現實時間超時
+            if (st.isLiveDutyExceeded) d_msgs.push('Live Duty Exceeded');
+
+            if (d_msgs.length > 0) {
+                // State: DANGER (Alert)
+                s_state = 'danger';
+                s_text = `Exceeded: ${d_msgs.join(', ')}`;
+            } else {
+                let c_msgs = [];
+                // State: CAUTION (Warning thresholds)
+                // 飛時 (FT) 只剩 60 分鐘內觸發 Caution
+                if (st.ftRem >= 0 && st.ftRem <= 60) c_msgs.push(`FT Rem: ${fmt(st.ftRem, false)}`);
+                // 任務期 (FDP) 剩下 90 分鐘內觸發 Caution
+                if (st.fdpRem >= 0 && st.fdpRem <= 90) c_msgs.push(`FDP Rem: ${fmt(st.fdpRem, false)}`);
+                
+                // 現實時間還在執勤中，且距離極限剩下 90 分鐘以內 (僅限合理的現實時間窗)
+                // Live FDP Rem checks if current real time is approaching limits
+                if (st.isLiveTracking && !st.isDutyFinished && st.elapsedSinceRep > 0 && st.rtRem >= 0 && st.rtRem <= 90) {
+                    c_msgs.push(`Live FDP Rem: ${Math.floor(st.rtRem)}m`);
+                }
+                
+                if (c_msgs.length > 0) {
+                    s_state = 'caution';
+                    s_text = `Approaching Limits: ${c_msgs.join(' · ')}`;
+                } else {
+                    // State: SAFE (Everything normal)
+                    s_state = 'safe';
+                    s_text = `Legal & In Range · Max FDT ${fmt(st.maxFdpMins, false)}`;
+                    if (st.ftRem > 0) s_text += ` · FT Rem ${fmt(st.ftRem, false)}`;
+                    if (app.isLocked) s_text += ' · [Locked]';
+                }
+            }
+        }
+
+        strip.dataset.state = s_state;
+        if (title) title.textContent = s_state === 'danger' ? 'ALERT' : s_state === 'caution' ? 'CAUTION' : s_state === 'safe' ? 'SAFE' : 'STATUS';
+        if (text) text.textContent = s_text;
+    }
+
+    // 全局執行計算總和與介面刷新 / Run all calculations and UI refreshes
     function runAllCalc(redraw = false) { 
-        // calc24hOverlap() is intentionally removed here to prevent "ghost jumps"
         saveData(); 
         updateResultsOnly(); 
-        if (redraw) drawTimeline();
+        if (redraw) drawTimeline(); 
+        refreshConditionsSummary(); 
+        refreshLegalStatusStrip(); 
     }
     
-    function togglePrevPopup() {
-        const el = document.getElementById('prevPopup');
-        const isClosed = !el.classList.contains('show');
-        if (isClosed) {
-            const curDateVal = document.getElementById('flightDate').value;
-            if (curDateVal) {
-                const d = getUtcDate(curDateVal);
-                d.setUTCDate(d.getUTCDate() - 1); 
-                const yyyy = d.getUTCFullYear();
-                const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-                const dd = String(d.getUTCDate()).padStart(2, '0');
-                document.getElementById('pf-date').value = `${yyyy}-${mm}-${dd}`;
-            }
-            calc24hOverlap(); 
-        }
-        el.classList.toggle('show');
-    }
-    
+    // --- 0. PREVIOUS FLIGHT 24H OVERLAP LOGIC ---
     function calc24hOverlap() {
-        const pfDateStr = document.getElementById('pf-date').value;
-        const pfInStr = document.getElementById('pf-in').value;
-        const pfDurStr = document.getElementById('pf-dur').value;
-        const curDateStr = document.getElementById('flightDate').value;
-        const s0 = app.stations[0];
-        const s1 = app.stations[1]; 
-        
+        const pfDateStr = document.getElementById('pf-date').value; const pfInStr = document.getElementById('pf-in').value; const pfDurStr = document.getElementById('pf-dur').value; const curDateStr = document.getElementById('flightDate').value;
+        const s0 = app.stations[0]; const s1 = app.stations[1]; 
         const curStartMins = parse(s0.out) !== null ? parse(s0.out) : parse(s0.std);
         let curDurMins = parse(app.sfts[0]);
-
-        if (curDurMins !== null) {
-            const tOut = s0.taxiOut !== undefined ? s0.taxiOut : 15;
-            const tIn = (s1 && s1.taxiIn !== undefined) ? s1.taxiIn : 15;
-            curDurMins += (tOut + tIn);
-        }
-        if(curDurMins === null && s1 && parse(s1.sta) !== null && parse(s0.std) !== null) {
-            curDurMins = diff(parse(s0.std), parse(s1.sta));
-        }
-        
+        if (curDurMins !== null) { const tOut = s0.taxiOut !== undefined ? s0.taxiOut : 15; const tIn = (s1 && s1.taxiIn !== undefined) ? s1.taxiIn : 15; curDurMins += (tOut + tIn); }
+        if(curDurMins === null && s1 && parse(s1.sta) !== null && parse(s0.std) !== null) curDurMins = diff(parse(s0.std), parse(s1.sta));
         if (!pfDateStr || !pfInStr || !pfDurStr || !curDateStr || curStartMins === null || curDurMins === null) return; 
 
-        const pfInMins = parse(pfInStr);
-        const pfDurMins = parse(pfDurStr);
-        const ONE_DAY = 24 * 60 * 60 * 1000;
+        const pfInMins = parse(pfInStr); const pfDurMins = parse(pfDurStr); const ONE_DAY = 24 * 60 * 60 * 1000;
+        const curBaseDate = getUtcDate(curDateStr); const curStartTs = curBaseDate.getTime() + (curStartMins * 60000); const curEndTs = curStartTs + (curDurMins * 60000); const windowStartTs = curEndTs - ONE_DAY;
+        const pfBaseDate = getUtcDate(pfDateStr); const pfEndTs = pfBaseDate.getTime() + (pfInMins * 60000); const pfStartTs = pfEndTs - (pfDurMins * 60000);
+        const overlapStart = Math.max(windowStartTs, pfStartTs); const overlapEnd = Math.min(curEndTs, pfEndTs); 
+        let overlapMins = 0; if (overlapEnd > overlapStart) overlapMins = Math.floor((overlapEnd - overlapStart) / 60000);
         
-        const curBaseDate = getUtcDate(curDateStr);
-        const curStartTs = curBaseDate.getTime() + (curStartMins * 60000);
-        const curEndTs = curStartTs + (curDurMins * 60000);
-        const windowStartTs = curEndTs - ONE_DAY;
-
-        const pfBaseDate = getUtcDate(pfDateStr);
-        const pfEndTs = pfBaseDate.getTime() + (pfInMins * 60000);
-        const pfStartTs = pfEndTs - (pfDurMins * 60000);
-
-        const overlapStart = Math.max(windowStartTs, pfStartTs);
-        const overlapEnd = Math.min(curEndTs, pfEndTs); 
-        
-        let overlapMins = 0;
-        if (overlapEnd > overlapStart) {
-            overlapMins = Math.floor((overlapEnd - overlapStart) / 60000);
-        }
-        
-        if (overlapMins > 0) {
-            document.getElementById('prevFt').value = fmt(overlapMins, false).replace(':',''); 
-            document.getElementById('prevFt').style.color = 'var(--brand-blue)';
-        } else {
-            document.getElementById('prevFt').value = "0000"; 
-            document.getElementById('prevFt').style.color = 'var(--text-tertiary)';
-        }
+        if (overlapMins > 0) { document.getElementById('prevFt').value = fmt(overlapMins, false).replace(':',''); document.getElementById('prevFt').style.color = 'var(--brand-blue)'; } 
+        else { document.getElementById('prevFt').value = "0000"; document.getElementById('prevFt').style.color = 'var(--text-tertiary)'; }
     }
 
     function updateResultsOnly() {
-        let stationLimitExtensions = []; 
-        let globalPauseMinutes = 0; 
+        app._stats.isReady = false; 
 
-        app.stations.forEach((s, i) => {
-            let extension = 0;
-            let pause = 0;
-            if (s.hotel && i < app.stations.length - 1) {
-                const hTime = calcRest(s.ci, s.co);
-                const badge = document.getElementById(`rest-badge-${i}`);
-                if(badge) {
-                    badge.style.display = 'block';
-                    badge.innerText = `Rest: ${hTime>0 ? fmt(hTime,false) : '--:--'}`;
-                    if (hTime > 0 && hTime < 180) {
-                        badge.style.color = 'var(--brand-red)';
-                        badge.innerText += ' (<3h)';
-                    } else {
-                        badge.style.color = 'var(--brand-blue)';
-                    }
-                }
-                if (hTime >= 180) {
-                    if (i === 0) {
-                        pause = hTime;
-                        if(badge) badge.innerText += ' (Split)';
-                    } else {
-                        extension = Math.floor(hTime / 2);
-                        if(badge) badge.innerText += ' (Ext)';
-                    }
-                }
-            } else {
-                const badge = document.getElementById(`rest-badge-${i}`);
-                if(badge) badge.style.display = 'none';
-            }
-            stationLimitExtensions.push(extension);
-            if (i === 0) globalPauseMinutes = pause;
-        });
-
-        // Calculate Limits First (Needed for Rest Logic)
-        let base = 14; 
-        if(app.crew==='M') base=18; if(app.crew==='D') base=24; 
-        
-        const isNight = document.getElementById('nightOps').checked;
-        let lim = isNight ? base - 2 : base;
-        
-        const totalExtension = stationLimitExtensions.reduce((a, b) => a + b, 0);
-        const isExt = document.getElementById('extFdt').checked;
-        const discretionMins = isExt ? 120 : 0;
-
-        let globalMaxFdpMins = (lim*60) + globalPauseMinutes + totalExtension + discretionMins; 
-        let isCapped = false;
-        if (globalMaxFdpMins > 1440) { globalMaxFdpMins = 1440; isCapped = true; } 
-
-        let limitText = `${base}h`;
-        if(isNight) limitText += `-2h`;
-        if(globalPauseMinutes > 0) limitText += `+S`; 
-        if(totalExtension > 0) limitText += `+E`; 
-        if(isExt) limitText += `+CD`; 
-
-        document.getElementById('disp-limit-dur').innerText = limitText;
-
-        calcTotals();
-
-        // 1. Calculate Total Block Time (For Table Lookup)
-        let totalFtCalc = 0;
-        for(let k=0; k<app.stations.length-1; k++) {
-             if (app.stations[k].isAcm) continue;
-             
-             const o = parse(app.stations[k].out);       
-             const i = parse(app.stations[k+1].in);      
-             const sft = parse(app.sfts[k]);             
-             const s_std = parse(app.stations[k].std);   
-             const s_sta = parse(app.stations[k+1].sta); 
-             
-             const txOut = (app.stations[k].taxiOut !== undefined) ? app.stations[k].taxiOut : 15;
-             const txIn  = (app.stations[k+1].taxiIn !== undefined) ? app.stations[k+1].taxiIn : 15;
-
-             if(o!==null && i!==null) {
-                 totalFtCalc += diff(o, i); // Actual Block
-             }
-             else if(sft !== null) {
-                 totalFtCalc += (sft + txOut + txIn); // Manual FT + Taxi
-             }
-             else if(s_std !== null && s_sta !== null) {
-                 totalFtCalc += diff(s_std, s_sta); // Plan Block
-             }
-        }
-        const ftHours = totalFtCalc / 60;
-
-        // 2. Determine Estimated Duty End Time (For Rest Start)
-        const lastIdx = app.stations.length - 1;
-        const lastLegIdx = lastIdx - 1; 
-        
-        const lastActIn = parse(app.stations[lastIdx].in);
-        const lastActOut = parse(app.stations[lastLegIdx].out);
-        const lastManFt = parse(app.sfts[lastLegIdx]);
-        const lastStd = parse(app.stations[lastLegIdx].std);
-        const lastSta = parse(app.stations[lastIdx].sta);
-        
-        const l_txOut = (app.stations[lastLegIdx].taxiOut !== undefined) ? app.stations[lastLegIdx].taxiOut : 15;
-        const l_txIn  = (app.stations[lastIdx].taxiIn !== undefined) ? app.stations[lastIdx].taxiIn : 15;
-
-        let estimatedDutyEndTime = null;
-
-        if (lastActIn !== null) {
-            estimatedDutyEndTime = lastActIn;
-        } 
-        else if (lastActOut !== null && lastManFt !== null) {
-            estimatedDutyEndTime = lastActOut + lastManFt + l_txOut + l_txIn;
-        }
-        else if (lastStd !== null && lastManFt !== null) {
-            estimatedDutyEndTime = lastStd + lastManFt + l_txOut + l_txIn;
-        }
-        else if (lastSta !== null) {
-            estimatedDutyEndTime = lastSta;
-        }
-
-        if (estimatedDutyEndTime !== null) {
-            while (estimatedDutyEndTime >= 1440) estimatedDutyEndTime -= 1440;
-            while (estimatedDutyEndTime < 0) estimatedDutyEndTime += 1440;
-        }
-
-        // 3. ULR Detection (Using Consistent Logic)
-        let isULR = false;
-        for(let i=0; i<app.stations.length-1; i++) {
-             let legBlock = 0;
-             const o = parse(app.stations[i].out);
-             const in_ = parse(app.stations[i+1].in);
-             const sft = parse(app.sfts[i]);
-             const std = parse(app.stations[i].std);
-             const sta = parse(app.stations[i+1].sta);
-             const tx = (app.stations[i].taxiOut||15) + (app.stations[i+1].taxiIn||15);
-
-             if (o!==null && in_!==null) legBlock = diff(o, in_);
-             else if (sft!==null) legBlock = sft + tx;
-             else if (std!==null && sta!==null) legBlock = diff(std, sta);
-
-             if (legBlock >= 960) isULR = true;
-        }
-
-        const alertOverlay = document.getElementById('ulr-alert');
-        if (isULR && app.crew !== 'D') {
-            alertOverlay.classList.remove('hidden');
-        } else {
-            alertOverlay.classList.add('hidden');
-        }
-
-        const s1 = parse(app.stations[0].std);
-        const code = app.stations[0].code.trim().toUpperCase();
-        const dateInput = document.getElementById('flightDate').value;
+        // --- 1. PRE-CALCULATION & AUTO-DETECT NIGHT OPS ---
+        // 預先計算並自動偵測夜間航班 (先偵測才能正確計算 Max FDP)
+        const s1 = parse(app.stations[0].std); 
+        const code = app.stations[0].code.trim().toUpperCase(); 
+        const dateInput = document.getElementById('flightDate').value; 
         const refDate = getUtcDate(dateInput) || new Date();
-
-        let rep = null;
-        let reportOffset = (code==='TPE'?90:60); 
         
-        if (app.isLocked && app.lockedReport !== null) {
-            rep = app.lockedReport;
-            document.getElementById('reportLabel').innerText = "LOCKED";
-        } else if (s1 !== null) {
-            rep = s1 - reportOffset; if(rep<0) rep+=1440;
-            document.getElementById('reportLabel').innerText = code==='TPE'?"STD-90":"STD-60";
-        }
-
         const nightContainer = document.getElementById('night-container');
         if (s1 !== null) {
             if (code in airportIanaZones) {
                 nightContainer.style.border = "1px solid var(--border-light)";
                 const stdInfo = getLocalInfo(s1, airportIanaZones[code], refDate);
                 if (stdInfo) {
-                    const h = parseInt(stdInfo.timeStr.split(':')[0]);
-                    const m = parseInt(stdInfo.timeStr.split(':')[1]);
+                    const h = parseInt(stdInfo.timeStr.split(':')[0]); const m = parseInt(stdInfo.timeStr.split(':')[1]);
+                    // Auto toggle Night Ops if STD is between 21:00L and 06:59L
                     const isNightTime = (h > 21 || h < 7) || (h === 21 && m > 0);
                     document.getElementById('nightOps').checked = isNightTime;
                     const offsetSign = stdInfo.offset >= 0 ? '+' : '';
                     document.getElementById('loc-time-display').innerText = `${stdInfo.timeStr} L (UTC${offsetSign}${stdInfo.offset})`;
                 }
-            } else {
-                nightContainer.style.border = "2px solid var(--brand-orange)";
-                document.getElementById('loc-time-display').innerText = `STD: --:-- (Chk Night)`;
-            }
-        } else {
-            document.getElementById('loc-time-display').innerText = `STD: --:--`;
-            nightContainer.style.border = "1px solid var(--border-light)";
+            } else { nightContainer.style.border = "2px solid var(--brand-orange)"; document.getElementById('loc-time-display').innerText = `STD: --:-- (Chk Night)`; }
+        } else { document.getElementById('loc-time-display').innerText = `STD: --:--`; nightContainer.style.border = "1px solid var(--border-light)"; }
+
+        // --- 2. GATHER HOTEL EXTENSIONS ---
+        // 計算飯店休息是否符合 Split Duty 或是 Extension
+        let stationLimitExtensions = []; let globalPauseMinutes = 0; 
+        app.stations.forEach((s, i) => {
+            let extension = 0; let pause = 0;
+            if (s.hotel && i < app.stations.length - 1) {
+                const hTime = calcRest(s.ci, s.co); const badge = document.getElementById(`rest-badge-${i}`);
+                if(badge) {
+                    badge.style.display = 'block'; badge.innerText = `Rest: ${hTime>0 ? fmt(hTime,false) : '--:--'}`;
+                    if (hTime > 0 && hTime < 180) { badge.style.color = 'var(--brand-red)'; badge.innerText += ' (<3h)'; } else badge.style.color = 'var(--brand-blue)';
+                }
+                if (hTime >= 180) { if (i === 0) { pause = hTime; if(badge) badge.innerText += ' (Split)'; } else { extension = Math.floor(hTime / 2); if(badge) badge.innerText += ' (Ext)'; } }
+            } else { const badge = document.getElementById(`rest-badge-${i}`); if(badge) badge.style.display = 'none'; }
+            stationLimitExtensions.push(extension); if (i === 0) globalPauseMinutes = pause;
+        });
+
+        // --- 3. CALCULATE FDP LIMITS ---
+        // 計算最大飛行任務期間 (Max FDP)
+        let base = 14; if(app.crew==='M') base=18; if(app.crew==='D') base=24; 
+        const isNight = document.getElementById('nightOps').checked; let lim = isNight ? base - 2 : base;
+        const totalExtension = stationLimitExtensions.reduce((a, b) => a + b, 0); const isExt = document.getElementById('extFdt').checked; const discretionMins = isExt ? 120 : 0;
+        let globalMaxFdpMins = (lim*60) + globalPauseMinutes + totalExtension + discretionMins; 
+        let isCapped = false; if (globalMaxFdpMins > 1440) { globalMaxFdpMins = 1440; isCapped = true; } 
+        let limitText = `${base}h`; if(isNight) limitText += `-2h`; if(globalPauseMinutes > 0) limitText += `+S`; if(totalExtension > 0) limitText += `+E`; if(isExt) limitText += `+CD`; 
+        document.getElementById('disp-limit-dur').innerText = limitText;
+        app._stats.maxFdpMins = globalMaxFdpMins;
+
+        // --- 4. CALCULATE TOTALS & ULR ---
+        // 計算總飛時與超長程航班判定
+        calcTotals(); 
+
+        let totalFtCalc = 0; let isULR = false;
+        for(let k=0; k<app.stations.length-1; k++) {
+             if (app.stations[k].isAcm) continue;
+             const o = parse(app.stations[k].out); const i = parse(app.stations[k+1].in); const sft = parse(app.sfts[k]); const s_std = parse(app.stations[k].std); const s_sta = parse(app.stations[k+1].sta); 
+             const txOut = (app.stations[k].taxiOut !== undefined) ? app.stations[k].taxiOut : 15; const txIn  = (app.stations[k+1].taxiIn !== undefined) ? app.stations[k+1].taxiIn : 15;
+             let legBlock = 0;
+             if(o!==null && i!==null) legBlock = diff(o, i); else if(sft !== null) legBlock = (sft + txOut + txIn); else if(s_std !== null && s_sta !== null) legBlock = diff(s_std, s_sta);
+             totalFtCalc += legBlock; if (legBlock >= 960) isULR = true;
+        }
+        const ftHours = totalFtCalc / 60;
+        const alertOverlay = document.getElementById('ulr-alert');
+        if (isULR && app.crew !== 'D') alertOverlay.classList.remove('hidden'); else alertOverlay.classList.add('hidden');
+
+        let hasAnyInput = false; let hasAnyStd = false;
+        for (let k = 0; k < app.stations.length - 1; k++) {
+            if (app.stations[k].std) hasAnyStd = true;
+            if (app.stations[k].out || app.stations[k+1].in || app.sfts[k]) hasAnyInput = true;
         }
 
-        if (rep === null) {
+        // --- 5. REPORT TIME LOGIC ---
+        // 報到時間計算與鎖定防呆
+        let rep = null; let reportOffset = (code==='TPE'?90:60); 
+        if (app.isLocked && app.lockedReport !== null) { rep = app.lockedReport; document.getElementById('reportLabel').innerText = "LOCKED"; } 
+        else if (s1 !== null) { rep = s1 - reportOffset; if(rep<0) rep+=1440; document.getElementById('reportLabel').innerText = code==='TPE'?"STD-90":"STD-60"; }
+
+        // 如果連基礎資料都沒有，終止後續渲染
+        if (rep === null || (!hasAnyStd && !hasAnyInput)) {
             document.getElementById('resReport').innerText="--:--"; 
-            const nextRptEl = document.getElementById('resNextRpt');
-            if(nextRptEl) nextRptEl.innerHTML = "--:--";
-            const minRestEl = document.getElementById('min-rest-lbl');
-            if(minRestEl) minRestEl.innerText = "Rest: --";
+            if(document.getElementById('resNextRpt')) document.getElementById('resNextRpt').innerHTML = "--:--";
+            if(document.getElementById('min-rest-lbl')) document.getElementById('min-rest-lbl').innerText = "Rest: --";
             document.getElementById('disp-limit-dur').innerText = "--";
-            const cardMax = document.getElementById('resMaxFdtCard');
-            if(cardMax) cardMax.innerText = "--:--";
+            if(document.getElementById('resMaxFdtCard')) document.getElementById('resMaxFdtCard').innerText = "--:--";
+            updateDynamicTimeline(null, null, 0, 0, 0, 0, false, null); 
             return; 
         }
 
-        let repHtml = fmt(rep);
-        if (rep !== null && code in airportIanaZones) {
-            let rptDate = new Date(refDate);
-            if (s1 !== null && (s1 - reportOffset) < 0) {
-                rptDate.setUTCDate(rptDate.getUTCDate() - 1);
-            }
+        // Data is sufficient to run stats engine / 如果資料足夠，將引擎狀態設為 Ready
+        app._stats.isReady = true;
+
+        let repHtml = fmt(rep); let rptDate = new Date(refDate);
+        if (code in airportIanaZones) {
+            if (s1 !== null && (s1 - reportOffset) < 0) rptDate.setUTCDate(rptDate.getUTCDate() - 1);
             const rptLoc = getLocalInfo(rep, airportIanaZones[code], rptDate);
-            if (rptLoc) {
-                repHtml += ` <span style="font-size:10px; color:var(--text-secondary); font-weight:normal;">(${rptLoc.timeStr}L)</span>`;
-            }
+            if (rptLoc) repHtml += ` <span style="font-size:10px; color:var(--text-secondary); font-weight:normal;">(${rptLoc.timeStr}L)</span>`;
         }
         document.getElementById('resReport').innerHTML = repHtml;
 
-        const fdpEndTime = rep + globalMaxFdpMins;
-        const maxFdtEl = document.getElementById('resMaxFdtCard');
-        if (maxFdtEl) {
-            maxFdtEl.innerText = fmt(fdpEndTime);
-            const capMsg = document.getElementById('cap-msg-card');
-            if (isCapped) {
-                if(capMsg) capMsg.innerText = " (Cap 24h)";
-            } else {
-                if(capMsg) capMsg.innerText = "";
+        rptDate.setUTCHours(Math.floor(rep/60), rep%60, 0, 0); const nowMs = Date.now(); const repMs = rptDate.getTime(); const elapsedSinceRepMins = (nowMs - repMs) / 60000;
+        app._stats.elapsedSinceRep = elapsedSinceRepMins;
+        
+        // 🚀 V5.8.1: Smart Simulation Detection (Live tracking window is Rep - 12h to MaxFDP + 12h)
+        // 只有現實時間介於這個範圍內，系統才會啟動 Live Time 現實追蹤警告，完美解決舊資料誤判的問題
+        app._stats.isLiveTracking = (elapsedSinceRepMins >= -720 && elapsedSinceRepMins <= (globalMaxFdpMins + 720));
+
+        // --- 6. PROJECTED ELAPSED (FDP Estimation) ---
+        // 計算預期飛行任務進度
+        let projectedElapsed = 0;
+        if (s1 !== null) {
+            let lastProjDepartureElapsed = reportOffset; 
+            for (let i = 0; i < app.stations.length - 1; i++) {
+                let st = app.stations[i]; let nextSt = app.stations[i+1]; let std = parse(st.std); let sta = parse(nextSt.sta); let out = parse(st.out); let inc = parse(nextSt.in); let ft = parse(app.sfts[i]); let txOut = st.taxiOut !== undefined ? st.taxiOut : 15; let txIn = nextSt.taxiIn !== undefined ? nextSt.taxiIn : 15;
+                let outElapsed = lastProjDepartureElapsed;
+                if (out !== null) { outElapsed = out - rep; if (outElapsed < 0) outElapsed += 1440; if (i > 0 && outElapsed < lastProjDepartureElapsed - 720) outElapsed += 1440; } 
+                else if (std !== null) { let stdElapsed = std - rep; if (stdElapsed < 0) stdElapsed += 1440; if (i > 0 && stdElapsed < lastProjDepartureElapsed - 720) stdElapsed += 1440; outElapsed = Math.max(lastProjDepartureElapsed, stdElapsed); }
+                let inElapsed = outElapsed;
+                if (inc !== null) { let rawInElapsed = inc - rep; if (rawInElapsed < 0) rawInElapsed += 1440; while (rawInElapsed < outElapsed) rawInElapsed += 1440; inElapsed = rawInElapsed; } 
+                else if (ft !== null) { inElapsed = outElapsed + ft + txOut + txIn; } 
+                else if (std !== null && sta !== null) { inElapsed = outElapsed + diff(std, sta); } 
+                else { inElapsed = outElapsed + txOut + txIn; }
+                projectedElapsed = inElapsed; lastProjDepartureElapsed = inElapsed + 45; 
             }
         }
-        
-        let cbnOffset = 60;
-        if (code === 'TPE') cbnOffset = 140;
-        else if (code === 'TSA') cbnOffset = 90;
-        else if (code === 'KHH') cbnOffset = 110;
 
-        let cbnLimit = 14 * 60;
-        if (app.crew === 'M' || app.crew === 'D') cbnLimit = 20 * 60;
-
-        let cbnEndRelative = cbnLimit - (cbnOffset - reportOffset); 
-        
-        let cbnChoke = false;
-        let cbnEndDisplay = "";
-        
-        if (cbnEndRelative < globalMaxFdpMins) {
-             cbnChoke = true;
-             let cbnEndAbs = rep + cbnEndRelative;
-             cbnEndDisplay = fmt(cbnEndAbs);
+        // --- 7. SOLID BAR ELAPSED (Actual flown) ---
+        // 計算確定已執行的進度，畫出時間軸的實色區塊
+        let solidBarElapsed = 0;
+        if (s1 !== null) {
+            let lastSolid = reportOffset;
+            for (let i = 0; i < app.stations.length - 1; i++) {
+                let st = app.stations[i]; let nextSt = app.stations[i+1]; let out = parse(st.out); let inc = parse(nextSt.in);
+                if (out === null && inc === null) break;
+                let outRel = lastSolid;
+                if (out !== null) { outRel = out - rep; if (outRel < 0) outRel += 1440; if (i > 0 && outRel < lastSolid - 720) outRel += 1440; } 
+                else { let std = parse(st.std); if (std !== null) { let stdRel = std - rep; if (stdRel < 0) stdRel += 1440; if (i > 0 && stdRel < lastSolid - 720) stdRel += 1440; outRel = Math.max(lastSolid, stdRel); } }
+                if (inc === null) { solidBarElapsed = outRel; break; }
+                let inRel = inc - rep; if (inRel < 0) inRel += 1440; while (inRel < outRel) inRel += 1440;
+                solidBarElapsed = inRel; let turn = 45;
+                if (st.hotel && i < app.stations.length - 1) { const hTime = calcRest(st.ci, st.co); if (hTime >= 180) turn = hTime; }
+                lastSolid = inRel + turn;
+            }
         }
 
-        const maxFdtBox = document.getElementById('max-fdt-box-card');
-        const capMsg = document.getElementById('cap-msg-card');
+        let estimatedDutyEndTime = rep + projectedElapsed; if (estimatedDutyEndTime >= 1440) estimatedDutyEndTime = estimatedDutyEndTime % 1440;
+        const fdpEndTime = rep + globalMaxFdpMins; const maxFdtEl = document.getElementById('resMaxFdtCard');
+        if (maxFdtEl) { maxFdtEl.innerText = fmt(fdpEndTime); const capMsg = document.getElementById('cap-msg-card'); if (isCapped) { if(capMsg) capMsg.innerText = " (Cap 24h)"; } else { if(capMsg) capMsg.innerText = ""; } }
         
-        let effectiveLimit = globalMaxFdpMins;
-        
-        // Use estimatedDutyEndTime to check limit compliance
-        let isActExceeded = false;
-        if (estimatedDutyEndTime !== null) {
-            let actualElapsed = estimatedDutyEndTime - rep;
-            if (actualElapsed < 0) actualElapsed += 1440;
-            if (actualElapsed > effectiveLimit) isActExceeded = true;
+        let cbnOffset = (code === 'TPE') ? 140 : (code === 'TSA' ? 90 : (code === 'KHH' ? 110 : 60));
+        let cbnLimit = (app.crew === 'M' || app.crew === 'D') ? 20 * 60 : 14 * 60; let cbnEndRelative = cbnLimit - (cbnOffset - reportOffset); 
+        let cbnChoke = false; let cbnEndDisplay = ""; if (cbnEndRelative < globalMaxFdpMins) { cbnChoke = true; cbnEndDisplay = fmt(rep + cbnEndRelative); }
+
+        const maxFdtBox = document.getElementById('max-fdt-box-card'); const capMsg = document.getElementById('cap-msg-card'); let effectiveLimit = globalMaxFdpMins;
+        let isActExceeded = false; if (estimatedDutyEndTime !== null) { let actualElapsed = estimatedDutyEndTime - rep; if (actualElapsed < 0) actualElapsed += 1440; if (actualElapsed > effectiveLimit) isActExceeded = true; }
+
+        // --- 8. SCHED ELAPSED (Pure Plan) ---
+        let schedElapsed = 0;
+        if (s1 !== null) {
+            let lastSchedDepartureElapsed = reportOffset; 
+            for (let i = 0; i < app.stations.length - 1; i++) {
+                let st = app.stations[i]; let nextSt = app.stations[i+1]; let std = parse(st.std); let sta = parse(nextSt.sta); let txOut = st.taxiOut !== undefined ? st.taxiOut : 15; let txIn = nextSt.taxiIn !== undefined ? nextSt.taxiIn : 15;
+                let outElapsed = lastSchedDepartureElapsed;
+                if (std !== null) { let stdElapsed = std - rep; if (stdElapsed < 0) stdElapsed += 1440; if (i > 0 && stdElapsed < lastSchedDepartureElapsed - 720) stdElapsed += 1440; outElapsed = Math.max(lastSchedDepartureElapsed, stdElapsed); }
+                let inElapsed = outElapsed;
+                if (std !== null && sta !== null) { inElapsed = outElapsed + diff(std, sta); } else { inElapsed = outElapsed + txOut + txIn; }
+                schedElapsed = inElapsed; let turn = 45;
+                if (st.hotel && i < app.stations.length - 1) { const hTime = calcRest(st.ci, st.co); if (hTime >= 180) turn = hTime; }
+                lastSchedDepartureElapsed = inElapsed + turn; 
+            }
         }
 
-        const lastSt = app.stations[app.stations.length - 1];
-        const lastStaVal = parse(lastSt.sta);
-        let isStaExceeded = false;
-        if (lastStaVal !== null) {
-             let staElapsed = lastStaVal - rep;
-             if (staElapsed < 0) staElapsed += 1440;
-             if (staElapsed > effectiveLimit) isStaExceeded = true;
-        }
+        let isStaExceeded = false; if (schedElapsed > effectiveLimit) isStaExceeded = true;
         
         if(maxFdtBox) {
-             maxFdtBox.querySelector('.lbo-time').style.color = 'var(--text-primary)'; 
-             maxFdtBox.querySelector('.lbo-label').style.color = 'var(--text-secondary)';
-
-             if (isActExceeded) {
-                maxFdtBox.style.background = 'var(--brand-red)'; 
-                maxFdtBox.querySelector('.lbo-time').style.color = 'white'; 
-                maxFdtBox.querySelector('.lbo-label').style.color = 'white';
-                if(capMsg) capMsg.innerText = "⚠️ ACT EXCEEDS LIMIT";
-             } else if (isStaExceeded) {
-                maxFdtBox.style.background = 'var(--brand-orange)'; 
-                maxFdtBox.querySelector('.lbo-time').style.color = 'white'; 
-                maxFdtBox.querySelector('.lbo-label').style.color = 'white';
-                if(capMsg) capMsg.innerText = "⚠️ STA EXCEEDS LIMIT";
-             } else {
-                maxFdtBox.style.background = 'var(--bg-accent)';
-                maxFdtBox.classList.remove('station-divert');
-                maxFdtBox.style.borderColor = 'var(--border-light)';
-                
-                if (cbnChoke) {
-                    if(capMsg) capMsg.innerText = `(CBN: ${cbnEndDisplay}Z)`;
-                } else if (isCapped) {
-                     if(capMsg) capMsg.innerText = " (Cap 24h)";
-                 } else {
-                     if(capMsg) capMsg.innerText = "";
-                 }
+             maxFdtBox.querySelector('.lbo-time').style.color = 'var(--text-primary)'; maxFdtBox.querySelector('.lbo-label').style.color = 'var(--text-secondary)';
+             if (isActExceeded && hasAnyInput) { maxFdtBox.style.background = 'var(--brand-red)'; maxFdtBox.querySelector('.lbo-time').style.color = 'white'; maxFdtBox.querySelector('.lbo-label').style.color = 'white'; if(capMsg) capMsg.innerText = "⚠️ ACT EXCEEDS LIMIT"; } 
+             else if (isStaExceeded) { maxFdtBox.style.background = 'var(--brand-orange)'; maxFdtBox.querySelector('.lbo-time').style.color = 'white'; maxFdtBox.querySelector('.lbo-label').style.color = 'white'; if(capMsg) capMsg.innerText = "⚠️ STA EXCEEDS LIMIT"; } 
+             else {
+                maxFdtBox.style.background = 'var(--bg-accent)'; maxFdtBox.classList.remove('station-divert'); maxFdtBox.style.borderColor = 'var(--border-light)';
+                if (cbnChoke) { if(capMsg) capMsg.innerText = `(CBN: ${cbnEndDisplay}Z)`; } else if (isCapped) { if(capMsg) capMsg.innerText = " (Cap 24h)"; } else { if(capMsg) capMsg.innerText = ""; }
              }
         }
         
-        // --- Final Rest Calculation ---
+        // 🚀 V5.8.3 Smart HUD FDP States Binding
+        // 綁定動態任務期剩餘資料，交由 Strip 統一判定警告
+        app._stats.fdpRem = globalMaxFdpMins - Math.max(projectedElapsed, schedElapsed);
+        app._stats.rtRem = globalMaxFdpMins - elapsedSinceRepMins;
+        app._stats.isFdpExceeded = isActExceeded && hasAnyInput;
+        
+        // 檢查是否已抵達最終站 Check if duty is finished
+        const lastIn = parse(app.stations[app.stations.length - 1].in);
+        app._stats.isDutyFinished = (lastIn !== null);
+        
+        // Only trigger live alert if inside the Live Tracking Window / 僅在執勤窗內觸發即時超時警告
+        app._stats.isLiveDutyExceeded = (app._stats.isLiveTracking && !app._stats.isDutyFinished && elapsedSinceRepMins > globalMaxFdpMins && hasAnyInput);
+
+        // --- 9. REST PERIOD CALCULATION ---
+        // 法定休時與下次報到計算
+        let calculatedRestMins = 0; const lastIdx = app.stations.length - 1;
         if (estimatedDutyEndTime === null) {
-            document.getElementById('resNextRpt').innerHTML = "--:--";
-            document.getElementById('min-rest-lbl').innerText = "Rest: --";
+            document.getElementById('resNextRpt').innerHTML = "--:--"; document.getElementById('min-rest-lbl').innerText = "Rest: --"; const tag = document.getElementById('ulr-tag'); if(tag) tag.remove();
         } else {
-            let tableRest = 0;
-
+            let tableRest = 0; let destIsHome = false;
             if (isULR) {
-                tableRest = 48; 
-                if(!document.getElementById('ulr-tag')) {
-                    const tag = document.createElement('span');
-                    tag.id = 'ulr-tag';
-                    tag.className = 'text-xs bg-purple-600 text-white px-1 rounded ml-1';
-                    tag.style.fontSize = '9px';
-                    tag.innerText = 'ULR';
-                    document.getElementById('min-rest-lbl').appendChild(tag);
-                }
+                const destCode = app.stations[lastIdx].code.toUpperCase().trim(); destIsHome = ['TPE', 'TSA', 'KHH'].includes(destCode); tableRest = destIsHome ? 96 : 48; 
+                if(!document.getElementById('ulr-tag')) { const tag = document.createElement('span'); tag.id = 'ulr-tag'; tag.className = 'text-xs text-white px-1 rounded ml-1'; tag.style.fontSize = '9px'; tag.style.background = destIsHome ? 'var(--brand-blue)' : 'var(--brand-orange)'; document.getElementById('min-rest-lbl').appendChild(tag); }
+                const tagEl = document.getElementById('ulr-tag'); if(tagEl) tagEl.innerText = destIsHome ? 'HB ULR' : 'ULR';
             } else {
-                const tag = document.getElementById('ulr-tag');
-                if(tag) tag.remove();
-
-                if (app.crew === 'S') {
-                    if (ftHours <= 8) tableRest = 10;
-                    else tableRest = 18; 
-                } else if (app.crew === 'M') {
-                    if (ftHours <= 12) tableRest = 18;
-                    else tableRest = 24; 
-                } else if (app.crew === 'D') {
-                    if (ftHours <= 16) tableRest = 18;
-                    else tableRest = 22; 
-                }
-                
-                // Exception: Single Crew Limits in Multi Crew
-                let actualFdpMins = estimatedDutyEndTime - rep;
-                if (actualFdpMins < 0) actualFdpMins += 1440;
-                let fdpHours = actualFdpMins / 60;
-                
-                if (app.crew === 'M') {
-                    if (ftHours <= 10 && fdpHours <= 14) {
-                        let sRest = (ftHours <= 8) ? 10 : 18;
-                        tableRest = Math.min(tableRest, sRest);
-                    }
-                }
-                
-                if (app.crew === 'D') {
-                    if (ftHours <= 10 && fdpHours <= 14) {
-                        let sRest = (ftHours <= 8) ? 10 : 18;
-                        tableRest = Math.min(tableRest, sRest);
-                    }
-                    if (ftHours <= 16 && fdpHours <= 18) {
-                        let mRest = (ftHours <= 12) ? 18 : 24;
-                        tableRest = Math.min(tableRest, mRest);
-                    }
-                }
+                const tag = document.getElementById('ulr-tag'); if(tag) tag.remove();
+                if (app.crew === 'S') { if (ftHours <= 8) tableRest = 10; else tableRest = 18; } 
+                else if (app.crew === 'M') { if (ftHours <= 12) tableRest = 18; else tableRest = 24; } 
+                else if (app.crew === 'D') { if (ftHours <= 16) tableRest = 18; else tableRest = 22; }
+                let actualFdpMins = estimatedDutyEndTime - rep; if (actualFdpMins < 0) actualFdpMins += 1440; let fdpHours = actualFdpMins / 60;
+                if (app.crew === 'M' && ftHours <= 10 && fdpHours <= 14) tableRest = Math.min(tableRest, (ftHours <= 8) ? 10 : 18);
+                if (app.crew === 'D') { if (ftHours <= 10 && fdpHours <= 14) tableRest = Math.min(tableRest, (ftHours <= 8) ? 10 : 18); if (ftHours <= 16 && fdpHours <= 18) tableRest = Math.min(tableRest, (ftHours <= 12) ? 18 : 24); }
             }
             
-            // --- NEXT LEG LOGIC ---
-            const nextLegCheck = document.getElementById('next-leg-check');
-            const nextLegLabel = document.getElementById('nextLegLabel');
-            const nextLegInput = document.getElementById('nextLegHigh');
-            
+            if (app.earlyMorning === '2') tableRest = Math.max(tableRest, 34); else if (app.earlyMorning === '3') tableRest = Math.max(tableRest, 54);
+
+            const nextLegCheck = document.getElementById('next-leg-check'); const nextLegLabel = document.getElementById('nextLegLabel'); const nextLegInput = document.getElementById('nextLegHigh');
             if (app.crew === 'S') {
                 const remaining24 = 600 - (ftHours * 60); 
-                if (remaining24 > 0 && remaining24 < 600) {
-                      nextLegCheck.classList.remove('hidden');
-                      nextLegLabel.innerText = `Next > ${fmt(remaining24, false)}?`;
-                      nextLegInput.checked = app.nextLegHeavy;
-                      
-                      if (app.nextLegHeavy) {
-                          tableRest = Math.max(tableRest, 12); // Force 12h
-                      }
-                } else {
-                    nextLegCheck.classList.add('hidden');
-                }
-            } else {
-                nextLegCheck.classList.add('hidden');
-            }
-            // --------------------------
+                if (remaining24 > 0 && remaining24 < 600) { nextLegCheck.classList.remove('hidden'); nextLegLabel.innerText = `Next > ${fmt(remaining24, false)}?`; nextLegInput.checked = app.nextLegHeavy; if (app.nextLegHeavy) tableRest = Math.max(tableRest, 12); } 
+                else { nextLegCheck.classList.add('hidden'); }
+            } else { nextLegCheck.classList.add('hidden'); }
             
-            // --- LOGIC FIX v4.8.2: Only apply FDP extension if LIMIT is exceeded ---
-            let finalRestHours = tableRest;
+            let finalRestHours = tableRest; let actualFdpMins = estimatedDutyEndTime - rep; if (actualFdpMins < 0) actualFdpMins += 1440;
+            if (actualFdpMins > globalMaxFdpMins && !isULR) { const fdpRestHours = Math.ceil(actualFdpMins / 60); finalRestHours = Math.max(tableRest, fdpRestHours); }
             
-            // Check current FDP against MAX FDP
-            let actualFdpMins = estimatedDutyEndTime - rep;
-            if (actualFdpMins < 0) actualFdpMins += 1440;
+            calculatedRestMins = finalRestHours * 60; const postDuty = 30; let arrivalZAbs = estimatedDutyEndTime; let nextRptZAbs = arrivalZAbs + postDuty + calculatedRestMins;
+            const destCode = app.stations[lastIdx].code; let nextRptHtml = fmt(nextRptZAbs % 1440) + " Z"; 
 
-            if (actualFdpMins > globalMaxFdpMins) {
-                const fdpRestHours = Math.ceil(actualFdpMins / 60);
-                finalRestHours = Math.max(tableRest, fdpRestHours);
-            }
-            
-            const finalRestMins = finalRestHours * 60;
-            const postDuty = 30; 
-            
-            let arrivalZAbs = estimatedDutyEndTime; 
-            let nextRptZAbs = arrivalZAbs + postDuty + finalRestMins;
-            const destCode = app.stations[lastIdx].code;
-            let nextRptHtml = fmt(nextRptZAbs % 1440) + " Z"; 
-
-            let localReportStr = "";
-            let dayOffsetStr = "";
-
+            let localReportStr = ""; let dayOffsetStr = "";
             if (destCode in airportIanaZones) {
-                const zone = airportIanaZones[destCode];
-                const anchor = new Date(refDate);
-                let flowMins = estimatedDutyEndTime - rep;
-                if(flowMins < 0) flowMins += 1440;
-                
-                const arrDate = new Date(anchor.getTime() + (rep * 60000) + (flowMins * 60000));
-                const nextDate = new Date(arrDate.getTime() + (postDuty + finalRestMins) * 60000);
-                
+                const zone = airportIanaZones[destCode]; const anchor = new Date(refDate);
+                let flowMins = estimatedDutyEndTime - rep; if(flowMins < 0) flowMins += 1440;
+                const arrDate = new Date(anchor.getTime() + (rep * 60000) + (flowMins * 60000)); const nextDate = new Date(arrDate.getTime() + (postDuty + calculatedRestMins) * 60000);
                 const fmtLocal = new Intl.DateTimeFormat('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23', day: 'numeric' });
-                const arrParts = fmtLocal.formatToParts(arrDate);
-                const nextParts = fmtLocal.formatToParts(nextDate);
-                
-                const arrDay = arrParts.find(p => p.type === 'day').value;
-                const nextDay = nextParts.find(p => p.type === 'day').value;
-                const h = nextParts.find(p => p.type === 'hour').value;
-                const m = nextParts.find(p => p.type === 'minute').value;
-                
-                localReportStr = `${h}:${m}L`;
-                
-                const dayDiff = Math.floor((nextDate - arrDate) / (1000 * 60 * 60 * 24));
-                if (arrDay !== nextDay || dayDiff > 0) {
-                      let label = "+1";
-                      if (finalRestHours >= 48) label = "+2"; 
-                      dayOffsetStr = `<span style="font-size:10px; background:var(--brand-red); color:white; padding:0 2px; border-radius:2px; margin-left:2px;">${label}</span>`;
-                }
+                const arrParts = fmtLocal.formatToParts(arrDate); const nextParts = fmtLocal.formatToParts(nextDate);
+                const arrDay = arrParts.find(p => p.type === 'day').value; const nextDay = nextParts.find(p => p.type === 'day').value;
+                const h = nextParts.find(p => p.type === 'hour').value; const m = nextParts.find(p => p.type === 'minute').value;
+                localReportStr = `${h}:${m}L`; const dayDiff = Math.floor((nextDate - arrDate) / (1000 * 60 * 60 * 24));
+                if (arrDay !== nextDay || dayDiff > 0) { let label = `+${dayDiff}`; if(dayDiff===0) label="+1"; dayOffsetStr = `<span style="font-size:10px; background:var(--brand-red); color:white; padding:0 2px; border-radius:2px; margin-left:2px;">${label}</span>`; }
             }
 
-            if (localReportStr) {
-                nextRptHtml = `${localReportStr}${dayOffsetStr} <span style="font-size:11px; color:var(--text-secondary);">(${fmt(nextRptZAbs % 1440)}Z)</span>`;
-            } else {
-                nextRptHtml = fmt(nextRptZAbs % 1440) + " Z"; 
-            }
-
+            if (isULR && destIsHome) { nextRptHtml = `<span style="font-size:14px;">(Check 4 Local Nights)</span>`; document.getElementById('min-rest-lbl').childNodes[0].nodeValue = `Rest: 4 Local Nights`; } 
+            else { if (localReportStr) nextRptHtml = `${localReportStr}${dayOffsetStr} <span style="font-size:11px; color:var(--text-secondary);">(${fmt(nextRptZAbs % 1440)}Z)</span>`; else nextRptHtml = fmt(nextRptZAbs % 1440) + " Z"; document.getElementById('min-rest-lbl').childNodes[0].nodeValue = `Rest: ${finalRestHours}h`; }
             document.getElementById('resNextRpt').innerHTML = nextRptHtml;
-            document.getElementById('min-rest-lbl').childNodes[0].nodeValue = `Rest: ${finalRestHours}h`;
         }
 
+        // --- 10. LAST BLOCK OUT CALCULATION ---
         calcLBO(rep, globalMaxFdpMins, stationLimitExtensions, globalPauseMinutes);
         
-        let landingCount = 0;
-        for(let k=0; k<app.stations.length-1; k++) {
-            if (!app.stations[k].isAcm) landingCount++;
-        }
-
+        let landingCount = 0; for(let k=0; k<app.stations.length-1; k++) { if (!app.stations[k].isAcm) landingCount++; }
+        app._stats.ldg = landingCount;
         const resLdgEl = document.getElementById('resLdg');
-        if(resLdgEl) {
-            resLdgEl.innerText = landingCount;
-            if(landingCount > 6) {
-                resLdgEl.classList.add('val-danger');
-            } else {
-                resLdgEl.classList.remove('val-danger');
-            }
-        }
+        if(resLdgEl) { resLdgEl.innerText = landingCount; if(landingCount > 6) resLdgEl.classList.add('val-danger'); else resLdgEl.classList.remove('val-danger'); }
         updateTurns();
+        updateDynamicTimeline(rep, globalMaxFdpMins, projectedElapsed, schedElapsed, calculatedRestMins, solidBarElapsed, hasAnyInput, elapsedSinceRepMins);
     }
       
     function updateTurns() {
         for(let i=1; i < app.stations.length - 1; i++) {
-             const div = document.getElementById(`turn-${i}`);
-             if(!div) continue;
-             const st = app.stations[i];
-             const actualIn = parse(st.in);
-             const actualOut = parse(st.out);
-             const schedIn = parse(st.sta);
-             const schedOut = parse(st.std);
-             let val = null;
-             let label = "Turn";
-             if (actualIn !== null && actualOut !== null) {
-                 val = diff(actualIn, actualOut);
-             } else if (schedIn !== null && schedOut !== null) {
-                 val = diff(schedIn, schedOut);
-                 label = "Turn (P)"; 
-             }
+             const div = document.getElementById(`turn-${i}`); if(!div) continue;
+             const st = app.stations[i]; const actualIn = parse(st.in); const actualOut = parse(st.out); const schedIn = parse(st.sta); const schedOut = parse(st.std);
+             let val = null; let label = "Turn";
+             if (actualIn !== null && actualOut !== null) val = diff(actualIn, actualOut); else if (schedIn !== null && schedOut !== null) { val = diff(schedIn, schedOut); label = "Turn (P)"; }
              div.innerText = val !== null ? `${label}: ${fmt(val, false)}` : `Turn: --:--`;
         }
     }
 
-    function updateBar(elId, val, limit) {
-        const el = document.getElementById(elId);
-        const parentBox = el.closest('.stat-card');
-        if(!el) return;
-        if(!val || val === 0) { el.innerHTML = ''; return; }
-        const maxRef = Math.max(val, limit);
-        const okPct = (Math.min(val, limit) / maxRef) * 100;
-        const errPct = (Math.max(0, val - limit) / maxRef) * 100;
-        let isAlert = false;
-        if (parentBox && parentBox.classList.contains('stat-alert')) {
-            isAlert = true;
+    // 繪製動態渲染時間軸動畫 / Render the Timeline Minimap Animations
+    function updateDynamicTimeline(rep, maxFdpMins, projElapsed, schedElapsed, restMins, solidBarElapsed, hasAnyInput, elapsedSinceRepMins) {
+        const wrapper = document.getElementById('dutyTimelineWrapper'); const content = document.getElementById('dtContent');
+        if (rep === null || !maxFdpMins || (schedElapsed === 0 && !hasAnyInput)) {
+            wrapper.style.display = 'none'; 
+            document.getElementById('box-act').classList.remove('act-focus'); document.getElementById('box-plan').classList.remove('dimmed'); document.getElementById('box-sched').classList.remove('dimmed');
+            return;
         }
-        let safeColor = isAlert ? 'rgba(255,59,48,0.3)' : (val > limit ? 'var(--brand-blue)' : 'var(--brand-blue)');
+        wrapper.style.display = 'flex'; content.style.display = 'flex';
+        if (hasAnyInput) { document.getElementById('box-act').classList.add('act-focus'); document.getElementById('box-plan').classList.add('dimmed'); document.getElementById('box-sched').classList.add('dimmed'); } 
+        else { document.getElementById('box-act').classList.remove('act-focus'); document.getElementById('box-plan').classList.remove('dimmed'); document.getElementById('box-sched').classList.remove('dimmed'); }
+
+        let postDutyMins = 0; if (hasAnyInput || schedElapsed > 0) postDutyMins = 30;
+        let fdpToUse = hasAnyInput ? projElapsed : schedElapsed;
+        let visualRestMins = restMins; let isRestTruncated = false; let maxVisualRest = Math.max(maxFdpMins * 0.4, 180); 
+        if (restMins > maxVisualRest) { visualRestMins = maxVisualRest; isRestTruncated = true; }
+        
+        let visualTotalCycleMins = fdpToUse + postDutyMins + visualRestMins; let totalCycleMins = fdpToUse + postDutyMins + restMins; let scaleMins = Math.max(maxFdpMins, visualTotalCycleMins) * 1.05; 
+        document.getElementById('dt-rpt-label').innerText = fmt(rep);
+        
+        if (restMins > 0) { document.getElementById('dt-end-title').innerText = 'NEXT RPT'; document.getElementById('dt-end-val').innerText = fmt(rep + totalCycleMins); } 
+        else { document.getElementById('dt-end-title').innerText = 'MAX LIMIT'; document.getElementById('dt-end-val').innerText = fmt(rep + maxFdpMins); }
+
+        const maxMarker = document.getElementById('dtMaxMarker'); maxMarker.style.display = 'block'; maxMarker.style.left = (maxFdpMins / scaleMins) * 100 + '%';
+        const maxMarkerText = document.querySelector('.dt-limit-text'); maxMarkerText.innerText = 'MAX ' + fmt(rep + maxFdpMins);
+        const ghostEl = document.getElementById('dtGhost');
+        if (schedElapsed > 0) { document.getElementById('dt-sch-val').innerText = fmt(schedElapsed, false); let schedPct = (schedElapsed / scaleMins) * 100; ghostEl.style.display = 'block'; ghostEl.style.width = Math.min(schedPct, 100) + '%'; } 
+        else { ghostEl.style.display = 'none'; document.getElementById('dt-sch-val').innerText = '--:--'; }
+
+        const fillEl = document.getElementById('dtFill'); const fillDangerEl = document.getElementById('dtFillDanger'); const pctLabel = document.getElementById('dt-pct-label'); const titleAct = document.getElementById('dt-act-title'); const segmentsContainer = document.getElementById('dtSegments'); const postDutyEl = document.getElementById('dtPostDuty'); const restEl = document.getElementById('dtRest'); const segmentInfoBar = document.getElementById('dtSegmentInfo');
+        segmentsContainer.innerHTML = ''; fillDangerEl.style.display = 'none'; fillDangerEl.style.width = '0%'; segmentInfoBar.innerHTML = ''; segmentInfoBar.style.opacity = 0;
+
+        if (!hasAnyInput) {
+            fillEl.style.width = '0%'; pctLabel.innerText = '0%'; pctLabel.style.color = 'var(--text-tertiary)'; titleAct.style.color = 'var(--text-tertiary)'; document.getElementById('dt-act-val').innerText = '--:--';
+            if (schedElapsed > 0) { postDutyEl.style.display = 'block'; postDutyEl.style.left = (schedElapsed / scaleMins) * 100 + '%'; postDutyEl.style.width = (postDutyMins / scaleMins) * 100 + '%'; } else { postDutyEl.style.display = 'none'; }
+            if (restMins > 0) { restEl.style.display = 'flex'; restEl.style.left = ((schedElapsed + postDutyMins) / scaleMins) * 100 + '%'; restEl.style.width = (visualRestMins / scaleMins) * 100 + '%'; let restText = (restMins / 60 >= 24 && document.getElementById('ulr-tag')) ? 'REST 4 Local Nights' : `REST ${(restMins/60).toFixed(1).replace('.0','')}h`; if (isRestTruncated) restText += ` <span style="letter-spacing:-2px; margin-left:4px; opacity:0.5;">//</span>`; restEl.innerHTML = restText; } 
+            else { restEl.style.display = 'none'; restEl.innerHTML = ''; }
+        } else {
+            let safeSolidMins = Math.min(solidBarElapsed, maxFdpMins); let displaySafePct = (safeSolidMins / scaleMins) * 100; fillEl.style.width = displaySafePct + '%';
+            if (solidBarElapsed > maxFdpMins) { let overflowMins = solidBarElapsed - maxFdpMins; fillDangerEl.style.display = 'block'; fillDangerEl.style.left = (maxFdpMins / scaleMins) * 100 + '%'; fillDangerEl.style.width = (overflowMins / scaleMins) * 100 + '%'; fillEl.style.borderRadius = 'var(--radius-full) 0 0 var(--radius-full)'; } 
+            else { fillDangerEl.style.display = 'none'; fillDangerEl.style.width = '0%'; fillEl.style.borderRadius = 'var(--radius-full)'; }
+            
+            let fdpHealthPct = (projElapsed / maxFdpMins) * 100;
+            if (fdpHealthPct > 100) { fillEl.style.background = 'linear-gradient(90deg, var(--brand-orange), var(--brand-red))'; pctLabel.style.color = 'var(--brand-red)'; titleAct.style.color = 'var(--brand-red)'; } 
+            else if (fdpHealthPct >= 75) { fillEl.style.background = 'linear-gradient(90deg, var(--brand-blue), var(--brand-orange))'; pctLabel.style.color = 'var(--brand-orange)'; titleAct.style.color = 'var(--brand-orange)'; } 
+            else { fillEl.style.background = 'linear-gradient(90deg, var(--brand-blue), var(--brand-purple))'; pctLabel.style.color = 'var(--brand-blue)'; titleAct.style.color = 'var(--brand-blue)'; }
+            document.getElementById('dt-act-val').innerText = fmt(projElapsed, false); pctLabel.innerText = Math.round(fdpHealthPct) + '%'; 
+
+            postDutyEl.style.display = 'block'; postDutyEl.style.left = (projElapsed / scaleMins) * 100 + '%'; postDutyEl.style.width = (postDutyMins / scaleMins) * 100 + '%';
+            if (restMins > 0) { restEl.style.display = 'flex'; restEl.style.left = ((projElapsed + postDutyMins) / scaleMins) * 100 + '%'; restEl.style.width = (visualRestMins / scaleMins) * 100 + '%'; let restText = (restMins / 60 >= 24 && document.getElementById('ulr-tag')) ? 'REST 4 Local Nights' : `REST ${(restMins/60).toFixed(1).replace('.0','')}h`; if (isRestTruncated) restText += ` <span style="letter-spacing:-2px; margin-left:4px; opacity:0.5;">//</span>`; restEl.innerHTML = restText; } 
+            else { restEl.style.display = 'none'; restEl.innerHTML = ''; }
+
+            let lastProgElapsed = (app.stations[0].code.trim().toUpperCase() === 'TPE') ? 90 : 60;
+            for (let i = 0; i < app.stations.length - 1; i++) {
+                let st = app.stations[i]; let nextSt = app.stations[i+1]; let out = parse(st.out); let inc = parse(nextSt.in); let ft = parse(app.sfts[i]); let std = parse(st.std); let sta = parse(nextSt.sta); let txOut = st.taxiOut !== undefined ? st.taxiOut : 15; let txIn = nextSt.taxiIn !== undefined ? nextSt.taxiIn : 15;
+                let legOutRel = lastProgElapsed;
+                if (out !== null) { legOutRel = out - rep; if (legOutRel < 0) legOutRel += 1440; if (i > 0 && legOutRel < lastProgElapsed - 720) legOutRel += 1440; } 
+                else if (std !== null) { let stdRel = std - rep; if (stdRel < 0) stdRel += 1440; if (i > 0 && stdRel < lastProgElapsed - 720) stdRel += 1440; legOutRel = Math.max(lastProgElapsed, stdRel);  }
+
+                let legInRel = legOutRel;
+                if (inc !== null) { legInRel = inc - rep; if (legInRel < 0) legInRel += 1440; while (legInRel < legOutRel) legInRel += 1440;  } 
+                else if (ft !== null) { legInRel = legOutRel + ft + txOut + txIn;  } 
+                else if (std !== null && sta !== null) { legInRel = legOutRel + diff(std, sta); } 
+                else { legInRel = legOutRel + txOut + txIn;  }
+                
+                let blockStr = "00:00";
+                if (out !== null && inc !== null) blockStr = fmt(diff(out, inc), false); else if (ft !== null) blockStr = fmt(ft + txOut + txIn, false) + '*'; else if (std !== null && sta !== null) blockStr = fmt(diff(std, sta), false);
+                let segLabel = `${st.code} ✈ ${nextSt.code}`;
+
+                let turn = 45; if (st.hotel && i < app.stations.length - 1) { const hTime = calcRest(st.ci, st.co); if (hTime >= 180) turn = hTime;  }
+                lastProgElapsed = legInRel + turn; 
+
+                let startPct = (legOutRel / scaleMins) * 100; let durationPct = ((legInRel - legOutRel) / scaleMins) * 100;
+                if (startPct >= 0 && startPct <= 100 && (out !== null || std !== null)) {
+                    const seg = document.createElement('div'); seg.className = 'dt-segment'; seg.tabIndex = 0; seg.style.left = startPct + '%'; seg.style.width = Math.min(durationPct, 100 - startPct) + '%';
+                    const handleSegInteraction = (e) => { e.stopPropagation(); document.querySelectorAll('.dt-segment').forEach(s => s.classList.remove('selected')); seg.classList.add('selected'); segmentInfoBar.innerHTML = `📍 ${segLabel} &nbsp;|&nbsp; ⏱️ Block: ${blockStr}`; segmentInfoBar.style.opacity = 1; };
+                    seg.addEventListener('click', handleSegInteraction); seg.addEventListener('touchstart', handleSegInteraction, {passive: true}); segmentsContainer.appendChild(seg);
+                }
+            }
+        }
+        
+        const nowMarker = document.getElementById('dtNowMarker');
+        if (elapsedSinceRepMins !== null && elapsedSinceRepMins >= 0 && elapsedSinceRepMins <= scaleMins && !app._stats.isDutyFinished && app._stats.isLiveTracking) { let nowPct = (elapsedSinceRepMins / scaleMins) * 100; nowMarker.style.display = 'block'; nowMarker.style.left = nowPct + '%'; } 
+        else { nowMarker.style.display = 'none'; }
+
+        const ruler = document.getElementById('dtRuler'); ruler.innerHTML = '';
+        if (fdpToUse > 0 || hasAnyInput) {
+            let tickLastProgElapsed = (app.stations[0].code.trim().toUpperCase() === 'TPE') ? 90 : 60; let rawTicks = [];
+            for (let i = 0; i < app.stations.length - 1; i++) {
+                let st = app.stations[i]; let nextSt = app.stations[i+1]; let std = parse(st.std); let sta = parse(nextSt.sta); let out = parse(st.out); let inc = parse(nextSt.in); let ft = parse(app.sfts[i]);
+                let outRel = tickLastProgElapsed;
+                if (out !== null) { outRel = out - rep; if (outRel < 0) outRel += 1440; if (i > 0 && outRel < tickLastProgElapsed - 720) outRel += 1440; let outPct = (outRel / scaleMins) * 100; if (outPct > 2 && outPct < 98) rawTicks.push({ pct: outPct, time: fmt(out), label: 'OUT', cls: 'actual-out' }); } 
+                else if (std !== null) { let stdRel = std - rep; if (stdRel < 0) stdRel += 1440; if (i > 0 && stdRel < tickLastProgElapsed - 720) stdRel += 1440; outRel = Math.max(tickLastProgElapsed, stdRel); let outPct = (outRel / scaleMins) * 100; let outLabel = (i > 0 && outRel > stdRel) ? "EST OUT" : "STD"; if (outPct > 2 && outPct < 98) rawTicks.push({ pct: outPct, time: fmt((rep + outRel) % 1440), label: outLabel, cls: '' }); }
+
+                let inRel = outRel;
+                if (inc !== null) { let actualInRel = inc - rep; if (actualInRel < 0) actualInRel += 1440; while (actualInRel < outRel) actualInRel += 1440; inRel = actualInRel; let inPct = (inRel / scaleMins) * 100; if (inPct > 2 && inPct < 98) rawTicks.push({ pct: inPct, time: fmt(inc), label: 'IN', cls: 'actual-in' }); } 
+                else {
+                    let block = 0; if (ft !== null) block = ft + (st.taxiOut !== undefined ? st.taxiOut : 15) + (nextSt.taxiIn !== undefined ? nextSt.taxiIn : 15); else if (std !== null && sta !== null) block = diff(std, sta); else block = 60;
+                    inRel = outRel + block; let inPct = (inRel / scaleMins) * 100; let stdRel = 0; if (std !== null) { stdRel = std - rep; if (stdRel < 0) stdRel += 1440; if (i > 0 && stdRel < tickLastProgElapsed - 720) stdRel += 1440; }
+                    let isProjected = (out !== null) || (ft !== null) || (outRel > stdRel); let inLabel = isProjected ? "EST IN" : "STA";
+                    if (inPct > 2 && inPct < 98 && (std !== null || out !== null)) rawTicks.push({ pct: inPct, time: fmt((rep + inRel) % 1440), label: inLabel, cls: '' });
+                }
+                let turn = 45; if (st.hotel && i < app.stations.length - 1) { const hTime = calcRest(st.ci, co); if (hTime >= 180) turn = hTime;  }
+                tickLastProgElapsed = inRel + turn;
+            }
+            rawTicks.sort((a, b) => a.pct - b.pct); let lastRenderedPct = -100; let isStaggered = false; let rulerHtml = '';
+            rawTicks.forEach(tick => {
+                if (tick.pct - lastRenderedPct < 8) isStaggered = !isStaggered; else isStaggered = false; let stgClass = isStaggered ? ' stagger' : '';
+                rulerHtml += `<div class="dt-tick minor ${tick.cls}${stgClass}" style="left: ${tick.pct}%;"><span>${tick.time}</span><span>${tick.label}</span></div>`;
+                lastRenderedPct = tick.pct;
+            });
+            ruler.innerHTML = rulerHtml;
+        }
+    }
+
+    function updateBar(elId, val, limit) {
+        const el = document.getElementById(elId); const parentBox = el.closest('.stat-card');
+        if(!el) return; if(!val || val === 0) { el.innerHTML = ''; return; }
+        const maxRef = Math.max(val, limit); const okPct = (Math.min(val, limit) / maxRef) * 100; const errPct = (Math.max(0, val - limit) / maxRef) * 100;
+        let isAlert = false; if (parentBox && parentBox.classList.contains('stat-alert')) isAlert = true;
+        let safeColor = isAlert ? 'rgba(255,59,48,0.3)' : 'var(--brand-blue)';
         if(elId === 'bar-sched') safeColor = 'var(--brand-green)';
         let excessColor = isAlert ? 'var(--brand-orange)' : 'var(--brand-red)'; 
-        let html = `<div style="display:flex; width:100%; height:100%;">`;
-        html += `<div class="progress-fill" style="width:${okPct}%; background:${safeColor};"></div>`;
-        if (errPct > 0) {
-            html += `<div class="progress-fill" style="width:${errPct}%; background:${excessColor};"></div>`;
-        }
-        html += `</div>`;
-        el.innerHTML = html;
+        let html = `<div style="display:flex; width:100%; height:100%;"><div class="progress-fill" style="width:${okPct}%; background:${safeColor};"></div>`;
+        if (errPct > 0) html += `<div class="progress-fill" style="width:${errPct}%; background:${excessColor};"></div>`;
+        html += `</div>`; el.innerHTML = html;
     }
 
     function calcTotals() {
         let prevVal = parse(document.getElementById('prevFt').value) || 0;
-        let totalAct = 0; // Purely actual flight time for current duty
-        let totalActWithPrev = prevVal; // Actual + Prev for limit checking
-        
-        let aggPlan = prevVal; 
-        let aggSched = prevVal; 
+        let totalAct = 0; let totalActWithPrev = prevVal; let aggPlan = prevVal; let aggSched = prevVal; 
         const noBunk = document.getElementById('noBunk').checked;
 
         for(let i=0; i<app.stations.length-1; i++) {
             const std=parse(app.stations[i].std), sta=parse(app.stations[i+1].sta);
             const out=parse(app.stations[i].out), inc=parse(app.stations[i+1].in);
             const sft=parse(app.sfts[i]);
-            const sftEl = document.getElementById(`sft-${i}`);
-            if(sftEl) sftEl.style.borderColor = 'var(--border-light)';
+            const sftEl = document.getElementById(`sft-${i}`); if(sftEl) sftEl.style.borderColor = 'var(--border-light)';
             const isAcm = app.stations[i].isAcm;
             const pEl = document.getElementById(`p-${i}`);
-            if(pEl) {
-                if(std!==null && sta!==null) { 
-                    let d = diff(std,sta); 
-                    if (!isAcm) aggPlan += d; 
-                    pEl.innerText = fmt(d, false); 
-                } 
-                else pEl.innerText = "--";
-            }
-            if (sft !== null) {
-                const txOut = app.stations[i].taxiOut !== undefined ? app.stations[i].taxiOut : 15;
-                const txIn = app.stations[i+1].taxiIn !== undefined ? app.stations[i+1].taxiIn : 15;
-                if (!isAcm) aggSched += (sft + txOut + txIn); 
-            }
-            let ft = 0;
-            const aEl = document.getElementById(`a-${i}`);
+            if(pEl) { if(std!==null && sta!==null) { let d = diff(std,sta); if (!isAcm) aggPlan += d; pEl.innerText = fmt(d, false); }  else pEl.innerText = "--"; }
+            if (sft !== null) { const txOut = app.stations[i].taxiOut !== undefined ? app.stations[i].taxiOut : 15; const txIn = app.stations[i+1].taxiIn !== undefined ? app.stations[i+1].taxiIn : 15; if (!isAcm) aggSched += (sft + txOut + txIn);  }
+            
+            // 🚨 V5.7.3 Strict Actual Logic / 嚴格要求輸入實際時間才計算 Actual
+            let ft = 0; const aEl = document.getElementById(`a-${i}`);
             if(out!==null && inc!==null) { 
                 ft = diff(out,inc); 
                 if(aEl) aEl.innerText = fmt(ft, false); 
-                if (!isAcm) {
-                    totalAct += ft; 
-                    totalActWithPrev += ft;
-                }
+                if (!isAcm) { totalAct += ft; totalActWithPrev += ft; } 
+            } else { 
+                if(aEl) aEl.innerText = "--"; 
             }
-            else if(sft!==null) { 
-                // Only for "Sched" calculation visual cue, NOT added to totalAct
-                let estimatedBlock = sft + (app.stations[i].taxiOut||15) + (app.stations[i+1].taxiIn||15);
-                if(aEl) aEl.innerText = fmt(estimatedBlock, false) + "*"; 
-            }
-            else { if(aEl) aEl.innerText = "--"; }
         }
         
-        let maxFt = 600; 
-        if (app.crew === 'M') {
-             maxFt = noBunk ? 720 : 960; 
-        } else if (app.crew === 'D') {
-             maxFt = noBunk ? 720 : 1080; 
-        }
-
-        const boxPlan = document.getElementById('box-plan');
-        const boxSched = document.getElementById('box-sched');
-        const boxAct = document.getElementById('box-act');
-
-        document.getElementById('t-plan').innerHTML = fmt(aggPlan, false);
-        document.getElementById('t-sched').innerHTML = fmt(aggSched, false);
+        let maxFt = 600; if (app.crew === 'M') maxFt = noBunk ? 720 : 960; else if (app.crew === 'D') maxFt = noBunk ? 720 : 1080; 
         
-        // Actual Box Logic
-        let actHtml = fmt(totalAct, false); // Display pure actual
-        if (prevVal > 0) {
-            actHtml += `<span style="font-size:9px; color:var(--text-tertiary); margin-left:2px;">+${fmt(prevVal,false)}</span>`;
+        // 🚀 V5.8.0 Smart HUD FT States / 計算飛時剩餘量供狀態列讀取
+        app._stats.ftRem = maxFt - Math.max(totalActWithPrev, aggSched, aggPlan);
+        app._stats.isFtExceeded = (totalActWithPrev > maxFt && totalAct > 0);
+
+        const boxPlan = document.getElementById('box-plan'); const boxSched = document.getElementById('box-sched'); const boxAct = document.getElementById('box-act');
+
+        document.getElementById('t-plan').innerHTML = fmt(aggPlan, false); document.getElementById('t-sched').innerHTML = fmt(aggSched, false);
+        
+        let actHtml = "--";
+        if (totalAct > 0 || prevVal > 0) {
+            actHtml = fmt(totalAct, false);
+            if (prevVal > 0) actHtml += `<span style="font-size:9px; color:var(--text-tertiary); margin-left:2px;">+${fmt(prevVal,false)}</span>`;
         }
         document.getElementById('t-act').innerHTML = actHtml;
         
-        // Update labels
-        const planLabel = document.querySelector('#box-plan .stat-label');
-        if(planLabel) planLabel.innerText = prevVal > 0 ? "Plan (+Prev)" : "Plan";
-        
-        const schedLabel = document.querySelector('#box-sched .stat-label');
-        if(schedLabel) schedLabel.innerText = prevVal > 0 ? "Sched (+Prev)" : "Sched";
+        const planLabel = document.querySelector('#box-plan .stat-label'); if(planLabel) planLabel.innerText = prevVal > 0 ? "Plan (+Prev)" : "Plan";
+        const schedLabel = document.querySelector('#box-sched .stat-label'); if(schedLabel) schedLabel.innerText = prevVal > 0 ? "Sched (+Prev)" : "Sched";
         
         if (aggPlan > maxFt) boxPlan.classList.add('stat-alert'); else boxPlan.classList.remove('stat-alert');
         if (aggSched > maxFt) boxSched.classList.add('stat-alert'); else boxSched.classList.remove('stat-alert');
+        if (app._stats.isFtExceeded) { boxAct.classList.add('stat-alert'); let alertMsg = " ⚠️"; if (noBunk && (app.crew === 'M' || app.crew === 'D') && totalActWithPrev > 720) alertMsg = "*"; document.getElementById('t-act').innerHTML += alertMsg; } 
+        else { boxAct.classList.remove('stat-alert'); }
         
-        // Check Limit using totalActWithPrev
-        if (totalActWithPrev > maxFt) {
-             boxAct.classList.add('stat-alert');
-             let alertMsg = " ⚠️";
-             if (noBunk && (app.crew === 'M' || app.crew === 'D') && totalActWithPrev > 720) {
-                 alertMsg = "*";
-             }
-             document.getElementById('t-act').innerHTML += alertMsg;
-        } else {
-             boxAct.classList.remove('stat-alert');
-        }
-        
-        updateBar('bar-plan', aggPlan, maxFt);
-        updateBar('bar-sched', aggSched, maxFt);
-        updateBar('bar-act', totalActWithPrev, maxFt); // Bar reflects limit check
+        updateBar('bar-plan', aggPlan, maxFt); updateBar('bar-sched', aggSched, maxFt); updateBar('bar-act', totalActWithPrev > prevVal ? totalActWithPrev : 0, maxFt);
         document.getElementById('limits-out').innerText = `FT Limit: ${fmt(maxFt, false)}`;
     }
     
     function calcLBO(rep, globalMaxFdpMins, stationLimitExtensions, globalPauseMinutes) {
+        let acarsLboMins = parse(app.acarsLbo);
+
         for(let i=0; i<app.stations.length-1; i++) {
-             let currentLimit = 14 * 60; 
-             if(app.crew==='M') currentLimit = 18 * 60;
-             if(app.crew==='D') currentLimit = 24 * 60;
+             let currentLimit = 14 * 60; if(app.crew==='M') currentLimit = 18 * 60; if(app.crew==='D') currentLimit = 24 * 60;
              if(document.getElementById('nightOps').checked) currentLimit -= 120;
              if (globalPauseMinutes > 0) currentLimit += globalPauseMinutes; 
-             let midDutyBonus = 0;
-             for(let b=1; b<=i; b++) midDutyBonus += stationLimitExtensions[b] || 0;
-             currentLimit += midDutyBonus;
-             const isExt = document.getElementById('extFdt').checked;
-             if (isExt) currentLimit += 120;
+             let midDutyBonus = 0; for(let b=1; b<=i; b++) midDutyBonus += stationLimitExtensions[b] || 0; currentLimit += midDutyBonus;
+             const isExt = document.getElementById('extFdt').checked; if (isExt) currentLimit += 120;
              if (currentLimit > 1440) currentLimit = 1440;
+             
              let timeNeeded = 0;
              for(let j=i; j<app.stations.length-1; j++) {
                 if (!app.stations[j] || !app.stations[j+1]) continue; 
                 let isFdpLeg = false;
-                if (!app.stations[j].isAcm) {
-                    isFdpLeg = true; 
-                } else {
-                    for (let x = j + 1; x < app.stations.length - 1; x++) {
-                        if (!app.stations[x].isAcm) {
-                            isFdpLeg = true;
-                            break;
-                        }
-                    }
-                }
+                if (!app.stations[j].isAcm) { isFdpLeg = true; } else { for (let x = j + 1; x < app.stations.length - 1; x++) { if (!app.stations[x].isAcm) { isFdpLeg = true; break; } } }
                 if (!isFdpLeg) continue; 
-                let seg = 0;
-                const s_sft=parse(app.sfts[j]), s_std=parse(app.stations[j].std), s_sta=parse(app.stations[j+1].sta);
-                if(s_sft!==null) {
-                    seg = s_sft + (app.stations[j].taxiOut||15) + (app.stations[j+1].taxiIn||15);
-                } 
-                else if(s_std!==null && s_sta!==null) seg = diff(s_std,s_sta);
-                else { seg = (app.stations[j].taxiOut||15) + (app.stations[j+1].taxiIn||15); }
+                let seg = 0; const s_sft=parse(app.sfts[j]), s_std=parse(app.stations[j].std), s_sta=parse(app.stations[j+1].sta); const lboTaxiOut = 15; const lboTaxiIn = 15;
+                if(s_sft!==null) seg = s_sft + lboTaxiOut + lboTaxiIn; else if(s_std!==null && s_sta!==null) seg = diff(s_std,s_sta); else seg = lboTaxiOut + lboTaxiIn;
                 timeNeeded += seg;
-                if (j > i && app.stations[j].hotel) {
-                      const hTime = calcRest(app.stations[j].ci, app.stations[j].co);
-                      if(hTime >= 180) {
-                          timeNeeded += hTime; 
-                      }
-                }
-                if(j < app.stations.length-2) {
-                    const currArr = parse(app.stations[j+1].sta);
-                    const nextDep = parse(app.stations[j+1].std);
-                    let turn = 45; 
-                    if (currArr !== null && nextDep !== null) turn = Math.max(diff(currArr, nextDep), 45);
-                    timeNeeded += turn;
-                }
+                if (j > i && app.stations[j].hotel) { const hTime = calcRest(app.stations[j].ci, app.stations[j].co); if(hTime >= 180) timeNeeded += hTime;  }
+                if(j < app.stations.length-2) { const currArr = parse(app.stations[j+1].sta); const nextDep = parse(app.stations[j+1].std); let turn = 45; if (currArr !== null && nextDep !== null) turn = Math.max(diff(currArr, nextDep), 45); timeNeeded += turn; }
              }
-             const lboFromReport = currentLimit - timeNeeded;
-             let lboAbs = rep + lboFromReport;
-             const actualOut = parse(app.stations[i].out);
-             const nextIn = parse(app.stations[i+1].in);
-             const isSectorFlown = (actualOut !== null && nextIn !== null);
-             if (isSectorFlown) {
-                 if (app.stations[i].frozenLbo === undefined || app.stations[i].frozenLbo === null) {
-                     app.stations[i].frozenLbo = lboAbs;
-                 } else {
-                     lboAbs = app.stations[i].frozenLbo;
-                 }
-             } else {
-                 app.stations[i].frozenLbo = null;
-             }
-             const lboEl = document.getElementById(`lbo-${i}`);
-             const lboDet = document.getElementById(`lbo-detail-${i}`);
-             const lboBox = document.getElementById(`lbo-box-${i}`);
+             const lboFromReport = currentLimit - timeNeeded; let lboAbs = rep + lboFromReport;
+
+             let usedAcars = false;
+             if (acarsLboMins !== null) { let acarsElapsed = acarsLboMins - rep; if (acarsElapsed < -720) acarsElapsed += 1440;  if (acarsElapsed > 0) { let absoluteAcars = rep + acarsElapsed; if (absoluteAcars < lboAbs) { lboAbs = absoluteAcars; usedAcars = true; } } }
+
+             const actualOut = parse(app.stations[i].out); const nextIn = parse(app.stations[i+1].in); const isSectorFlown = (actualOut !== null && nextIn !== null);
+             if (isSectorFlown) { if (app.stations[i].frozenLbo === undefined || app.stations[i].frozenLbo === null) { app.stations[i].frozenLbo = lboAbs; } else { lboAbs = app.stations[i].frozenLbo; } } 
+             else { app.stations[i].frozenLbo = null; }
+             
+             const lboEl = document.getElementById(`lbo-${i}`); const lboDet = document.getElementById(`lbo-detail-${i}`); const lboBox = document.getElementById(`lbo-box-${i}`);
              let isImpossible = false;
-             if (app.stations[i].hotel) {
-                const co = parse(app.stations[i].co);
-                if (co !== null) {
-                    let coElapsed = co - rep; 
-                    if (coElapsed < 0) coElapsed += 1440;
-                    if (lboFromReport < coElapsed) {
-                        isImpossible = true;
-                    }
-                }
-             }
+             if (app.stations[i].hotel) { const co = parse(app.stations[i].co); if (co !== null) { let coElapsed = co - rep; if (coElapsed < 0) coElapsed += 1440; if (lboFromReport < coElapsed) isImpossible = true; } }
+             
              if(lboEl) {
-                lboEl.classList.remove('lbo-locked');
-                lboBox.classList.remove('lbo-warn', 'lbo-safe');
-                if (isImpossible) {
-                    lboEl.innerText = "IMPOSSIBLE";
-                    lboEl.style.color = 'var(--brand-red)';
-                } else {
-                    lboEl.innerText = fmt(lboAbs)+" Z";
-                    lboEl.style.color = 'var(--text-primary)';
-                    if (isSectorFlown && app.stations[i].frozenLbo !== null) {
-                        lboBox.classList.add('lbo-locked');
-                    }
-                }
+                lboEl.classList.remove('lbo-locked'); lboBox.classList.remove('lbo-warn', 'lbo-safe', 'lbo-acars');
+                if (isImpossible) { lboEl.innerText = "IMPOSSIBLE"; lboEl.style.color = 'var(--brand-red)'; } 
+                else { lboEl.innerText = fmt(lboAbs)+" Z"; lboEl.style.color = 'var(--text-primary)'; if (isSectorFlown && app.stations[i].frozenLbo !== null) lboBox.classList.add('lbo-locked'); if (usedAcars && !isSectorFlown) lboBox.classList.add('lbo-acars'); }
              }
              let detText = "";
-             if (globalPauseMinutes > 0) detText += `Split+${fmt(globalPauseMinutes,false)} `;
-             if (midDutyBonus > 0) detText += `Ext+${fmt(midDutyBonus,false)}`;
-             if (isExt) detText += `CD+2h`; 
+             if (usedAcars) { detText += `LIMITED BY JZ ACARS`; } else { if (globalPauseMinutes > 0) detText += `Split+${fmt(globalPauseMinutes,false)} `; if (midDutyBonus > 0) detText += `Ext+${fmt(midDutyBonus,false)}`; if (isExt) detText += `CD+2h`;  }
              if (lboDet) lboDet.innerText = detText;
-             const outEl = document.getElementById(`out-${i}`);
-             if(outEl) outEl.style.borderColor = 'var(--border-light)';
+             
+             const outEl = document.getElementById(`out-${i}`); if(outEl) outEl.style.borderColor = 'var(--border-light)';
              if (!isImpossible && actualOut !== null) {
-                let outElapsed = actualOut - rep; 
-                if(outElapsed < 0) outElapsed += 1440;
-                let actualOutAbs = rep + outElapsed;
-                let diffTime = actualOutAbs - lboAbs;
-                if(diffTime > 0) {
-                    if(outEl) outEl.style.borderColor = 'var(--brand-red)';
-                    if(lboBox) lboBox.classList.add('lbo-warn');
-                } else {
-                    if(lboBox) lboBox.classList.add('lbo-safe');
-                }
+                let outElapsed = actualOut - rep; if(outElapsed < 0) outElapsed += 1440; let actualOutAbs = rep + outElapsed; let diffTime = actualOutAbs - lboAbs;
+                if(diffTime > 0) { if(outEl) outEl.style.borderColor = 'var(--brand-red)'; if(lboBox) lboBox.classList.add('lbo-warn'); } 
+                else { if(lboBox && !usedAcars) lboBox.classList.add('lbo-safe'); }
              }
         }
     }
 
-    function calcRest(ci, co) {
-        const i = parse(ci);
-        const o = parse(co);
-        if(i === null || o === null) return 0;
-        let diff = o - i;
-        if(diff < 0) diff += 1440;
-        return diff;
-    }
-
-    function parse(v) { 
-        if(!v) return null; 
-        let c=v.replace(/\D/g,''); 
-        if(c.length===0) return null;
-        while(c.length<4) c='0'+c; 
-        return parseInt(c.substring(0,2))*60 + parseInt(c.substring(2,4)); 
-    }
+    // === UTILITY FUNCTIONS ===
+    function calcRest(ci, co) { const i = parse(ci); const o = parse(co); if(i === null || o === null) return 0; let diff = o - i; if(diff < 0) diff += 1440; return diff; }
+    function parse(v) { if(!v) return null; let c=v.replace(/\D/g,''); if(c.length===0) return null; while(c.length<4) c='0'+c; return parseInt(c.substring(0,2))*60 + parseInt(c.substring(2,4)); }
     function fmt(m, mod=true) { while(m<0) m+=1440; let h=Math.floor(m/60), n=m%60; if(mod) h%=24; return `${String(h).padStart(2,'0')}:${String(n).padStart(2,'0')}`; }
     function diff(s,e) { let d=e-s; if(d<0) d+=1440; return d; }
 
     function getLocalInfo(utcMins, ianaZone, refDate) {
-        if (!ianaZone) return null;
-        const y = refDate.getUTCFullYear();
-        const m = refDate.getUTCMonth();
-        const d = refDate.getUTCDate();
-        const utcDate = new Date(Date.UTC(y, m, d, Math.floor(utcMins/60), utcMins%60));
+        if (!ianaZone) return null; const y = refDate.getUTCFullYear(); const m = refDate.getUTCMonth(); const d = refDate.getUTCDate(); const utcDate = new Date(Date.UTC(y, m, d, Math.floor(utcMins/60), utcMins%60));
         try {
             const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: ianaZone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23', day: 'numeric', month: 'numeric' });
-            const parts = fmt.formatToParts(utcDate);
-            const h = parseInt(parts.find(p => p.type === 'hour').value);
-            const min = parseInt(parts.find(p => p.type === 'minute').value);
+            const parts = fmt.formatToParts(utcDate); const h = parseInt(parts.find(p => p.type === 'hour').value); const min = parseInt(parts.find(p => p.type === 'minute').value);
             const timeStr = `${String(h).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
             const localStr = new Intl.DateTimeFormat('en-GB', { timeZone: ianaZone, hour: 'numeric', hourCycle: 'h23' }).format(utcDate);
-            const localH = parseInt(localStr.split(':')[0]);
-            const utcH = Math.floor(utcMins/60)%24;
-            let offset = localH - utcH; if (offset < -12) offset += 24; if (offset > 12) offset -= 24;
+            const localH = parseInt(localStr.split(':')[0]); const utcH = Math.floor(utcMins/60)%24; let offset = localH - utcH; if (offset < -12) offset += 24; if (offset > 12) offset -= 24;
             return { timeStr, offset };
         } catch (e) { return null; }
     }
       
+    // === PERSISTENCE & INITIALIZATION ===
     function saveData() {
         const data = {
             stations: app.stations, sfts: app.sfts, crew: app.crew, 
-            isNight: document.getElementById('nightOps').checked,
-            isNoBunk: document.getElementById('noBunk').checked,
-            prevFt: document.getElementById('prevFt').value,
-            extFdt: document.getElementById('extFdt').checked, 
-            pfDate: document.getElementById('pf-date').value,
-            pfIn: document.getElementById('pf-in').value,
-            pfDur: document.getElementById('pf-dur').value,
-            flightDate: document.getElementById('flightDate').value,
-            isLocked: app.isLocked,
-            lockedReport: app.lockedReport,
-            nextLegHeavy: app.nextLegHeavy,
-            nightMode: localStorage.getItem('nightMode')
+            isNight: document.getElementById('nightOps').checked, isNoBunk: document.getElementById('noBunk').checked, prevFt: document.getElementById('prevFt').value, extFdt: document.getElementById('extFdt').checked, pfDate: document.getElementById('pf-date').value, pfIn: document.getElementById('pf-in').value, pfDur: document.getElementById('pf-dur').value, flightDate: document.getElementById('flightDate').value,
+            isLocked: app.isLocked, lockedReport: app.lockedReport, nextLegHeavy: app.nextLegHeavy, acarsLbo: app.acarsLbo, earlyMorning: app.earlyMorning, nightMode: localStorage.getItem('nightMode')
         };
         localStorage.setItem('calData158', JSON.stringify(data));
     }
 
-    // Global Click Listener to Close Popups
-    window.addEventListener('click', function(e) {
-        const prevPopup = document.getElementById('prevPopup');
-        const prevBadge = document.querySelector('.prev-ft-badge');
-        if (prevPopup.classList.contains('show')) {
-            if (!prevPopup.contains(e.target) && !prevBadge.contains(e.target)) {
-                prevPopup.classList.remove('show');
-            }
-        }
+    const hideGlobalElements = (e) => {
+        const prevPopup = document.getElementById('prevPopup'); const prevBadge = document.querySelector('.badge-prev-ft');
+        if (prevPopup && prevPopup.classList.contains('show')) { if (!prevPopup.contains(e.target) && prevBadge && !prevBadge.contains(e.target)) prevPopup.classList.remove('show'); }
+        const routePopup = document.getElementById('routePopup'); const routeBtn = document.getElementById('routeBtn');
+        if (routePopup && routePopup.classList.contains('show')) { if (!routePopup.contains(e.target) && routeBtn && !routeBtn.contains(e.target)) routePopup.classList.remove('show'); }
+        const infoModal = document.getElementById('infoModal'); if (e.target === infoModal) closeInfo();
+        const isSegment = e.target.closest('.dt-segment');
+        if (!isSegment) { document.querySelectorAll('.dt-segment').forEach(s => s.classList.remove('selected')); const infoBar = document.getElementById('dtSegmentInfo'); if(infoBar) infoBar.style.opacity = 0; }
+    };
+    
+    window.addEventListener('click', hideGlobalElements);
+    window.addEventListener('touchstart', hideGlobalElements, {passive: true});
 
-        const routePopup = document.getElementById('routePopup');
-        const routeBtn = document.getElementById('routeBtn');
-        if (routePopup.classList.contains('show')) {
-            if (!routePopup.contains(e.target) && !routeBtn.contains(e.target)) {
-                routePopup.classList.remove('show');
-            }
-        }
-    });
+    // 每 60 秒背景更新一次，驅動 Live Time 檢查 / 60s Background Update Loop for Live tracking
+    setInterval(() => { if(app.stations[0].std) runAllCalc(false); }, 60000); 
 
     window.onload = () => { 
         const isDark = localStorage.getItem('nightMode') === 'true';
-        if(isDark) {
-            document.body.classList.add('dark-mode');
-            document.getElementById('nightBtnIcon').innerText = '☀️';
+        if(isDark) { document.body.classList.add('dark-mode'); document.getElementById('nightBtnIcon').innerText = '☀️'; }
+        const routes = localStorage.getItem('calSavedRoutes'); if(routes) { try { savedRoutes = JSON.parse(routes); } catch(e) {} }
+        
+        if(localStorage.getItem('toolbarCollapsed') === 'true') {
+            document.getElementById('toolbarWrapper').classList.add('collapsed');
+            document.getElementById('headerToggleBtn').classList.add('collapsed');
         }
-        const routes = localStorage.getItem('calSavedRoutes');
-        if(routes) {
-            try { savedRoutes = JSON.parse(routes); } catch(e) {}
-        }
-        const d = localStorage.getItem('calData158'); 
-        let savedCrew = 'S';
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('flightDate').value = today;
+
+        const d = localStorage.getItem('calData158'); let savedCrew = 'S';
+        const today = new Date().toISOString().split('T')[0]; document.getElementById('flightDate').value = today;
         if(d) { 
             try { 
-                const p=JSON.parse(d); 
-                app.stations=p.stations; 
-                app.sfts=p.sfts; 
-                app.crew=p.crew; 
-                savedCrew=p.crew; 
+                const p=JSON.parse(d); app.stations=p.stations; app.sfts=p.sfts; app.crew=p.crew; savedCrew=p.crew; 
                 document.getElementById('nightOps').checked=p.isNight;
                 if(p.isNoBunk) document.getElementById('noBunk').checked=p.isNoBunk;
                 if(p.extFdt) document.getElementById('extFdt').checked=p.extFdt;
@@ -2164,9 +2175,13 @@
                 if(p.isLocked !== undefined) app.isLocked = p.isLocked;
                 if(p.lockedReport !== undefined) app.lockedReport = p.lockedReport;
                 if(p.nextLegHeavy !== undefined) app.nextLegHeavy = p.nextLegHeavy;
+                if(p.acarsLbo !== undefined) { app.acarsLbo = p.acarsLbo; document.getElementById('acarsLbo').value = p.acarsLbo; }
+                if(p.earlyMorning !== undefined) { app.earlyMorning = p.earlyMorning; document.getElementById('earlyMorningSel').value = p.earlyMorning; }
             } catch(e){} 
         }
+
         setCrew(savedCrew);
+        initHHMMUX();
         drawTimeline(); 
     };
 </script>
