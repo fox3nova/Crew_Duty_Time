@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>CAL Duty (Pro v6.7.4)</title>
+    <title>CAL Duty (Pro v6.8.3)</title>
     <style>
         /* === SYSTEM & VARIABLES === */
         :root {
@@ -150,6 +150,48 @@
             gap: 6px;
             flex-shrink: 0;
             order: 1;
+        }
+        .release-pill {
+            appearance: none;
+            -webkit-appearance: none;
+            border: 1px solid color-mix(in srgb, var(--brand-blue) 14%, var(--border-light) 86%);
+            background: linear-gradient(180deg, color-mix(in srgb, var(--bg-card) 86%, white 14%), color-mix(in srgb, var(--bg-input) 78%, white 22%));
+            color: var(--text-primary);
+            -webkit-text-fill-color: initial;
+            border-radius: 999px;
+            padding: 4px 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            font: inherit;
+            line-height: 1;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+        .release-pill * { -webkit-text-fill-color: initial; }
+        .release-pill:hover {
+            border-color: color-mix(in srgb, var(--brand-blue) 28%, var(--border-light) 72%);
+            box-shadow: var(--shadow-md);
+        }
+        .release-pill:active { transform: scale(0.98); }
+        .release-pill:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-blue) 18%, transparent), var(--shadow-md);
+        }
+        .release-pill-main {
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.02em;
+            color: var(--brand-blue);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        }
+        .release-pill-sub {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-secondary);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
         }
 
         .header-actions {
@@ -726,6 +768,52 @@
         .rb-chip-clickable { cursor: pointer; user-select: none; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: 0; } }
 
+
+        /* === iPad Floating Time Pad (v6.8.1) === */
+        .glass-input.custom-pad-active {
+            border-color: var(--brand-blue) !important;
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-blue) 20%, transparent) !important;
+            background: var(--bg-card) !important;
+        }
+        .custom-time-pad {
+            position: fixed;
+            z-index: 1400;
+            width: 232px;
+            max-width: calc(100vw - 16px);
+            display: none;
+            border-radius: 16px;
+            padding: 10px;
+            border: 1px solid var(--border-light);
+            background: var(--bg-glass);
+            box-shadow: var(--shadow-float);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+        .custom-time-pad.show { display: block; }
+        .ctp-head { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:8px; }
+        .ctp-title-wrap { min-width:0; }
+        .ctp-title { font-size: 11px; font-weight: 900; color: var(--brand-blue); letter-spacing: 0.2px; }
+        .ctp-target { margin-top: 2px; font-size: 10px; font-weight: 800; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
+        .ctp-close {
+            width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--border-light);
+            background: var(--bg-input); color: var(--text-secondary); font-weight: 900; cursor: pointer;
+            display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+        }
+        .ctp-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; }
+        .ctp-key {
+            height: 42px; border-radius: 12px; border: 1px solid var(--border-light); background: var(--bg-card);
+            color: var(--text-primary); font-size: 18px; font-weight: 900; cursor: pointer;
+            box-shadow: var(--shadow-sm); display:flex; align-items:center; justify-content:center; user-select:none;
+        }
+        .ctp-key:active { transform: scale(0.98); opacity: 0.96; }
+        .ctp-key.action { font-size: 12px; font-weight: 800; }
+        .ctp-key.done { background: var(--brand-blue); color: white; border-color: transparent; }
+        .ctp-actions { display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:8px; }
+        @media (max-width: 430px) {
+            .custom-time-pad { width: min(220px, calc(100vw - 12px)); padding: 9px; }
+            .ctp-key { height: 40px; }
+        }
+
         /* === INFO MODAL === */
         .info-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s ease; }
         .info-modal-overlay.show { display: flex; opacity: 1; }
@@ -847,6 +935,224 @@
         .changelog-details { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px; margin-top: 12px; transition: all 0.3s ease;}
         .changelog-summary { cursor: pointer; font-size: 12px; font-weight: 800; color: var(--brand-blue); outline: none; user-select: none; }
         .changelog-summary::-webkit-details-marker { display: none; }
+
+
+        /* === RELEASE NOTES (v6.8.3 UI refresh) === */
+        #infoModal.release-notes-mode .info-modal-card {
+            width: 92%;
+            max-width: 980px;
+        }
+        #infoModal.release-notes-mode .info-modal-body {
+            padding: 14px 16px 18px 16px;
+            max-height: 78vh;
+            -webkit-overflow-scrolling: touch;
+        }
+        .release-shell { display: flex; flex-direction: column; gap: 14px; }
+        .release-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .release-tabs {
+            display: inline-flex;
+            background: color-mix(in srgb, var(--bg-input) 70%, transparent 30%);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 3px;
+            gap: 4px;
+        }
+        .release-tab {
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 800;
+            border-radius: 10px;
+            padding: 8px 10px;
+            min-width: 88px;
+            cursor: pointer;
+        }
+        .release-tab.active {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+        }
+        .release-hero {
+            background: linear-gradient(135deg, color-mix(in srgb, var(--brand-blue) 8%, var(--bg-card) 92%), color-mix(in srgb, var(--brand-purple) 8%, var(--bg-card) 92%));
+            border: 1px solid color-mix(in srgb, var(--brand-blue) 16%, var(--border-light) 84%);
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: var(--shadow-sm);
+        }
+        .release-kicker {
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--brand-blue);
+            margin-bottom: 8px;
+        }
+        .release-hero-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .release-current-version {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--text-primary);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+            letter-spacing: -0.02em;
+        }
+        .release-hero-desc {
+            margin-top: 8px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .release-hero-tags, .release-card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .release-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 24px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+            line-height: 1;
+            border: 1px solid var(--border-light);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+        }
+        .release-chip.primary {
+            background: color-mix(in srgb, var(--brand-blue) 10%, var(--bg-card) 90%);
+            color: var(--brand-blue);
+            border-color: color-mix(in srgb, var(--brand-blue) 20%, var(--border-light) 80%);
+        }
+        .release-chip.success {
+            background: color-mix(in srgb, var(--brand-green) 10%, var(--bg-card) 90%);
+            color: #15803d;
+            border-color: color-mix(in srgb, var(--brand-green) 20%, var(--border-light) 80%);
+        }
+        .release-chip.warn {
+            background: color-mix(in srgb, var(--brand-orange) 10%, var(--bg-card) 90%);
+            color: #b45309;
+            border-color: color-mix(in srgb, var(--brand-orange) 22%, var(--border-light) 78%);
+        }
+        .release-chip.mono {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+            color: var(--text-primary);
+        }
+        .release-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+        }
+        .release-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 100%;
+        }
+        .release-card.latest {
+            border-color: color-mix(in srgb, var(--brand-blue) 24%, var(--border-light) 76%);
+            box-shadow: 0 10px 28px -18px rgba(0, 122, 255, 0.45);
+        }
+        .release-card-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .release-version {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--text-primary);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+            line-height: 1.1;
+        }
+        .release-summary {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.45;
+        }
+        .release-copy {
+            font-size: 13px;
+            line-height: 1.65;
+            color: var(--text-secondary);
+        }
+        .release-points {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .release-points li {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 8px;
+            align-items: start;
+        }
+        .release-point-label {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 46px;
+            padding: 3px 7px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 900;
+            line-height: 1;
+            color: var(--brand-blue);
+            background: color-mix(in srgb, var(--brand-blue) 10%, var(--bg-card) 90%);
+            border: 1px solid color-mix(in srgb, var(--brand-blue) 18%, var(--border-light) 82%);
+        }
+        .release-point-text { color: var(--text-secondary); }
+        .release-foot {
+            margin-top: auto;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border-light);
+            font-size: 11px;
+            color: var(--text-tertiary);
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .release-empty {
+            padding: 22px 16px;
+            border: 1px dashed var(--border-light);
+            border-radius: 14px;
+            text-align: center;
+            color: var(--text-secondary);
+            background: var(--bg-input);
+            font-size: 13px;
+            font-weight: 700;
+        }
+        @media (max-width: 430px) {
+            #infoModal.release-notes-mode .info-modal-card { width: 94%; }
+            .release-tab { min-width: 84px; padding: 8px 8px; }
+            .release-hero, .release-card { padding: 12px; }
+            .release-list { grid-template-columns: 1fr; }
+        }
 
 
         /* === iPad TIMELINE HEIGHT FIX (v6.5.5) ===
@@ -1112,7 +1418,7 @@
                 </div>
 
                 <div id="help-zh" class="help-section" role="tabpanel" aria-labelledby="helpTabZh">
-                    <div class="help-title">✈️ CAL Duty (Pro v6.7.4) 雙語使用手冊 / Bilingual User Guide</div>
+                    <div class="help-title">✈️ CAL Duty (Pro v6.8.3) 雙語使用手冊 / Bilingual User Guide</div>
 
                     <div class="help-block">
                         <div class="help-h">【中文版使用說明】</div>
@@ -1139,6 +1445,7 @@
                             <li><b>輸入機場代碼 (Code)</b>：輸入 3 碼 IATA 或 4 碼 ICAO 代碼（如輸入 RJAA 會自動轉為 NRT）。</li>
                             <li>點擊卡片下方的 <b>+</b> 新增航段，<b>⤵</b> 新增轉降 (Divert)。</li>
                             <li><b>輸入表定時間 (STD / STA)</b>：輸入 4 位數字（如 0830），系統會自動換算時區。</li>
+                            <li><b>iPad 浮動數字鍵盤</b>：在 iPad 點按 HHMM 時間欄位時，會直接顯示 app 內建數字鍵盤（含 ⌫／清除／完成）；v6.8.3 延續 v6.8.2 的 iPad 浮動鍵盤修正，並把版本更新標註重構為卡片式雙語 Release Notes，現在更容易閱讀與檢索。</li>
                         </ul>
                         <div class="help-tip">💡 提示：輸入完成後，底部 HUD 會自動算出您的報到時間 (Report) 與 最大任務時間 (Max FDT)。</div>
                     </div>
@@ -1185,7 +1492,7 @@
                 </div>
 
                 <div id="help-en" class="help-section" role="tabpanel" aria-labelledby="helpTabEn" style="display:none;">
-                    <div class="help-title">✈️ CAL Duty (Pro v6.7.4) Bilingual User Guide</div>
+                    <div class="help-title">✈️ CAL Duty (Pro v6.8.3) Bilingual User Guide</div>
 
                     <div class="help-block">
                         <div class="help-h">【English User Guide】</div>
@@ -1211,6 +1518,7 @@
                         <ul class="help-ul">
                             <li><b>Code</b>: Input 3-letter IATA or 4-letter ICAO codes. Tap <b>+</b> to add legs, <b>⤵</b> to add diverts.</li>
                             <li><b>STD / STA</b>: Input 4 digits (e.g., 0830). The system automatically formats and converts timezones.</li>
+                            <li><b>iPad floating number pad</b>: On iPad, tapping an HHMM field opens the built-in number pad (with ⌫ / Clear / Done); v6.8.3 carries forward the v6.8.2 iPad floating-pad fix and restructures update annotations into a bilingual card-based Release Notes panel for cleaner reading and scanning.</li>
                         </ul>
                         <div class="help-tip">💡 Tip: Bottom HUD will auto-calculate your Report Time and Max FDT once STD/STA are entered.</div>
                     </div>
@@ -1271,7 +1579,10 @@
             <!-- 1. Logo (Left) -->
             <div class="app-title">
                 <span style="font-size:20px;">✈️</span> CAL Duty 
-                <span class="text-xs font-medium text-secondary" style="border:1px solid var(--border-light); padding:1px 4px; border-radius:4px; cursor:pointer;" title="v6.7.4：iPad Safari NOW 標記穩定性修正＋版本更新標注補齊中英雙語 / v6.7.4: iPad Safari NOW marker stability fix + bilingual update annotations; v6.7.3：HHMM 連續輸入 / v6.7.3: Continuous HHMM input; v6.7.2：LBO 警告更顯眼 / v6.7.2: More visible LBO warnings; v6.7.1：Rest 時數顯示增強 / v6.7.1: Rest label readability; v6.7.0：IATA/ICAO 資料庫更新 / v6.7.0: Airport DB update; v6.6.0：LBO 倒數預警 / v6.6.0: LBO countdown warning" onclick="showInfo('changelog')">Pro v6.7.4 ⓘ</span>
+                <button class="release-pill" title="Open structured bilingual release notes / 開啟結構化中英雙語版本更新" onclick="showInfo('changelog')">
+                    <span class="release-pill-main">v6.8.3</span>
+                    <span class="release-pill-sub">Release Notes</span>
+                </button>
             </div>
 
             <!-- 2. Primary Responsive Group (Center on iPad, Wraps to Bottom on Mobile) -->
@@ -1538,6 +1849,35 @@
         </div>
     </footer>
 
+
+    <div id="customTimePad" class="custom-time-pad" aria-hidden="true">
+        <div class="ctp-head">
+            <div class="ctp-title-wrap">
+                <div class="ctp-title">時間鍵盤 / Time Pad</div>
+                <div class="ctp-target">HHMM</div>
+            </div>
+            <button type="button" class="ctp-close" onclick="__closeCustomTimePad({ blur: true })" aria-label="Close">✕</button>
+        </div>
+        <div class="ctp-grid">
+            <button type="button" class="ctp-key" data-key="1">1</button>
+            <button type="button" class="ctp-key" data-key="2">2</button>
+            <button type="button" class="ctp-key" data-key="3">3</button>
+            <button type="button" class="ctp-key" data-key="4">4</button>
+            <button type="button" class="ctp-key" data-key="5">5</button>
+            <button type="button" class="ctp-key" data-key="6">6</button>
+            <button type="button" class="ctp-key" data-key="7">7</button>
+            <button type="button" class="ctp-key" data-key="8">8</button>
+            <button type="button" class="ctp-key" data-key="9">9</button>
+            <button type="button" class="ctp-key action" data-key="00">00</button>
+            <button type="button" class="ctp-key" data-key="0">0</button>
+            <button type="button" class="ctp-key action" data-key="DEL">⌫</button>
+        </div>
+        <div class="ctp-actions">
+            <button type="button" class="ctp-key action" data-key="CLR">清除 / Clear</button>
+            <button type="button" class="ctp-key action done" data-key="DONE">完成 / Done</button>
+        </div>
+    </div>
+
 <script>
 
     // === VIEWPORT HEIGHT STABILIZER (iPad/iOS WebKit) ===
@@ -1625,117 +1965,8 @@
     // === INFO SYSTEM DATA & BILINGUAL TEXTS ===
     const INFO_DATA = {
         'changelog': {
-            title: '版本更新資訊 (Changelog)',
-            text: `<div class="info-zh"><b>v6.7.4 iPad Safari NOW 標記穩定性修正（UI；不更動計算公式）</b><br>
-                   • <b>修正</b>：Duty Timeline 的 NOW 改為實體標籤層，不再依賴 iPad Safari 較容易漏繪的偽元素重繪。<br>
-                   • <b>穩定化</b>：NOW 採中心點定位並限制在 0.5%–99.5% 區間，同時使用較穩定的合成層轉換，降低 Safari 在工具列/重排時消失的機率。<br>
-                   • <b>文件</b>：版本更新標注補齊中英雙語。<br><br></div>
-                   <div class="info-en" style="margin-top:8px;"><b>v6.7.4 iPad Safari NOW marker stability fix (UI-only; no formula changes)</b><br>
-                   • <b>Fix</b>: the Duty Timeline NOW indicator now uses a real label layer instead of a Safari-sensitive pseudo-element. <br>
-                   • <b>Stabilized</b>: NOW uses center-based positioning, is clamped to the 0.5%–99.5% range, and uses GPU-friendly transforms to reduce disappearing during Safari relayout or toolbar changes.<br>
-                   • <b>Docs</b>: changelog/update annotations are now fully bilingual.<br><br></div>
-                   <div class="info-zh"><b>v6.7.3 HHMM 連續輸入（無間斷）</b><br>
-                   • <b>新增</b>：在「脈衝陰影（Guided Focus）」的時間欄位，輸入滿 4 碼且有效（0000–2359）後，會自動跳到下一個脈衝欄位，連續輸入不中斷。<br>
-                   • <b>顯示維持</b>：時間仍以四碼 HHMM 顯示，不轉換成 HH:MM。<br><br>
-                   <b>v6.7.2 LBO（LAST LEGAL PUSH / Z）警告更顯眼</b><br>
-                   • <b>加強</b>：LBO 卡片在 CAUTION/ALERT 時使用高對比邊框、警示圖示與輕微脈衝陰影，提升 iPad 上可辨識度。<br>
-                   • <b>修正</b>：若 ACT OUT 已超過 LBO，改為直接顯示 <b>ALERT（紅色）</b>（原先為橘色 warn）。<br>
-                   • <b>不影響</b>：所有計算公式/數值完全不變（純視覺強化）。</div>
-                   <div class="info-zh" style="margin-top:8px;"><b>v6.7.1 Rest Time 顯示增強（時間條不增高）</b><br>
-                   • <b>改善</b>：Duty Timeline Minimap 的 Rest 時數改為「浮動膠囊標籤」顯示，維持 Track 高度不變，解決 10px 內文字難辨問題。<br>
-                   • <b>定位</b>：標籤會自動對齊 Rest 區段中心，並在左右邊界自動避開溢出。<br>
-                   • <b>不影響</b>：計算公式/數值完全不變（純顯示改善）。</div>
-                   <div class="info-zh" style="margin-top:8px;"><b>v6.7.0 資料庫更新</b><br>
-                   • <b>資料擴充</b>：把你提供的 IATA 清單整合進資料庫，新增/補齊 IATA→時區（IANA）與 ICAO→IATA 對照（新增 67 個 IATA code）。<br>
-                   • <b>影響</b>：提升 Local 時間換算正確性，並改善 Next Duty Planner（4 碼 ICAO→3 碼 IATA）自動轉換與 Flight/Ground 判定。</div>
-                   <div class="info-zh" style="margin-top:8px;"><b>v6.6.0 LBO 倒數預警（預設啟用）</b><br>
-                   • <b>新增</b>：以「目前時間」計算距離下一航段 Last Legal Push（LBO）的剩餘分鐘（LBO Rem）。<br>
-                   • <b>狀態整合</b>：LBO Rem 進入門檻即自動切換 Legal Status Strip → CAUTION/ALERT；超過 LBO 直接 ALERT。<br>
-                   • <b>視覺定位</b>：僅針對「下一個尚未 OUT 的航段」顯示/警示，避免噪音；同步標示該航段的 LBO 與 OUT 欄位。<br>
-                   • <b>設定簡化</b>：移除「LBO Warn 啟用」開關，功能固定啟用；保留 C/A 門檻與 Pop（Toast）選項。</div>
-
-                   <div class="info-en" style="margin-top:8px;"><b>v6.7.3 Continuous HHMM input (seamless)</b><br>
-                   • <b>New</b>: For Guided Focus time fields, once 4 digits (0000–2359) are entered and valid, focus automatically moves to the next pulsing field for uninterrupted entry.<br>
-                   • <b>Display</b>: Times remain 4-digit HHMM (no HH:MM conversion).<br><br>
-                   <b>v6.7.2 More visible LBO (LAST LEGAL PUSH / Z) warnings</b><br>
-                   • <b>Enhanced</b>: higher-contrast borders, warning icon, and subtle pulsing shadow for CAUTION/ALERT to improve legibility on iPad.<br>
-                   • <b>Fix</b>: when ACT OUT exceeds LBO, it now shows <b>ALERT (red)</b> instead of an orange warn state.<br>
-                   • <b>No changes</b>: formulas/values remain identical (visual-only).</div>
-                   <div class="info-en" style="margin-top:8px;"><b>v6.7.1 Rest label readability (no height change)</b><br>
-                   • <b>Improved</b>: moved Rest text out of the 10px track into a floating pill label for legibility; track height unchanged.<br>
-                   • <b>Positioning</b>: label anchors to the center of the Rest segment and auto-clamps near left/right edges.<br>
-                   • <b>No changes</b>: formulas/values remain identical (display-only).</div>
-                   <div class="info-en" style="margin-top:8px;"><b>v6.7.0 Airport DB update</b><br>
-                   • <b>Data expansion</b>: integrated your IATA list into the database, expanding IATA→IANA timezone and ICAO→IATA mappings (67 added IATA codes).<br>
-                   • <b>Impact</b>: improves Local-time conversion and enhances Next Duty Planner auto-conversion (ICAO→IATA) and Flight/Ground classification.</div>
-                   <div class="info-en" style="margin-top:8px;"><b>v6.6.0 LBO countdown warning (enabled by default)</b><br>
-                   • <b>Added</b>: real-time minutes remaining to the next leg’s Last Legal Push (LBO Rem), based on current time.<br>
-                   • <b>Status integration</b>: crossing thresholds automatically switches the Legal Status Strip to CAUTION/ALERT; exceeding LBO triggers ALERT.<br>
-                   • <b>Targeted highlight</b>: monitors only the next not-yet-OUT leg to avoid noise; highlights that leg’s LBO and OUT fields.<br>
-                   • <b>Settings</b>: warning is always on; adjustable C/A thresholds and Pop (toast) remain.</div>
-<hr style="border:none;border-top:1px solid #e2e8f0;margin:10px 0;">
-                   <div class="info-zh"><b>v6.5.10 Next Duty 輸入穩定性（刪除不卡頓＋ICAO=Ground 規則）</b><br>
-                   • <b>時間條極限瘦身</b>：Duty Timeline Minimap 進一步降低高度（Track／刻度／段落提示），釋放更多航段卡可視面積。<br>
-                   • <b>鍵盤彈出自動讓位</b>：iPad 橫向輸入時間時，偵測鍵盤開啟自動隱藏上方統計/狀態/時間條與底部 HUD，避免航段卡被擠到看不見；收鍵盤後自動復原。<br>
-                   • <b>輸入框置中</b>：點選時間欄位會自動 scrollIntoView 置中，降低被鍵盤遮擋。</div>
-                   <hr style="border:none;border-top:1px solid #e2e8f0;margin:10px 0;">
-                   <div class="info-zh"><b>v6.5.5 48h Long Layover 規則修正（邏輯）</b><br>
-                   • <b>修正</b>：依 FOM 3.4.3.2，「返台後 48 小時內不得再派遣 Flight Duty」僅適用於 Flight Duty。當 Planned Next Duty 為非機場代碼（例如 SIM／訓練）時，不再誤判為 Rest Short。<br>
-                   • <b>保留</b>：若下次 Flight Duty 目的地為前一 &gt;48h 外站或與其時差≤3h，仍自動豁免 48h 限制（但一般 minimum rest 仍需滿足）。<br>
-                   <hr style="border:none;border-top:1px solid #e2e8f0;margin:10px 0;">
-                   </div>
-                   <div class="info-zh"><b>v6.5.2 iPad 時間條高度修正（UI；不更動計算公式）</b><br>
-                   • <b>iPad Safari/Chrome</b>：Duty Timeline（時間條）改為 Compact（降低刻度/間距），避免擠壓航段卡區塊。<br>
-                   • <b>Viewport 校正</b>：使用 Visual Viewport 高度鎖定 App 版面，降低 iPad 動態工具列造成的高度誤判。</div>
-                   <div class="info-en" style="margin-top:8px;"><b>v6.5.10 Next Duty input stability (smooth delete + ICAO-as-ground rule)</b><br>
-                   • <b>Minimap ultra-compact</b>: further reduced Duty Timeline Minimap height to reclaim leg-card space.<br>
-                   • <b>Keyboard-aware layout</b>: on iPad landscape while editing time fields, auto-hides top strips and bottom HUD to prevent the leg cards from being squeezed; auto-restores when the keyboard closes.<br>
-                   • <b>Auto-centering inputs</b>: focused time fields are scrolled into the center of the viewport to avoid being covered by the keyboard.</div>
-                   <hr style="border:none;border-top:1px solid #e2e8f0;margin:10px 0;">
-                   <div class="info-en" style="margin-top:8px;"><b>v6.5.5 48h Long Layover Rule Fix (Logic)</b><br>
-                   • <b>Fix</b>: per FOM 3.4.3.2, the “no flight duty within 48h after returning to home base” restriction applies to <u>flight duty</u> only. When the planned next duty is NOT a flight duty (non-airport code such as SIM/training), it will no longer be flagged as Rest Short.<br>
-                   • <b>Kept</b>: exemption still applies when the next <u>flight</u> is to the previous &gt;48h layover point or any point within ≤3h TZ difference (minimum required rest still applies).<br>
-                   <hr style="border:none;border-top:1px solid #e2e8f0;margin:10px 0;">
-                   </div>
-                   <div class="info-en" style="margin-top:8px;"><b>v6.5.2 iPad Timeline Height Fix (UI-only; no formula changes)</b><br>
-                   • <b>iPad Safari/Chrome</b>: compact the duty timeline (ruler/track spacing) so leg cards are not squeezed.<br>
-                   • <b>Viewport stabilization</b>: use the visual viewport height to keep flex layout stable when browser toolbars resize.</div>
-<div class="info-divider"></div>
-<div class="info-zh"><b>v6.5.1 輸休換班鬧鐘（不更動計算公式 / 不改動視覺風格）</b><br>
-                   • <b>輸休展開</b>：點擊航段卡的 💤 輸休時間，可展開輸入 Block Off（OUT）時間。<br>
-                   • <b>自動計算換班時間</b>：
-                       <span style="font-weight:800;">D Crew</span> 顯示 2 段、<span style="font-weight:800;">M Crew</span> 顯示 3 段，依序計算：<br>
-                       &nbsp;&nbsp;第1段 = Block Off + 00:15 + 輪休時間<br>
-                       &nbsp;&nbsp;第2段 = Block Off + 00:15 + 2×輪休時間<br>
-                       &nbsp;&nbsp;第3段 = Block Off + 00:15 + 3×輪休時間（僅 M Crew）<br>
-                   • <b>同步更新</b>：輪休時間採用既有機上輪休估算（依 FT 或 Plan），輸入/更動後即時更新。</div>
-                   <div class="info-en" style="margin-top:8px;"><b>v6.5.1 In-flight Rest Alarm Helper (No formula/style changes)</b><br>
-                   • Tap the 💤 rest chip to expand a small panel for Block Off (OUT).<br>
-                   • Auto swap-time schedule: <b>D Crew</b> shows 2 times, <b>M Crew</b> shows 3 times.<br>
-                     1) Block Off + 00:15 + 1×Rest<br>
-                     2) Block Off + 00:15 + 2×Rest<br>
-                     3) Block Off + 00:15 + 3×Rest (M only)<br>
-                   • Uses the existing rest estimate (FT/Plan-based) and updates live.</div>
-<div class="info-divider"></div>
-                   <details class="changelog-details">
-                       <summary class="changelog-summary">查看歷史版本 (Previous Versions) ▼</summary>
-                       <div class="info-zh" style="margin-top:8px; font-size:12px; line-height:1.6;">
-                           <b>v6.5.0 UI/可用性強化</b><br>• Legal Status Strip 診斷（可點擊原因/數值）。<br>• Routes 全改內建 Modal/Toast（移除瀏覽器彈窗）。<br>• HHMM 輸入防呆擴充；Guided Focus 自動捲動；Info/Dialogs 無障礙鍵盤支援。<hr style="border:0; border-top:1px dashed var(--border-light); margin:8px 0;">
-                           <b>v6.4.2 引導光環強化</b><br>• 加強引導輸入脈衝光暈；新增 Safari WebKit 動畫支援。<hr style="border:0; border-top:1px dashed var(--border-light); margin:8px 0;">
-                           <b>v6.4.1 Safari 相容性修復</b><br>• 修復 iOS/macOS Safari Flexbox 高度崩塌問題。<hr style="border:0; border-top:1px dashed var(--border-light); margin:8px 0;">
-                           <b>v6.4.0 智慧引導輸入</b><br>• 視覺脈衝引導填寫；支援智慧捷徑 (Smart Bypass)。<hr style="border:0; border-top:1px dashed var(--border-light); margin:8px 0;">
-                           <b>v6.3.0 智慧機上輪休計算</b><br>• 航段卡新增輪休預估，支援 M/D Crew 動態雙重計算。<hr style="border:0; border-top:1px dashed var(--border-light); margin:8px 0;">
-                           <b>v6.2.4 智慧字典反向判定</b><br>• 自動將非機場代碼識別為地面任務 (-0m)。
-                       </div>
-                       <div class="info-en" style="margin-top:8px; font-size:12px; line-height:1.6;">
-                           <b>v6.5.0 UI / usability enhancements</b><br>• Legal Status Strip diagnostics (clickable reason/values).<br>• Route actions moved to built-in Modal/Toast UI (browser popups removed).<br>• Expanded HHMM input validation, Guided Focus auto-scroll, and keyboard accessibility for Info/Dialogs.<hr style="border:0; border-top:1px dashed var(--border-light); margin:8px 0;">
-                           <b>v6.4.2 Guided halo enhancement</b><br>• Stronger pulsing guidance halo for focused inputs; added Safari WebKit animation support.<hr style="border:0; border-top:1px dashed var(--border-light); margin:8px 0;">
-                           <b>v6.4.1 Safari compatibility fix</b><br>• Fixed flexbox height collapse on iOS/macOS Safari.<hr style="border:0; border-top:1px dashed var(--border-light); margin:8px 0;">
-                           <b>v6.4.0 Smart guided input</b><br>• Visual pulsing guidance and Smart Bypass shortcuts for faster entry.<hr style="border:0; border-top:1px dashed var(--border-light); margin:8px 0;">
-                           <b>v6.3.0 Smart in-flight rest calculation</b><br>• Added rest estimates to leg cards with dynamic dual logic for M/D Crew.<hr style="border:0; border-top:1px dashed var(--border-light); margin:8px 0;">
-                           <b>v6.2.4 Reverse dictionary duty detection</b><br>• Automatically classifies unknown non-airport codes as ground duty (-0m).
-                       </div>
-                   </details>`
+            title: '版本更新 / Release Notes',
+            text: ''
         },
         'nextRpt': {
             title: '下次合法報到 (Next Report)',
@@ -1814,16 +2045,1127 @@
         }
     };
 
+    
+    const RELEASE_NOTES_VERSION = '6.8.3';
+    const RELEASE_NOTES = [
+    {
+        "version": "6.8.3",
+        "latest": true,
+        "summary": {
+            "zh": "版本更新面板重構為卡片式雙語 Release Notes",
+            "en": "Release notes panel redesigned into structured bilingual cards"
+        },
+        "description": {
+            "zh": "本次改版聚焦在版本資訊的可讀性與一致性，不更動任何計算公式或飛時邏輯。",
+            "en": "This update focuses on readability and consistency of version annotations, with no changes to formulas or duty-time logic."
+        },
+        "tags": {
+            "zh": [
+                "Patch",
+                "UI",
+                "文件",
+                "雙語"
+            ],
+            "en": [
+                "Patch",
+                "UI",
+                "Docs",
+                "Bilingual"
+            ]
+        },
+        "scope": {
+            "zh": "UI / 文件更新；不更動計算公式",
+            "en": "UI / documentation refresh; no formula changes"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "改版",
+                    "en": "Redesign"
+                },
+                "text": {
+                    "zh": "把原本堆疊式 changelog 改為卡片化版本列表，建立一致的標題、摘要、條列與尾註層級。",
+                    "en": "Replaced the stacked text changelog with card-based release entries using a consistent title, summary, bullet, and footer hierarchy."
+                }
+            },
+            {
+                "label": {
+                    "zh": "雙語",
+                    "en": "Bilingual"
+                },
+                "text": {
+                    "zh": "加入全域中文 / English 切換，避免同一版本上下重複堆疊兩種語言。",
+                    "en": "Added a global 中文 / English switch so each version no longer duplicates both languages in a single long block."
+                }
+            },
+            {
+                "label": {
+                    "zh": "入口",
+                    "en": "Entry"
+                },
+                "text": {
+                    "zh": "Header 版號改為較正式的 Release Notes pill，辨識度與可點擊性更清楚。",
+                    "en": "Upgraded the header version badge into a clearer, more intentional Release Notes pill."
+                }
+            },
+            {
+                "label": {
+                    "zh": "檢索",
+                    "en": "Scan"
+                },
+                "text": {
+                    "zh": "新增 Latest / All 切換，先看近期更新，再視需要展開完整歷史版本。",
+                    "en": "Added Latest / All filtering so recent updates are easier to scan before expanding full history."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.8.2",
+        "summary": {
+            "zh": "iPad 浮動時間鍵盤目標判定修正",
+            "en": "iPad floating time pad target-detection fix"
+        },
+        "description": {
+            "zh": "修正自訂鍵盤與 readonly HHMM 欄位的判定衝突。",
+            "en": "Resolved the target-detection conflict between the custom pad and readonly HHMM fields."
+        },
+        "tags": {
+            "zh": [
+                "Fix",
+                "UI",
+                "iPad"
+            ],
+            "en": [
+                "Fix",
+                "UI",
+                "iPad"
+            ]
+        },
+        "scope": {
+            "zh": "UI-only；不更動計算公式",
+            "en": "UI-only; no formula changes"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "修正",
+                    "en": "Fix"
+                },
+                "text": {
+                    "zh": "HHMM 欄位雖設為 readonly 以阻止原生鍵盤，但仍可正確被 app 內建數字鍵盤辨識。",
+                    "en": "Readonly HHMM fields now remain eligible for the built-in number pad instead of being rejected by the target check."
+                }
+            },
+            {
+                "label": {
+                    "zh": "保留",
+                    "en": "Kept"
+                },
+                "text": {
+                    "zh": "HHMM 驗證、Guided Focus、自動跳下一格與不叫出原生鍵盤的流程維持不變。",
+                    "en": "HHMM validation, Guided Focus, auto-advance, and the no-native-keyboard flow remain unchanged."
+                }
+            },
+            {
+                "label": {
+                    "zh": "文件",
+                    "en": "Docs"
+                },
+                "text": {
+                    "zh": "同步補上版本更新與雙語說明。",
+                    "en": "Updated the version annotation and bilingual documentation."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.8.1",
+        "summary": {
+            "zh": "iPad 浮動時間鍵盤觸發修正",
+            "en": "iPad floating time pad trigger fix"
+        },
+        "description": {
+            "zh": "改善部分 iPad Safari / Chrome 點按 HHMM 欄位未出現浮動鍵盤的問題。",
+            "en": "Improved cases where the floating pad failed to appear on some iPad Safari / Chrome setups."
+        },
+        "tags": {
+            "zh": [
+                "Fix",
+                "UI",
+                "iPad"
+            ],
+            "en": [
+                "Fix",
+                "UI",
+                "iPad"
+            ]
+        },
+        "scope": {
+            "zh": "UI-only；不更動計算公式",
+            "en": "UI-only; no formula changes"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "觸發",
+                    "en": "Trigger"
+                },
+                "text": {
+                    "zh": "改以點按事件直接開啟浮動鍵盤，不再依賴原生 focus 流程。",
+                    "en": "The floating pad now opens directly on tap instead of relying on the native focus flow."
+                }
+            },
+            {
+                "label": {
+                    "zh": "裝置",
+                    "en": "Device"
+                },
+                "text": {
+                    "zh": "放寬 iPad / 觸控平板偵測邏輯，提升不同 iPadOS 與瀏覽器組合下的成功率。",
+                    "en": "Broadened iPad / touch-tablet detection to improve reliability across iPadOS and browser combinations."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.8.0",
+        "summary": {
+            "zh": "iPad 浮動時間鍵盤上線",
+            "en": "iPad floating time pad introduced"
+        },
+        "description": {
+            "zh": "在 iPad 點按 HHMM 欄位時，以 app 內建浮動數字鍵盤取代原生鍵盤。",
+            "en": "HHMM fields on iPad now use the app’s floating number pad instead of the native keyboard."
+        },
+        "tags": {
+            "zh": [
+                "New",
+                "UI",
+                "iPad"
+            ],
+            "en": [
+                "New",
+                "UI",
+                "iPad"
+            ]
+        },
+        "scope": {
+            "zh": "UI-only；不更動計算公式",
+            "en": "UI-only; no formula changes"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "新增",
+                    "en": "New"
+                },
+                "text": {
+                    "zh": "提供 0–9、00、⌫、清除、完成等按鍵，避免 Safari / Chrome 原生鍵盤把中間航段卡頂到看不見。",
+                    "en": "Added 0–9, 00, ⌫, Clear, and Done keys so Safari / Chrome no longer pushes the center leg cards out of view."
+                }
+            },
+            {
+                "label": {
+                    "zh": "定位",
+                    "en": "Placement"
+                },
+                "text": {
+                    "zh": "鍵盤會優先貼近輸入欄位，若空間不足則自動改到下方或上方，並跟隨捲動與旋轉重新定位。",
+                    "en": "The pad prefers to appear near the active field, then automatically repositions above or below when space is limited and re-anchors on scroll or rotation."
+                }
+            },
+            {
+                "label": {
+                    "zh": "流程",
+                    "en": "Flow"
+                },
+                "text": {
+                    "zh": "保留既有 HHMM 驗證、Guided Focus 與自動跳下一格邏輯。",
+                    "en": "Existing HHMM validation, Guided Focus, and auto-advance behavior remain intact."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.7.4",
+        "summary": {
+            "zh": "iPad Safari NOW 標記穩定性修正",
+            "en": "iPad Safari NOW marker stability fix"
+        },
+        "description": {
+            "zh": "Duty Timeline 的 NOW 標記改為較穩定的實體標籤層。",
+            "en": "The NOW indicator on the Duty Timeline now uses a more stable real label layer."
+        },
+        "tags": {
+            "zh": [
+                "Fix",
+                "UI",
+                "Safari"
+            ],
+            "en": [
+                "Fix",
+                "UI",
+                "Safari"
+            ]
+        },
+        "scope": {
+            "zh": "UI-only；不更動計算公式",
+            "en": "UI-only; no formula changes"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "修正",
+                    "en": "Fix"
+                },
+                "text": {
+                    "zh": "不再依賴 iPad Safari 較容易漏繪的偽元素重繪。",
+                    "en": "Removed reliance on Safari-sensitive pseudo-element rendering."
+                }
+            },
+            {
+                "label": {
+                    "zh": "穩定",
+                    "en": "Stabilize"
+                },
+                "text": {
+                    "zh": "採中心點定位並限制在 0.5%–99.5% 區間，降低 Safari 工具列變化時消失的機率。",
+                    "en": "Uses center-based positioning and clamps the marker to 0.5%–99.5% to reduce disappearing during Safari relayouts."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.7.3",
+        "summary": {
+            "zh": "HHMM 連續輸入",
+            "en": "Continuous HHMM input"
+        },
+        "description": {
+            "zh": "Guided Focus 時間欄位支援輸滿 4 碼後自動跳下一格。",
+            "en": "Guided Focus time fields now auto-advance after a valid 4-digit HHMM entry."
+        },
+        "tags": {
+            "zh": [
+                "Input",
+                "UX"
+            ],
+            "en": [
+                "Input",
+                "UX"
+            ]
+        },
+        "scope": {
+            "zh": "輸入流程優化",
+            "en": "Input-flow refinement"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "新增",
+                    "en": "New"
+                },
+                "text": {
+                    "zh": "有效時間（0000–2359）輸入完成後，焦點會自動移至下一個脈衝欄位。",
+                    "en": "Once a valid time (0000–2359) is entered, focus automatically moves to the next pulsing field."
+                }
+            },
+            {
+                "label": {
+                    "zh": "顯示",
+                    "en": "Display"
+                },
+                "text": {
+                    "zh": "時間仍維持四碼 HHMM，不轉成 HH:MM。",
+                    "en": "Times remain in 4-digit HHMM format rather than HH:MM."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.7.2",
+        "summary": {
+            "zh": "LBO 警告視覺更顯眼",
+            "en": "More visible LBO warnings"
+        },
+        "description": {
+            "zh": "強化 CAUTION / ALERT 狀態下的 LBO 卡片辨識度。",
+            "en": "Improved the visibility of LBO cards in CAUTION / ALERT states."
+        },
+        "tags": {
+            "zh": [
+                "UI",
+                "Warning"
+            ],
+            "en": [
+                "UI",
+                "Warning"
+            ]
+        },
+        "scope": {
+            "zh": "純視覺強化；公式不變",
+            "en": "Visual-only enhancement; formulas unchanged"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "強化",
+                    "en": "Enhance"
+                },
+                "text": {
+                    "zh": "使用更高對比邊框、警示圖示與輕微脈衝陰影。",
+                    "en": "Added higher-contrast borders, warning iconography, and subtle pulsing emphasis."
+                }
+            },
+            {
+                "label": {
+                    "zh": "修正",
+                    "en": "Fix"
+                },
+                "text": {
+                    "zh": "若 ACT OUT 已超過 LBO，狀態直接顯示 ALERT（紅色）。",
+                    "en": "When ACT OUT exceeds LBO, the status now shows ALERT (red) directly."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.7.1",
+        "summary": {
+            "zh": "Rest 時數顯示增強",
+            "en": "Rest label readability enhancement"
+        },
+        "description": {
+            "zh": "將 Rest 時數移出窄軌道，改為較易讀的浮動膠囊標籤。",
+            "en": "Moved Rest text out of the narrow track into a more legible floating pill label."
+        },
+        "tags": {
+            "zh": [
+                "UI",
+                "Timeline"
+            ],
+            "en": [
+                "UI",
+                "Timeline"
+            ]
+        },
+        "scope": {
+            "zh": "純顯示改善；公式不變",
+            "en": "Display-only refinement; formulas unchanged"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "改善",
+                    "en": "Improve"
+                },
+                "text": {
+                    "zh": "保持時間條高度不變，同時提升 10px 軌道上的可讀性。",
+                    "en": "Preserves track height while improving readability over the 10px timeline track."
+                }
+            },
+            {
+                "label": {
+                    "zh": "定位",
+                    "en": "Position"
+                },
+                "text": {
+                    "zh": "標籤自動對齊 Rest 區段中心，並在左右邊界避免溢出。",
+                    "en": "The label auto-centers on the Rest segment and avoids overflow near the left/right edges."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.7.0",
+        "summary": {
+            "zh": "IATA / ICAO 資料庫更新",
+            "en": "IATA / ICAO database update"
+        },
+        "description": {
+            "zh": "整合新增機場資料，提升時區與代碼轉換正確性。",
+            "en": "Expanded the airport data set to improve timezone and code conversion accuracy."
+        },
+        "tags": {
+            "zh": [
+                "Data",
+                "Airport DB"
+            ],
+            "en": [
+                "Data",
+                "Airport DB"
+            ]
+        },
+        "scope": {
+            "zh": "資料層更新",
+            "en": "Data-layer refresh"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "擴充",
+                    "en": "Expand"
+                },
+                "text": {
+                    "zh": "新增 67 個 IATA code 並補齊 IATA→IANA、ICAO→IATA 對照。",
+                    "en": "Added 67 IATA codes and expanded IATA→IANA plus ICAO→IATA mappings."
+                }
+            },
+            {
+                "label": {
+                    "zh": "影響",
+                    "en": "Impact"
+                },
+                "text": {
+                    "zh": "改善 Local 時間換算與 Next Duty Planner 的 4 碼 ICAO → 3 碼 IATA 自動轉換。",
+                    "en": "Improves Local-time conversion and Next Duty Planner auto-conversion from 4-letter ICAO to 3-letter IATA."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.6.0",
+        "summary": {
+            "zh": "LBO 倒數預警",
+            "en": "LBO countdown warning"
+        },
+        "description": {
+            "zh": "依目前時間即時計算距離下一航段 Last Legal Push 的剩餘分鐘。",
+            "en": "Calculates real-time minutes remaining to the next leg’s Last Legal Push."
+        },
+        "tags": {
+            "zh": [
+                "New",
+                "Alert",
+                "LBO"
+            ],
+            "en": [
+                "New",
+                "Alert",
+                "LBO"
+            ]
+        },
+        "scope": {
+            "zh": "預設啟用",
+            "en": "Enabled by default"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "新增",
+                    "en": "New"
+                },
+                "text": {
+                    "zh": "LBO Rem 進入門檻即自動切換 Legal Status Strip 至 CAUTION / ALERT。",
+                    "en": "Crossing the threshold automatically switches the Legal Status Strip to CAUTION / ALERT."
+                }
+            },
+            {
+                "label": {
+                    "zh": "定位",
+                    "en": "Target"
+                },
+                "text": {
+                    "zh": "只針對下一個尚未 OUT 的航段顯示與警示，避免資訊噪音。",
+                    "en": "Targets only the next not-yet-OUT leg to reduce noise."
+                }
+            },
+            {
+                "label": {
+                    "zh": "設定",
+                    "en": "Settings"
+                },
+                "text": {
+                    "zh": "移除啟用開關，保留 C/A 門檻與 Pop（Toast）選項。",
+                    "en": "Removed the on/off switch while keeping configurable C/A thresholds and Pop (toast)."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.5.10",
+        "summary": {
+            "zh": "Next Duty 輸入穩定性與鍵盤避讓",
+            "en": "Next Duty input stability and keyboard-aware layout"
+        },
+        "description": {
+            "zh": "優化 iPad 橫向輸入時的時間條高度、畫面讓位與欄位置中。",
+            "en": "Refined timeline height, keyboard-aware layout behavior, and input centering on iPad landscape."
+        },
+        "tags": {
+            "zh": [
+                "UX",
+                "iPad"
+            ],
+            "en": [
+                "UX",
+                "iPad"
+            ]
+        },
+        "scope": {
+            "zh": "版面 / 輸入穩定性",
+            "en": "Layout / input stability"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "瘦身",
+                    "en": "Compact"
+                },
+                "text": {
+                    "zh": "Duty Timeline Minimap 再縮減高度，釋放更多航段卡可視面積。",
+                    "en": "Further reduced Duty Timeline Minimap height to reclaim more space for the leg cards."
+                }
+            },
+            {
+                "label": {
+                    "zh": "讓位",
+                    "en": "Layout"
+                },
+                "text": {
+                    "zh": "鍵盤開啟時自動隱藏上方統計 / 狀態 / 時間條與底部 HUD，收鍵盤後再復原。",
+                    "en": "Auto-hides top strips and the bottom HUD while the keyboard is open, then restores them automatically."
+                }
+            },
+            {
+                "label": {
+                    "zh": "置中",
+                    "en": "Center"
+                },
+                "text": {
+                    "zh": "點選時間欄位時自動 scrollIntoView 置中，降低被鍵盤遮擋。",
+                    "en": "Focused time fields are auto-centered with scrollIntoView to reduce keyboard obstruction."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.5.5",
+        "summary": {
+            "zh": "48h Long Layover 規則修正",
+            "en": "48h Long Layover rule fix"
+        },
+        "description": {
+            "zh": "修正返台後 48 小時限制只適用於 Flight Duty 的邏輯。",
+            "en": "Corrected the logic so the 48-hour restriction after returning home applies only to flight duty."
+        },
+        "tags": {
+            "zh": [
+                "Logic",
+                "Fix"
+            ],
+            "en": [
+                "Logic",
+                "Fix"
+            ]
+        },
+        "scope": {
+            "zh": "規則判定修正",
+            "en": "Rule interpretation fix"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "修正",
+                    "en": "Fix"
+                },
+                "text": {
+                    "zh": "Planned Next Duty 為非機場代碼（例如 SIM / training）時，不再誤判為 Rest Short。",
+                    "en": "Planned Next Duty entries that are not airport codes (such as SIM / training) are no longer flagged as Rest Short."
+                }
+            },
+            {
+                "label": {
+                    "zh": "保留",
+                    "en": "Kept"
+                },
+                "text": {
+                    "zh": "若下次 Flight Duty 前往前一 >48h 外站或與其時差 ≤3h，仍保留 48h 限制豁免。",
+                    "en": "The exemption remains when the next flight returns to the previous >48h layover point or another point within ≤3h time difference."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.5.2",
+        "summary": {
+            "zh": "iPad 時間條高度修正",
+            "en": "iPad timeline height fix"
+        },
+        "description": {
+            "zh": "針對 iPad Safari / Chrome 壓縮時間條高度並校正 Visual Viewport。",
+            "en": "Compacted the timeline and stabilized Visual Viewport handling on iPad Safari / Chrome."
+        },
+        "tags": {
+            "zh": [
+                "UI",
+                "iPad"
+            ],
+            "en": [
+                "UI",
+                "iPad"
+            ]
+        },
+        "scope": {
+            "zh": "UI-only；不更動計算公式",
+            "en": "UI-only; no formula changes"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "壓縮",
+                    "en": "Compact"
+                },
+                "text": {
+                    "zh": "Duty Timeline 改為較緊湊的刻度與間距，避免擠壓航段卡。",
+                    "en": "The Duty Timeline uses tighter ruler spacing to prevent the leg cards from being squeezed."
+                }
+            },
+            {
+                "label": {
+                    "zh": "校正",
+                    "en": "Viewport"
+                },
+                "text": {
+                    "zh": "使用 Visual Viewport 高度鎖定版面，降低 iPad 動態工具列造成的高度誤判。",
+                    "en": "Uses Visual Viewport height to stabilize layout when iPad browser toolbars resize."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.5.1",
+        "summary": {
+            "zh": "輸休換班鬧鐘",
+            "en": "In-flight Rest Alarm Helper"
+        },
+        "description": {
+            "zh": "點擊 💤 輪休時間即可展開 OUT 輸入與換班時刻表。",
+            "en": "Tapping the 💤 rest chip opens an OUT input and a computed swap-time schedule."
+        },
+        "tags": {
+            "zh": [
+                "New",
+                "Rest"
+            ],
+            "en": [
+                "New",
+                "Rest"
+            ]
+        },
+        "scope": {
+            "zh": "不更動計算公式 / 不改動視覺風格",
+            "en": "No formula or visual-style changes"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "展開",
+                    "en": "Expand"
+                },
+                "text": {
+                    "zh": "支援輸入 Block Off（OUT）時間。",
+                    "en": "Supports direct Block Off (OUT) input."
+                }
+            },
+            {
+                "label": {
+                    "zh": "自動",
+                    "en": "Auto"
+                },
+                "text": {
+                    "zh": "D Crew 顯示 2 段、M Crew 顯示 3 段換班時間，並依既有輪休估算即時更新。",
+                    "en": "Shows 2 swap times for D Crew and 3 for M Crew, updating live from the existing rest estimate."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.5.0",
+        "summary": {
+            "zh": "UI / 可用性強化",
+            "en": "UI / usability enhancements"
+        },
+        "description": {
+            "zh": "Legal Status Strip、Routes 操作與 HHMM 輸入體驗全面提升。",
+            "en": "Improved Legal Status diagnostics, route actions, and HHMM input usability."
+        },
+        "tags": {
+            "zh": [
+                "UI",
+                "Usability"
+            ],
+            "en": [
+                "UI",
+                "Usability"
+            ]
+        },
+        "scope": {
+            "zh": "互動體驗升級",
+            "en": "Interaction upgrade"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "診斷",
+                    "en": "Diag"
+                },
+                "text": {
+                    "zh": "Legal Status Strip 可點擊查看原因與數值。",
+                    "en": "Legal Status Strip diagnostics became clickable with underlying reasons and values."
+                }
+            },
+            {
+                "label": {
+                    "zh": "操作",
+                    "en": "Routes"
+                },
+                "text": {
+                    "zh": "Routes 全改為內建 Modal / Toast，移除瀏覽器彈窗。",
+                    "en": "Route actions moved into built-in Modal / Toast UI instead of browser popups."
+                }
+            },
+            {
+                "label": {
+                    "zh": "輸入",
+                    "en": "Input"
+                },
+                "text": {
+                    "zh": "擴充 HHMM 驗證、Guided Focus 自動捲動與 Info / Dialog 鍵盤無障礙支援。",
+                    "en": "Expanded HHMM validation, Guided Focus auto-scroll, and keyboard accessibility for Info / Dialog UI."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.4.2",
+        "summary": {
+            "zh": "引導光環強化",
+            "en": "Guided halo enhancement"
+        },
+        "description": {
+            "zh": "加強焦點脈衝光暈與 Safari WebKit 動畫支援。",
+            "en": "Strengthened the focus halo and added Safari WebKit animation support."
+        },
+        "tags": {
+            "zh": [
+                "Guided Focus",
+                "UI"
+            ],
+            "en": [
+                "Guided Focus",
+                "UI"
+            ]
+        },
+        "scope": {
+            "zh": "輸入提示增強",
+            "en": "Guidance enhancement"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "強化",
+                    "en": "Enhance"
+                },
+                "text": {
+                    "zh": "脈衝引導更明顯，視覺辨識度更高。",
+                    "en": "The pulsing guidance halo is stronger and easier to notice."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.4.1",
+        "summary": {
+            "zh": "Safari 相容性修復",
+            "en": "Safari compatibility fix"
+        },
+        "description": {
+            "zh": "修復 iOS / macOS Safari 上的 Flexbox 高度崩塌問題。",
+            "en": "Fixed a flexbox height collapse issue on iOS / macOS Safari."
+        },
+        "tags": {
+            "zh": [
+                "Fix",
+                "Safari"
+            ],
+            "en": [
+                "Fix",
+                "Safari"
+            ]
+        },
+        "scope": {
+            "zh": "相容性修正",
+            "en": "Compatibility fix"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "修正",
+                    "en": "Fix"
+                },
+                "text": {
+                    "zh": "改善 Safari 版面高度計算異常。",
+                    "en": "Stabilized layout height calculation in Safari."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.4.0",
+        "summary": {
+            "zh": "智慧引導輸入",
+            "en": "Smart guided input"
+        },
+        "description": {
+            "zh": "建立視覺脈衝引導與 Smart Bypass 快捷流程。",
+            "en": "Introduced pulsing visual guidance and Smart Bypass shortcuts."
+        },
+        "tags": {
+            "zh": [
+                "Input",
+                "Guided"
+            ],
+            "en": [
+                "Input",
+                "Guided"
+            ]
+        },
+        "scope": {
+            "zh": "輸入流程升級",
+            "en": "Input-flow upgrade"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "新增",
+                    "en": "New"
+                },
+                "text": {
+                    "zh": "讓填寫順序更直觀，降低漏填與跳填。",
+                    "en": "Makes the entry order more intuitive and reduces missed fields."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.3.0",
+        "summary": {
+            "zh": "智慧機上輪休計算",
+            "en": "Smart in-flight rest calculation"
+        },
+        "description": {
+            "zh": "航段卡新增輪休預估，支援 M / D Crew 動態雙重計算。",
+            "en": "Added rest estimates to leg cards with dynamic logic for M / D Crew."
+        },
+        "tags": {
+            "zh": [
+                "Rest",
+                "Calculation"
+            ],
+            "en": [
+                "Rest",
+                "Calculation"
+            ]
+        },
+        "scope": {
+            "zh": "功能新增",
+            "en": "Feature addition"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "新增",
+                    "en": "New"
+                },
+                "text": {
+                    "zh": "依航段與 crew 類型動態估算機上輪休。",
+                    "en": "Dynamically estimates in-flight rest by leg and crew type."
+                }
+            }
+        ]
+    },
+    {
+        "version": "6.2.4",
+        "summary": {
+            "zh": "智慧字典反向判定",
+            "en": "Reverse dictionary duty detection"
+        },
+        "description": {
+            "zh": "自動把未知非機場代碼辨識為地面任務。",
+            "en": "Automatically classifies unknown non-airport codes as ground duty."
+        },
+        "tags": {
+            "zh": [
+                "Logic",
+                "Ground Duty"
+            ],
+            "en": [
+                "Logic",
+                "Ground Duty"
+            ]
+        },
+        "scope": {
+            "zh": "判定邏輯改善",
+            "en": "Classification refinement"
+        },
+        "points": [
+            {
+                "label": {
+                    "zh": "判定",
+                    "en": "Detect"
+                },
+                "text": {
+                    "zh": "提升 Next Duty 與相關輸入的地面任務識別能力。",
+                    "en": "Improves ground-duty recognition in Next Duty and related inputs."
+                }
+            }
+        ]
+    }
+];
+    let __releaseLang = (localStorage.getItem('calDutyReleaseLang') || 'zh');
+    let __releaseScope = (localStorage.getItem('calDutyReleaseScope') || 'latest');
+
+    function releaseText(obj) {
+        if (obj == null) return '';
+        if (typeof obj === 'string') return obj;
+        return (__releaseLang === 'en' ? (obj.en || obj.zh || '') : (obj.zh || obj.en || ''));
+    }
+
+    function releaseChipClass(label) {
+        const t = String(label || '').toLowerCase();
+        if (t.includes('patch') || t.includes('fix') || t.includes('ui') || t.includes('docs') || t.includes('bilingual') || t.includes('文件') || t.includes('雙語') || t.includes('修正')) return 'primary';
+        if (t.includes('new') || t.includes('新增') || t.includes('rest') || t.includes('data') || t.includes('airport')) return 'success';
+        if (t.includes('warn') || t.includes('alert') || t.includes('safari') || t.includes('ipad') || t.includes('logic') || t.includes('warning') || t.includes('相容') || t.includes('規則')) return 'warn';
+        return '';
+    }
+
+    function escapeHtml(str) {
+        return String(str == null ? '' : str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function setReleaseLang(lang) {
+        __releaseLang = (lang === 'en') ? 'en' : 'zh';
+        localStorage.setItem('calDutyReleaseLang', __releaseLang);
+        renderReleaseNotesIntoModal();
+    }
+
+    function setReleaseScope(scope) {
+        __releaseScope = (scope === 'all') ? 'all' : 'latest';
+        localStorage.setItem('calDutyReleaseScope', __releaseScope);
+        renderReleaseNotesIntoModal();
+    }
+
+    function buildReleaseCard(note) {
+        const tags = (note.tags && note.tags[__releaseLang] ? note.tags[__releaseLang] : []).map(tag => `<span class="release-chip ${releaseChipClass(tag)}">${escapeHtml(tag)}</span>`).join('');
+        const points = (note.points || []).map(item => `
+            <li>
+                <span class="release-point-label">${escapeHtml(releaseText(item.label))}</span>
+                <span class="release-point-text">${escapeHtml(releaseText(item.text))}</span>
+            </li>
+        `).join('');
+        const latestChip = note.latest ? `<span class="release-chip primary">${__releaseLang === 'en' ? 'Current' : '目前版'}</span>` : '';
+        const scopeText = releaseText(note.scope);
+        const footerLeft = __releaseLang === 'en' ? 'Scope' : '範圍';
+        const footerRight = __releaseLang === 'en' ? 'Channel' : '類型';
+        return `
+            <article class="release-card ${note.latest ? 'latest' : ''}">
+                <div class="release-card-head">
+                    <div>
+                        <div class="release-version">v${escapeHtml(note.version)}</div>
+                    </div>
+                    ${latestChip}
+                </div>
+                <div class="release-card-tags">${tags}</div>
+                <div class="release-summary">${escapeHtml(releaseText(note.summary))}</div>
+                <div class="release-copy">${escapeHtml(releaseText(note.description))}</div>
+                <ul class="release-points">${points}</ul>
+                <div class="release-foot">
+                    <span><strong>${footerLeft}:</strong> ${escapeHtml(scopeText)}</span>
+                    <span><strong>${footerRight}:</strong> v${escapeHtml(note.version)}</span>
+                </div>
+            </article>
+        `;
+    }
+
+    function buildReleaseNotesHtml() {
+        const notes = (__releaseScope === 'all') ? RELEASE_NOTES : RELEASE_NOTES.slice(0, 6);
+        const langTitle = (__releaseLang === 'en') ? 'Structured release history with cleaner typography, clearer hierarchy, and a single-language view for faster scanning.' : '以一致字體階層、較清楚資訊層級與單語切換，重整版本更新標註的閱讀體驗。';
+        const filterLatest = (__releaseLang === 'en') ? 'Latest' : '近期';
+        const filterAll = (__releaseLang === 'en') ? 'All versions' : '全部版本';
+        const languageZh = '🇹🇼 中文';
+        const languageEn = '🇺🇸 English';
+        const kicker = (__releaseLang === 'en') ? 'Current release channel' : '目前版本通道';
+        const heroScope = (__releaseLang === 'en') ? 'UI / Docs refresh' : 'UI / 文件更新';
+        const heroSafe = (__releaseLang === 'en') ? 'Formula logic unchanged' : '計算公式未變更';
+        const emptyText = (__releaseLang === 'en') ? 'No release notes available.' : '目前沒有可顯示的版本更新。';
+        return `
+            <div class="release-shell">
+                <div class="release-toolbar">
+                    <div class="release-tabs" role="tablist" aria-label="Release language">
+                        <button type="button" class="release-tab ${__releaseLang === 'zh' ? 'active' : ''}" onclick="setReleaseLang('zh')">${languageZh}</button>
+                        <button type="button" class="release-tab ${__releaseLang === 'en' ? 'active' : ''}" onclick="setReleaseLang('en')">${languageEn}</button>
+                    </div>
+                    <div class="release-tabs" role="tablist" aria-label="Release scope">
+                        <button type="button" class="release-tab ${__releaseScope === 'latest' ? 'active' : ''}" onclick="setReleaseScope('latest')">${filterLatest}</button>
+                        <button type="button" class="release-tab ${__releaseScope === 'all' ? 'active' : ''}" onclick="setReleaseScope('all')">${filterAll}</button>
+                    </div>
+                </div>
+                <section class="release-hero">
+                    <div class="release-kicker">${kicker}</div>
+                    <div class="release-hero-row">
+                        <div class="release-current-version">v${RELEASE_NOTES_VERSION}</div>
+                        <div class="release-hero-tags">
+                            <span class="release-chip primary mono">v${RELEASE_NOTES_VERSION}</span>
+                            <span class="release-chip success">${heroScope}</span>
+                            <span class="release-chip warn">${heroSafe}</span>
+                        </div>
+                    </div>
+                    <div class="release-hero-desc">${langTitle}</div>
+                </section>
+                <section class="release-list">
+                    ${notes.length ? notes.map(buildReleaseCard).join('') : `<div class="release-empty">${emptyText}</div>`}
+                </section>
+            </div>
+        `;
+    }
+
+    function renderReleaseNotesIntoModal() {
+        const body = document.getElementById('infoBody');
+        if (!body) return;
+        body.innerHTML = buildReleaseNotesHtml();
+    }
+
+
     function showInfo(key) {
         const data = INFO_DATA[key];
         if(!data) return;
-        document.getElementById('infoTitle').innerHTML = data.title;
-        document.getElementById('infoBody').innerHTML = data.text;
+        const overlay = document.getElementById('infoModal');
+        const title = document.getElementById('infoTitle');
+        const body = document.getElementById('infoBody');
+        if (!title || !body) return;
+
+        title.innerHTML = data.title;
+        if (overlay) overlay.classList.toggle('release-notes-mode', key === 'changelog');
+
+        if (key === 'changelog') {
+            renderReleaseNotesIntoModal();
+        } else {
+            body.innerHTML = data.text;
+        }
 
         __openOverlayModal('infoModal', '#infoModal button, #infoModal [tabindex], #infoModal a, #infoModal input');
     }
 
-    function closeInfo() { 
+    function closeInfo() {
+        const overlay = document.getElementById('infoModal');
+        if (overlay) overlay.classList.remove('release-notes-mode');
         __closeOverlayModal('infoModal');
     }
 
@@ -2253,7 +3595,8 @@ function uiToast(message, tone = 'info') {
 
     // === HHMM VALIDATION UX ===
     function isHHMMFieldTarget(el) {
-        if (!el || el.tagName !== 'INPUT' || el.type !== 'tel' || el.classList.contains('taxi-val') || el.readOnly) return false;
+        if (!el || el.tagName !== 'INPUT' || el.type !== 'tel' || el.classList.contains('taxi-val')) return false;
+        if (el.readOnly && el.dataset.customPad !== '1') return false;
         const id = el.id || '';
         if (['acarsLbo', 'pf-in', 'pf-dur', 'nd-time', 'rb-off'].includes(id)) return true;
         if (/^(in|out|ci|co|std|sta|sft)-\d+$/.test(id)) return true;
@@ -2340,6 +3683,326 @@ function uiToast(message, tone = 'info') {
                 } catch(_) {}
             });
         });
+    }
+
+
+    // === iPad FLOATING TIME PAD (v6.8.2) ===
+    const __customTimePad = {
+        enabled: false,
+        open: false,
+        targetId: null,
+        observer: null
+    };
+
+    function __isIpadCustomPadDevice() {
+        const ua = navigator.userAgent || '';
+        const maxSide = Math.max(window.screen.width || 0, window.screen.height || 0, window.innerWidth || 0, window.innerHeight || 0);
+        const coarsePointer = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+        const isiPadUA = /iPad/.test(ua);
+        const touchMac = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+        const touchTabletLike = navigator.maxTouchPoints > 0 && coarsePointer && maxSide >= 768;
+        const iosBrowser = /Safari|CriOS|FxiOS|EdgiOS|Version\//.test(ua);
+        return isiPadUA || touchMac || (touchTabletLike && iosBrowser);
+    }
+
+    function __isValidHHMMGlobal(v) {
+        if (!/^\d{4}$/.test(v || '')) return false;
+        const h = parseInt(v.slice(0, 2), 10);
+        const m = parseInt(v.slice(2, 4), 10);
+        return h >= 0 && h <= 23 && m >= 0 && m <= 59;
+    }
+
+    function __getCustomTimePadEl() {
+        return document.getElementById('customTimePad');
+    }
+
+    function __getCustomTimePadTarget() {
+        if (!__customTimePad.targetId) return null;
+        return document.getElementById(__customTimePad.targetId);
+    }
+
+    function __isCustomTimePadTarget(el) {
+        return !!(el && __customTimePad.enabled && isHHMMFieldTarget(el) && !el.disabled);
+    }
+
+    function __markCustomPadTargets(root = document) {
+        if (!__customTimePad.enabled || !root || !root.querySelectorAll) return;
+        root.querySelectorAll('input[type="tel"]').forEach(el => {
+            if (!isHHMMFieldTarget(el) || el.disabled) return;
+            el.readOnly = true;
+            el.setAttribute('inputmode', 'none');
+            el.setAttribute('enterkeyhint', 'done');
+            el.dataset.customPad = '1';
+        });
+    }
+
+    function __refreshCustomTimePadLabel() {
+        const pad = __getCustomTimePadEl();
+        const target = __getCustomTimePadTarget();
+        if (!pad) return;
+        const label = pad.querySelector('.ctp-target');
+        if (!label) return;
+        if (!target) {
+            label.textContent = 'HHMM';
+            return;
+        }
+        const base = (target.getAttribute('placeholder') || target.id || 'HHMM').trim();
+        const val = String(target.value || '').replace(/\D/g, '').slice(0, 4);
+        label.textContent = `${base} · ${val || 'HHMM'}`;
+    }
+
+    function __positionCustomTimePad(target) {
+        const pad = __getCustomTimePadEl();
+        if (!pad || !target || !document.body.contains(target)) return;
+
+        const vw = window.innerWidth || document.documentElement.clientWidth || 0;
+        const vh = window.innerHeight || document.documentElement.clientHeight || 0;
+        const rect = target.getBoundingClientRect();
+
+        pad.style.visibility = 'hidden';
+        pad.classList.add('show');
+
+        const padW = Math.min(232, Math.max(200, vw - 16));
+        pad.style.width = `${padW}px`;
+        const padH = pad.offsetHeight || 270;
+        const gap = 10;
+
+        let left = rect.right + gap;
+        let top = Math.max(8, rect.top - 6);
+
+        if (left + padW > vw - 8) {
+            const leftSide = rect.left - padW - gap;
+            if (leftSide >= 8) {
+                left = leftSide;
+            } else {
+                left = Math.min(Math.max(8, rect.left + ((rect.width - padW) / 2)), vw - padW - 8);
+                top = rect.bottom + gap;
+                if (top + padH > vh - 8) top = Math.max(8, rect.top - padH - gap);
+            }
+        }
+
+        if (top + padH > vh - 8) top = Math.max(8, vh - padH - 8);
+        left = Math.min(Math.max(8, left), vw - padW - 8);
+
+        pad.style.left = `${Math.round(left)}px`;
+        pad.style.top = `${Math.round(top)}px`;
+        pad.style.visibility = 'visible';
+    }
+
+    function __openCustomTimePad(target) {
+        if (!__isCustomTimePadTarget(target)) return;
+        const pad = __getCustomTimePadEl();
+        if (!pad) return;
+
+        const prev = __getCustomTimePadTarget();
+        if (prev && prev !== target) prev.classList.remove('custom-pad-active');
+
+        __customTimePad.targetId = target.id || null;
+        __customTimePad.open = true;
+        target.classList.add('custom-pad-active');
+        try { target.focus({ preventScroll: true }); } catch (_) { try { target.focus(); } catch(__) {} }
+        __refreshCustomTimePadLabel();
+        __positionCustomTimePad(target);
+        pad.setAttribute('aria-hidden', 'false');
+    }
+
+    function __closeCustomTimePad(options = {}) {
+        const opts = Object.assign({ blur: false }, options || {});
+        const pad = __getCustomTimePadEl();
+        const target = __getCustomTimePadTarget();
+
+        if (target) target.classList.remove('custom-pad-active');
+        if (pad) {
+            pad.classList.remove('show');
+            pad.setAttribute('aria-hidden', 'true');
+            pad.style.visibility = '';
+        }
+
+        __customTimePad.open = false;
+        __customTimePad.targetId = null;
+
+        if (opts.blur && target) {
+            try { target.blur(); } catch (_) {}
+        }
+    }
+
+    function __advanceFromCustomTimePad(currentId) {
+        let nextId = null;
+        try { nextId = (typeof __lastGuidedTargetId !== 'undefined') ? (__lastGuidedTargetId || null) : null; }
+        catch (_) { nextId = null; }
+
+        if (!nextId || nextId === currentId) {
+            const still = __getCustomTimePadTarget();
+            if (still) __positionCustomTimePad(still);
+            return;
+        }
+
+        const nextEl = document.getElementById(nextId);
+        if (!nextEl) return;
+        try { nextEl.focus({ preventScroll: true }); } catch (_) { try { nextEl.focus(); } catch(__) {} }
+        __openCustomTimePad(nextEl);
+    }
+
+    function __commitCustomTimePadValue(nextValue, options = {}) {
+        const opts = Object.assign({ triggerAdvance: true }, options || {});
+        const target = __getCustomTimePadTarget();
+        if (!target) return;
+
+        const cleaned = String(nextValue || '').replace(/\D/g, '').slice(0, 4);
+        target.value = cleaned;
+        target.classList.remove('hhmm-invalid', 'hhmm-valid');
+        target.title = '';
+        target.dispatchEvent(new Event('input', { bubbles: true }));
+
+        if (cleaned.length === 4) {
+            if (__isValidHHMMGlobal(cleaned)) {
+                target.classList.add('hhmm-valid');
+            } else {
+                target.classList.add('hhmm-invalid');
+                target.title = '格式錯誤：請輸入 HHMM（0000–2359）';
+            }
+        }
+
+        __refreshCustomTimePadLabel();
+
+        if (opts.triggerAdvance && cleaned.length === 4 && __isValidHHMMGlobal(cleaned)) {
+            const currentId = target.id || '';
+            setTimeout(() => {
+                const still = __getCustomTimePadTarget();
+                if (!still || still.id !== currentId) return;
+                __advanceFromCustomTimePad(currentId);
+            }, 40);
+        } else {
+            __positionCustomTimePad(target);
+        }
+    }
+
+    function __pressCustomTimePad(key) {
+        const target = __getCustomTimePadTarget();
+        if (!target) return;
+
+        let val = String(target.value || '').replace(/\D/g, '').slice(0, 4);
+        const isNumeric = /^\d+$/.test(key || '');
+
+        if (key === 'DONE') {
+            __closeCustomTimePad({ blur: true });
+            return;
+        }
+        if (key === 'DEL') {
+            __commitCustomTimePadValue(val.slice(0, -1), { triggerAdvance: false });
+            return;
+        }
+        if (key === 'CLR') {
+            __commitCustomTimePadValue('', { triggerAdvance: false });
+            return;
+        }
+        if (!isNumeric) return;
+
+        if (val.length >= 4) val = '';
+        const nextVal = (val + key).slice(0, 4);
+        __commitCustomTimePadValue(nextVal, { triggerAdvance: true });
+    }
+
+    function initCustomTimePad() {
+        __customTimePad.enabled = __isIpadCustomPadDevice();
+        if (!__customTimePad.enabled) return;
+
+        __markCustomPadTargets(document);
+
+        const pad = __getCustomTimePadEl();
+        if (pad) {
+            pad.addEventListener('click', function(e) {
+                const btn = e.target.closest('.ctp-key');
+                if (!btn) return;
+                e.preventDefault();
+                e.stopPropagation();
+                __pressCustomTimePad(btn.getAttribute('data-key') || '');
+            });
+        }
+
+        if (window.MutationObserver && document.body) {
+            __customTimePad.observer = new MutationObserver(mutations => {
+                mutations.forEach(m => {
+                    m.addedNodes.forEach(node => {
+                        if (!node || node.nodeType !== 1) return;
+                        if (node.matches && node.matches('input[type="tel"]')) __markCustomPadTargets(node.parentNode || document);
+                        else __markCustomPadTargets(node);
+                    });
+                });
+            });
+            __customTimePad.observer.observe(document.body, { childList: true, subtree: true });
+        }
+
+        const __openPadFromPointer = function(e) {
+            const inputEl = e.target && e.target.closest ? e.target.closest('input[type="tel"]') : null;
+            if (!__isCustomTimePadTarget(inputEl)) return;
+            e.preventDefault();
+            e.stopPropagation();
+            __openCustomTimePad(inputEl);
+        };
+
+        document.addEventListener('pointerdown', __openPadFromPointer, true);
+        document.addEventListener('touchstart', __openPadFromPointer, { capture: true, passive: false });
+        document.addEventListener('mousedown', __openPadFromPointer, true);
+
+        document.addEventListener('focusin', function(e) {
+            const el = e.target;
+            if (!__isCustomTimePadTarget(el)) return;
+            __openCustomTimePad(el);
+        }, true);
+
+        document.addEventListener('click', function(e) {
+            const padEl = __getCustomTimePadEl();
+            const inputEl = e.target && e.target.closest ? e.target.closest('input[type="tel"]') : null;
+
+            if (padEl && padEl.contains(e.target)) return;
+            if (__isCustomTimePadTarget(inputEl)) {
+                __openCustomTimePad(inputEl);
+                return;
+            }
+            if (__customTimePad.open) __closeCustomTimePad({ blur: true });
+        }, true);
+
+        document.addEventListener('keydown', function(e) {
+            if (!__customTimePad.open) return;
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                __closeCustomTimePad({ blur: true });
+                return;
+            }
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                __closeCustomTimePad({ blur: true });
+                return;
+            }
+            if (e.key === 'Backspace') {
+                e.preventDefault();
+                __pressCustomTimePad('DEL');
+                return;
+            }
+            if (/^\d$/.test(e.key)) {
+                e.preventDefault();
+                __pressCustomTimePad(e.key);
+            }
+        }, true);
+
+        const reposition = () => {
+            if (!__customTimePad.open) return;
+            const target = __getCustomTimePadTarget();
+            if (!target || !document.body.contains(target)) {
+                __closeCustomTimePad({ blur: false });
+                return;
+            }
+            __positionCustomTimePad(target);
+        };
+
+        window.addEventListener('resize', reposition, { passive: true });
+        window.addEventListener('orientationchange', () => setTimeout(reposition, 80), { passive: true });
+        document.addEventListener('scroll', reposition, true);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', reposition, { passive: true });
+            window.visualViewport.addEventListener('scroll', reposition, { passive: true });
+        }
     }
 
     // === CORE LOGIC & STATE ===
@@ -3012,6 +4675,7 @@ lboWarnCautionMins: 30,
             if (!isHHMMFieldTarget(el)) return;
             el.setAttribute('inputmode', 'numeric'); el.setAttribute('maxlength', '4');
         });
+        if (typeof __markCustomPadTargets === 'function') __markCustomPadTargets(con);
     }
 
     function toggleLock() {
@@ -4489,6 +6153,7 @@ function updateDynamicTimeline(rep, maxFdpMins, projElapsed, schedElapsed, restM
 
         setCrew(savedCrew);
         initHHMMUX();
+        initCustomTimePad();
         drawTimeline(); 
         updateGuidedFocus(); // Initialize focus on load
     };
